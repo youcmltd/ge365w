@@ -10,26 +10,16 @@
       "binding": "DB",
       "database_name": "ge365x-web-production",
       "database_id": "44b03d54-c23e-4258-a4f9-00cc397594b6"
-
-"
     }
   ],
   "triggers": {
     "crons": [
-      "*/1 * * * *",   // 毎分: post_queue 消化
-      "*/5 * * * *"    // 5分毎: autopilot 次ターン生成
+      "*/1 * * * *",
+      "*/5 * * * *"
     ]
   },
   "vars": {
     "OPENAI_MODEL": "gpt-4o-mini",
     "PAYPAL_MODE": "sandbox"
   }
-  // secrets は Cloudflare ダッシュボード / wrangler secret put で設定:
-  //   JWT_SECRET, ENCRYPTION_KEY, ADMIN_PASSWORD,
-  //   OPENAI_API_KEY, GEMINI_API_KEY,
-  //   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
-  //   PAYPAL_CLIENT_ID, PAYPAL_SECRET,
-  //   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID,
-  //   X_API_KEY, X_API_SECRET, X_BEARER_TOKEN,
-  //   X_CLIENT_ID, X_CLIENT_SECRET, X_OAUTH_REDIRECT_URL
 }
