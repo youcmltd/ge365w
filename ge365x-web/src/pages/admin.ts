@@ -30,6 +30,7 @@ adminPage.get('/admin', authMiddleware, adminMiddleware, (c) => {
         </div>
       </div>
       <div class="flex items-center gap-3 text-sm">
+        <button onclick="dlAdminExport('admin/all')" class="btn-ghost" title="管理者全データJSON"><i class="fas fa-download"></i>全データDL</button>
         <a href="/dashboard" class="btn-ghost"><i class="fas fa-gauge"></i>ダッシュボード</a>
         <button onclick="doLogout()" class="btn-ghost"><i class="fas fa-right-from-bracket"></i>ログアウト</button>
       </div>
@@ -63,6 +64,7 @@ adminPage.get('/admin', authMiddleware, adminMiddleware, (c) => {
             <option value="admin">管理者</option>
           </select>
           <button onclick="loadUsers()" class="btn-ghost"><i class="fas fa-rotate"></i></button>
+          <button onclick="dlAdminExport('admin/users')" class="btn-ghost" title="ユーザー一覧CSV"><i class="fas fa-download"></i></button>
         </div>
       </div>
       <div class="card overflow-x-auto">
@@ -80,9 +82,12 @@ adminPage.get('/admin', authMiddleware, adminMiddleware, (c) => {
     <section id="section-licenses" class="space-y-4 hidden-force">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">ライセンスキー管理</h2>
-        <button onclick="openIssueLicenseModal()" class="btn-primary">
-          <i class="fas fa-plus"></i>新規発行
-        </button>
+        <div class="flex gap-2">
+          <button onclick="dlAdminExport('admin/licenses')" class="btn-ghost" title="ライセンスCSV"><i class="fas fa-download"></i></button>
+          <button onclick="openIssueLicenseModal()" class="btn-primary">
+            <i class="fas fa-plus"></i>新規発行
+          </button>
+        </div>
       </div>
       <div class="card overflow-x-auto">
         <table class="data-table">
@@ -142,7 +147,10 @@ adminPage.get('/admin', authMiddleware, adminMiddleware, (c) => {
 
     <!-- === サブスク === -->
     <section id="section-subs" class="space-y-4 hidden-force">
-      <h2 class="text-xl font-bold text-white">サブスクリプション</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">サブスクリプション</h2>
+        <button onclick="dlAdminExport('admin/subs')" class="btn-ghost" title="サブスクリプションCSV"><i class="fas fa-download"></i></button>
+      </div>
       <div class="card overflow-x-auto">
         <table class="data-table">
           <thead><tr>
@@ -185,7 +193,10 @@ adminPage.get('/admin', authMiddleware, adminMiddleware, (c) => {
 
     <!-- === 監査ログ === -->
     <section id="section-audit" class="space-y-4 hidden-force">
-      <h2 class="text-xl font-bold text-white">認証・監査ログ</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">認証・監査ログ</h2>
+        <button onclick="dlAdminExport('admin/audit')" class="btn-ghost" title="監査ログCSV"><i class="fas fa-download"></i></button>
+      </div>
       <div class="card overflow-x-auto">
         <table class="data-table">
           <thead><tr>
@@ -450,6 +461,25 @@ async function saveSetting(key) {
     method: 'POST', headers: {'content-type':'application/json'},
     body: JSON.stringify({ key, value }),
   });
+}
+
+// ---------- 一括ダウンロード ----------
+function dlAdminExport(key) {
+  const url = '/api/admin/export/' + key;
+  fetch(url).then(r => {
+    if (!r.ok) throw new Error('ダウンロード失敗 (' + r.status + ')');
+    const cd = r.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'ge365x_' + key.replace('/', '_') + '.' + (key.includes('all') ? 'json' : 'csv');
+    return r.blob().then(blob => ({ blob, filename }));
+  }).then(({ blob, filename }) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }).catch(e => alert(e.message));
 }
 
 // 起動時

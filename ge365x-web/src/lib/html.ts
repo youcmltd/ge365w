@@ -8,6 +8,7 @@ export const BRAND = {
   shortName: 'GE365x',
   version: 'ver1.00',
   tagline: 'X (Twitter) 自動投稿プラットフォーム',
+  longName: 'X (Twitter) 自動投稿プラットフォーム',
   icon: 'fa-bolt',
 
   // サイドバー（紺）
