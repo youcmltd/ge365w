@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+*.log
+.dev.vars
+.data/
+ge365x-web-complete.zip
+dl.js
+download-server.js

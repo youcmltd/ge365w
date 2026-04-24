@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ge365w",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ge365x-web-production",
+      "database_id": "44b03d54-c23e-4258-a4f9-00ce397594b6"
+    }
+  ],
+  "vars": {
+    "OPENAI_MODEL": "gpt-4o-mini",
+    "PAYPAL_MODE": "sandbox"
+  }
+}
