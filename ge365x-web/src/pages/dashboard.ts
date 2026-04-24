@@ -20,6 +20,7 @@ import {
   renderAutopilotPage,
   renderAccountsPage,
   renderApiPage,
+  renderExportPage,
 } from './dashboard-tabs'
 
 const dashboardPage = new Hono<AppEnv>()
@@ -253,6 +254,12 @@ dashboardPage.get('/dashboard/api', authMiddleware, async (c) => {
     ).bind(user.id).first<any>()
 
     return renderApiPage({ settings })
+  })
+})
+
+dashboardPage.get('/dashboard/export', authMiddleware, async (c) => {
+  return renderTab(c, 'export', ({ user }) => {
+    return renderExportPage({ isAdmin: user.is_admin })
   })
 })
 

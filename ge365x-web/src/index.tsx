@@ -29,6 +29,10 @@ import { kpiApi } from './routes/kpi'
 import { logsApi } from './routes/logs'
 import { targetApi } from './routes/target'
 import { voiceApi } from './routes/voice'
+import { apiSettingsApi } from './routes/api-settings'
+
+// ----- エクスポート（一括ダウンロード） -----
+import { exportApi } from './routes/export'
 
 const app = new Hono<AppEnv>()
 
@@ -61,6 +65,10 @@ app.route('/', kpiApi)
 app.route('/', logsApi)
 app.route('/', targetApi)
 app.route('/', voiceApi)
+app.route('/', apiSettingsApi)
+
+// API: エクスポート（一括ダウンロード）
+app.route('/', exportApi)
 
 // 404 / 500
 app.notFound((c) => c.json({ error: 'not_found', path: c.req.path }, 404))

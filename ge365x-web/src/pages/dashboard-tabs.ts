@@ -434,7 +434,10 @@ export function renderPostsPage(args: {
       <button class="btn btn-ghost" onclick="navMonth(1)"><i class="fas fa-chevron-right"></i></button>
       <button class="btn btn-primary btn-sm" onclick="thisMonth()">当月</button>
     </div>
-    <button class="btn btn-danger" onclick="bulkDel()" id="bulk-del-btn" disabled><i class="fas fa-trash"></i>一括削除</button>
+    <div class="flex gap-2">
+      <button class="btn btn-ghost" onclick="dlExportPosts()" title="投稿データをCSVダウンロード"><i class="fas fa-download"></i>CSV</button>
+      <button class="btn btn-danger" onclick="bulkDel()" id="bulk-del-btn" disabled><i class="fas fa-trash"></i>一括削除</button>
+    </div>
   </div>
   <div class="flex items-center gap-6 text-sm">
     <div>合計: <span class="font-bold">${stats.total}件</span></div>
@@ -469,6 +472,24 @@ export function renderPostsPage(args: {
   </div>
 </div>
 <script>
+function dlExportPosts() {
+  const url = '/api/admin/export/posts?month=${month}';
+  fetch(url).then(r => {
+    if (!r.ok) throw new Error('ダウンロード失敗');
+    const cd = r.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'ge365x_posts.csv';
+    return r.blob().then(blob => ({ blob, filename }));
+  }).then(({ blob, filename }) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast(filename + ' をダウンロードしました', 'ok');
+  }).catch(e => toast(e.message, 'err'));
+}
 function navMonth(delta) {
   const [y, m] = '${month}'.split('-').map(Number);
   const d = new Date(y, m - 1 + delta, 1);
@@ -908,6 +929,148 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
 // ============================================================
 // 11. API設定
 // ============================================================
+export function renderExportPage(args: { isAdmin: boolean }): string {
+  const userItems = [
+    { key: 'posts',       label: '投稿キュー',         desc: '全投稿データ（予約・投稿済・失敗含む）',     icon: 'fa-brands fa-x-twitter', color: 'text-blue-600' },
+    { key: 'logs',        label: '投稿ログ',           desc: '投稿実行の全履歴（成功・失敗）',           icon: 'fa-clipboard-list',      color: 'text-emerald-600' },
+    { key: 'generations', label: 'AI生成ログ',         desc: 'AI生成されたテキストの記録',               icon: 'fa-robot',               color: 'text-purple-600' },
+    { key: 'autopilot',   label: 'オートパイロット',    desc: '予約ジョブの一覧',                        icon: 'fa-plane-departure',     color: 'text-amber-600' },
+    { key: 'drafts',      label: '下書き',             desc: '保存済みの下書きデータ',                   icon: 'fa-file-pen',            color: 'text-sky-600' },
+    { key: 'kpi',         label: 'KPI',               desc: '日別投稿数・失敗数の統計',                  icon: 'fa-chart-line',          color: 'text-rose-600' },
+    { key: 'accounts',    label: 'Xアカウント',        desc: 'アカウント情報（トークン除外）',            icon: 'fa-users-gear',          color: 'text-indigo-600' },
+    { key: 'targets',     label: 'ターゲット設定',      desc: 'ターゲットテンプレート',                   icon: 'fa-bullseye',            color: 'text-orange-600' },
+    { key: 'voices',      label: 'ブランドボイス',      desc: 'ボイスプロファイル',                       icon: 'fa-palette',             color: 'text-pink-600' },
+  ]
+  const adminItems = [
+    { key: 'admin/users',    label: 'ユーザー一覧',       desc: '全ユーザー（プラン・承認状態含む）',  icon: 'fa-users',    color: 'text-blue-600' },
+    { key: 'admin/licenses', label: 'ライセンス',         desc: 'ライセンスキーの全データ',           icon: 'fa-key',      color: 'text-amber-600' },
+    { key: 'admin/subs',     label: 'サブスクリプション',  desc: '全契約情報',                        icon: 'fa-credit-card', color: 'text-emerald-600' },
+    { key: 'admin/audit',    label: '監査ログ',           desc: '認証・操作ログ',                    icon: 'fa-shield-halved', color: 'text-red-600' },
+  ]
+
+  return `
+<div class="space-y-6">
+  <div>
+    <h1 class="section-title"><i class="fas fa-download"></i>一括ダウンロード</h1>
+    <p class="section-desc">各データをCSV形式でダウンロードできます。ExcelやGoogleスプレッドシートで開けます。</p>
+  </div>
+
+  <!-- 全データ一括 -->
+  <div class="card">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="font-bold text-ink"><i class="fas fa-box-archive text-accent"></i> 全データ一括</h3>
+        <p class="text-xs text-ink-muted mt-1">全データをJSON形式で一括ダウンロードします（バックアップ用途）</p>
+      </div>
+      <button class="btn btn-primary" onclick="dlExport('all')">
+        <i class="fas fa-download"></i>全データ JSON
+      </button>
+    </div>
+  </div>
+
+  <!-- 個別ダウンロード -->
+  <div class="card">
+    <h3 class="font-bold text-ink mb-4"><i class="fas fa-file-csv text-accent"></i> 個別ダウンロード（CSV）</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      ${userItems.map(item => `
+        <div class="border border-line rounded-lg p-4 hover:border-accent hover:bg-accent-light/30 transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <i class="fas ${item.icon} ${item.color}"></i>
+                <span class="font-semibold text-sm text-ink">${item.label}</span>
+              </div>
+              <p class="text-xs text-ink-muted">${item.desc}</p>
+            </div>
+            <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dlExport('${item.key}')" title="${item.label}をCSVでダウンロード">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  ${args.isAdmin ? `
+  <!-- 管理者向け -->
+  <div class="card">
+    <h3 class="font-bold text-ink mb-1"><i class="fas fa-shield-halved text-red-500"></i> 管理者エクスポート</h3>
+    <p class="text-xs text-ink-muted mb-4">管理者のみがダウンロードできるシステム全体のデータです。</p>
+    <div class="flex items-center gap-3 mb-4">
+      <button class="btn btn-primary" onclick="dlExport('admin/all')">
+        <i class="fas fa-download"></i>管理者全データ JSON
+      </button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      ${adminItems.map(item => `
+        <div class="border border-line rounded-lg p-4 hover:border-accent hover:bg-accent-light/30 transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <i class="fas ${item.icon} ${item.color}"></i>
+                <span class="font-semibold text-sm text-ink">${item.label}</span>
+              </div>
+              <p class="text-xs text-ink-muted">${item.desc}</p>
+            </div>
+            <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dlExport('${item.key}')" title="${item.label}をCSVでダウンロード">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+
+  <!-- 使い方 -->
+  <div class="card bg-paper-soft">
+    <h3 class="font-bold text-ink mb-3"><i class="fas fa-circle-info text-accent"></i> 使い方</h3>
+    <ul class="text-sm text-ink-muted space-y-2">
+      <li class="flex items-start gap-2">
+        <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+        <span>CSVファイルはBOM付きUTF-8で出力されるため、Excelで直接開いても文字化けしません。</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+        <span>各CSVは最大10,000件までエクスポートされます。</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+        <span>「全データJSON」はバックアップ目的で、全テーブルのデータをまとめてダウンロードします。</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <i class="fas fa-lock text-amber-500 mt-0.5"></i>
+        <span>Xアカウントのアクセストークンはセキュリティ上エクスポートされません。</span>
+      </li>
+    </ul>
+  </div>
+</div>
+<script>
+function dlExport(key) {
+  toast('ダウンロード開始...', 'info');
+  const url = '/api/admin/export/' + key;
+  fetch(url)
+    .then(r => {
+      if (!r.ok) throw new Error('ダウンロード失敗 (' + r.status + ')');
+      const cd = r.headers.get('content-disposition') || '';
+      const match = cd.match(/filename="?([^"]+)"?/);
+      const filename = match ? match[1] : 'ge365x_export.' + (key.includes('all') ? 'json' : 'csv');
+      return r.blob().then(blob => ({ blob, filename }));
+    })
+    .then(({ blob, filename }) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      toast(filename + ' をダウンロードしました', 'ok');
+    })
+    .catch(e => toast(e.message, 'err'));
+}
+</script>`
+}
+
 export function renderApiPage(args: { settings: any }): string {
   const s = args.settings || {}
   return `

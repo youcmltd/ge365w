@@ -21,6 +21,7 @@ export type NavKey =
   | 'autopilot'
   | 'accounts'
   | 'api'
+  | 'export'
 
 export const NAV_ITEMS: { key: NavKey; label: string; icon: string; path: string }[] = [
   { key: 'dashboard', label: 'ダッシュボード',    icon: 'fa-gauge-high',            path: '/dashboard' },
@@ -34,6 +35,7 @@ export const NAV_ITEMS: { key: NavKey; label: string; icon: string; path: string
   { key: 'autopilot', label: 'オートパイロット',  icon: 'fa-plane-departure',       path: '/dashboard/autopilot' },
   { key: 'accounts',  label: 'アカウント管理',    icon: 'fa-users-gear',            path: '/dashboard/accounts' },
   { key: 'api',       label: 'API設定',           icon: 'fa-key',                   path: '/dashboard/api' },
+  { key: 'export',    label: '一括ダウンロード',  icon: 'fa-download',              path: '/dashboard/export' },
 ]
 
 /**
