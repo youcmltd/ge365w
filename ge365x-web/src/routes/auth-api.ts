@@ -240,4 +240,70 @@ authApi.post('/api/auth/password/change', authMiddleware, async (c) => {
   return c.json({ ok: true })
 })
 
+// ---------- GET /setup ----------
+// ブラウザのURLだけで管理者アカウントを初期化できるエンドポイント
+// 例: https://ge365w.pages.dev/setup?token=admin123
+// token が ADMIN_PASSWORD と一致する場合のみ実行
+authApi.get('/setup', async (c) => {
+  const token = c.req.query('token') || ''
+  const adminPw = c.env.ADMIN_PASSWORD || ''
+  if (!adminPw || token !== adminPw) {
+    return c.html(`<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<title>Setup</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f7f8fb}
+.card{background:#fff;border-radius:12px;padding:2rem;max-width:420px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center}
+h2{color:#dc2626;margin:0 0 .5rem}p{color:#6b7280;font-size:.9rem}</style></head>
+<body><div class="card"><h2>❌ 認証失敗</h2>
+<p>URLに正しい token を付けてください。<br>例: /setup?token=（ADMIN_PASSWORDの値）</p></div></body></html>`, 403)
+  }
+
+  const adminEmail = 'admin@ge365x.local'
+  const adminPassword = 'Ge365x@Admin!'
+  const hash = await hashPassword(adminPassword)
+
+  // ユーザー作成 or 既存ユーザーのパスワード更新
+  const existing = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(adminEmail).first<{id:number}>()
+  if (existing) {
+    await c.env.DB.prepare(
+      "UPDATE users SET password_hash=?, is_admin=1, is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?"
+    ).bind(hash, existing.id).run()
+    await c.env.DB.prepare(
+      "UPDATE user_subscriptions SET plan_code='ge365x_pro', status='active', current_period_end='2099-12-31 23:59:59' WHERE user_id=?"
+    ).bind(existing.id).run()
+  } else {
+    const ins = await c.env.DB.prepare(
+      `INSERT INTO users (email, password_hash, is_approved, is_admin, trial_start, trial_end)
+       VALUES (?, ?, 1, 1, datetime('now','+9 hours'), '2099-12-31 23:59:59')`
+    ).bind(adminEmail, hash).run()
+    const uid = ins.meta.last_row_id as number
+    await c.env.DB.prepare(
+      `INSERT OR REPLACE INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end)
+       VALUES (?, 'ge365x_pro', 'active', datetime('now','+9 hours'), '2099-12-31 23:59:59')`
+    ).bind(uid).run()
+  }
+
+  return c.html(`<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<title>Setup 完了</title><style>
+body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f0fdf4}
+.card{background:#fff;border-radius:16px;padding:2.5rem;max-width:480px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center}
+h2{color:#16a34a;margin:0 0 1rem;font-size:1.5rem}.icon{font-size:3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1.2rem 0;text-align:left}
+td{padding:8px 12px;font-size:.9rem;border-bottom:1px solid #e5e7eb}
+td:first-child{color:#6b7280;width:40%}
+td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8fafc;border-radius:4px}
+.btn{display:block;background:#2563eb;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;margin-top:1.5rem;font-weight:600;font-size:1rem}
+.warn{background:#fef3c7;border-radius:8px;padding:10px 14px;font-size:.8rem;color:#92400e;margin-top:1rem}</style></head>
+<body><div class="card">
+<div class="icon">✅</div>
+<h2>管理者アカウント設定完了</h2>
+<p style="color:#6b7280;font-size:.9rem">以下の情報でログインしてください</p>
+<table>
+<tr><td>メールアドレス</td><td>${adminEmail}</td></tr>
+<tr><td>パスワード</td><td>Ge365x@Admin!</td></tr>
+<tr><td>権限</td><td>Admin / Pro</td></tr>
+</table>
+<a class="btn" href="/login">→ ログイン画面へ</a>
+<div class="warn">⚠️ ログイン後すぐにパスワードを変更してください<br>このURLは設定後も有効なため、token を知らない人には教えないでください</div>
+</div></body></html>`)
+})
+
 export { authApi }
