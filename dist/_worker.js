@@ -1477,7 +1477,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         '<td style="font-size:.75rem;max-width:18rem"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(p.body||'').slice(0,80).replace(/</g,'&lt;')+'</div></td>' +
         '<td>'+statusBadge(p.status)+'</td>' +
         '<td style="white-space:nowrap">' +
-          '<button class="btn btn-ghost btn-sm" onclick="scEditPost(\\''+p.id+'\\')"><i class="fas fa-pen"></i></button>' +
+          (isAP ? '' : '<button class="btn btn-ghost btn-sm" onclick="scEditPost(\\''+p.id+'\\')"><i class="fas fa-pen"></i></button>') +
           '<button class="btn btn-danger btn-sm" onclick="scDeletePost(\\''+p.id+'\\')"><i class="fas fa-trash"></i></button>' +
         '</td>' +
       '</tr>';
@@ -1963,11 +1963,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         ORDER BY pq.id DESC LIMIT 200`).bind(t.id,n).all(),d=(o||[]).length,l=(o||[]).filter(_=>_.status==="pending"||_.status==="approved").length,c=(o||[]).filter(_=>_.status==="posted").length,p=(o||[]).filter(_=>_.status==="failed").length;return cn({hasAccount:s,noAccountAlert:he,month:n,y:i,m:parseInt(r,10),posts:o||[],stats:{total:d,pending:l,posted:c,failed:p}})}));H.get("/dashboard/thread",m,async e=>K(e,"thread",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.status, pq.posted_at, pq.created_at, pq.thread_parent_id
          FROM post_queue pq
         WHERE pq.user_id = ? AND pq.post_mode = 'thread' AND pq.thread_parent_id IS NOT NULL
-        ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return un({hasAccount:s,noAccountAlert:he,history:a||[]})}));H.get("/dashboard/scheduled",m,async e=>K(e,"scheduled",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.scheduled_at, pq.status, xa.x_username
-         FROM post_queue pq LEFT JOIN x_accounts xa ON xa.id = pq.account_id
-        WHERE pq.user_id = ? AND pq.scheduled_at IS NOT NULL
-          AND pq.status NOT IN ('cancelled','rejected')
-        ORDER BY pq.scheduled_at ASC LIMIT 100`).bind(t.id).all();return mn({hasAccount:s,noAccountAlert:he,scheduled:a||[]})}));H.get("/dashboard/autopilot",m,async e=>K(e,"autopilot",async({user:t,hasAccount:s,accounts:a})=>{const{results:n}=await e.env.DB.prepare(`SELECT aj.*, xa.x_username FROM autopilot_jobs aj
+        ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return un({hasAccount:s,noAccountAlert:he,history:a||[]})}));H.get("/dashboard/scheduled",m,async e=>K(e,"scheduled",async({hasAccount:s})=>mn({hasAccount:s,noAccountAlert:he})));H.get("/dashboard/autopilot",m,async e=>K(e,"autopilot",async({user:t,hasAccount:s,accounts:a})=>{const{results:n}=await e.env.DB.prepare(`SELECT aj.*, xa.x_username FROM autopilot_jobs aj
          LEFT JOIN x_accounts xa ON xa.id = aj.account_id
         WHERE aj.user_id = ?
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
