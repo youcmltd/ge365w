@@ -1,4 +1,4 @@
-var ls=Object.defineProperty;var Vt=e=>{throw TypeError(e)};var cs=(e,t,a)=>t in e?ls(e,t,{enumerable:!0,configurable:!0,writable:!0,value:a}):e[t]=a;var _=(e,t,a)=>cs(e,typeof t!="symbol"?t+"":t,a),Ot=(e,t,a)=>t.has(e)||Vt("Cannot "+a);var u=(e,t,a)=>(Ot(e,t,"read from private field"),a?a.call(e):t.get(e)),E=(e,t,a)=>t.has(e)?Vt("Cannot add the same private member more than once"):t instanceof WeakSet?t.add(e):t.set(e,a),b=(e,t,a,s)=>(Ot(e,t,"write to private field"),s?s.call(e,a):t.set(e,a),a),S=(e,t,a)=>(Ot(e,t,"access private method"),a);var Gt=(e,t,a,s)=>({set _(n){b(e,t,n,a)},get _(){return u(e,t,s)}});var Xt=(e,t,a)=>(s,n)=>{let i=-1;return r(0);async function r(o){if(o<=i)throw new Error("next() called multiple times");i=o;let d,l=!1,c;if(e[o]?(c=e[o][0][0],s.req.routeIndex=o):c=o===e.length&&n||void 0,c)try{d=await c(s,()=>r(o+1))}catch(p){if(p instanceof Error&&t)s.error=p,d=await t(p,s),l=!0;else throw p}else s.finalized===!1&&a&&(d=await a(s));return d&&(s.finalized===!1||l)&&(s.res=d),s}},ps=Symbol(),us=async(e,t=Object.create(null))=>{const{all:a=!1,dot:s=!1}=t,i=(e instanceof ka?e.raw.headers:e.headers).get("Content-Type");return i!=null&&i.startsWith("multipart/form-data")||i!=null&&i.startsWith("application/x-www-form-urlencoded")?ms(e,{all:a,dot:s}):{}};async function ms(e,t){const a=await e.formData();return a?fs(a,t):{}}function fs(e,t){const a=Object.create(null);return e.forEach((s,n)=>{t.all||n.endsWith("[]")?hs(a,n,s):a[n]=s}),t.dot&&Object.entries(a).forEach(([s,n])=>{s.includes(".")&&(gs(a,s,n),delete a[s])}),a}var hs=(e,t,a)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(a):e[t]=[e[t],a]:t.endsWith("[]")?e[t]=[a]:e[t]=a},gs=(e,t,a)=>{if(/(?:^|\.)__proto__\./.test(t))return;let s=e;const n=t.split(".");n.forEach((i,r)=>{r===n.length-1?s[i]=a:((!s[i]||typeof s[i]!="object"||Array.isArray(s[i])||s[i]instanceof File)&&(s[i]=Object.create(null)),s=s[i])})},ba=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},_s=e=>{const{groups:t,path:a}=bs(e),s=ba(a);return vs(s,t)},bs=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(a,s)=>{const n=`@${s}`;return t.push([n,a]),n}),{groups:t,path:e}},vs=(e,t)=>{for(let a=t.length-1;a>=0;a--){const[s]=t[a];for(let n=e.length-1;n>=0;n--)if(e[n].includes(s)){e[n]=e[n].replace(s,t[a][1]);break}}return e},mt={},ys=(e,t)=>{if(e==="*")return"*";const a=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(a){const s=`${e}#${t}`;return mt[s]||(a[2]?mt[s]=t&&t[0]!==":"&&t[0]!=="*"?[s,a[1],new RegExp(`^${a[2]}(?=/${t})`)]:[e,a[1],new RegExp(`^${a[2]}$`)]:mt[s]=[e,a[1],!0]),mt[s]}return null},Ft=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,a=>{try{return t(a)}catch{return a}})}},va=e=>Ft(e,decodeURI),ya=e=>{const t=e.url,a=t.indexOf("/",t.indexOf(":")+4);let s=a;for(;s<t.length;s++){const n=t.charCodeAt(s);if(n===37){const i=t.indexOf("?",s),r=t.indexOf("#",s),o=i===-1?r===-1?void 0:r:r===-1?i:Math.min(i,r),d=t.slice(a,o);return va(d.includes("%25")?d.replace(/%25/g,"%2525"):d)}else if(n===63||n===35)break}return t.slice(a,s)},xs=e=>{const t=ya(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},Be=(e,t,...a)=>(a.length&&(t=Be(t,...a)),`${(e==null?void 0:e[0])==="/"?"":"/"}${e}${t==="/"?"":`${(e==null?void 0:e.at(-1))==="/"?"":"/"}${(t==null?void 0:t[0])==="/"?t.slice(1):t}`}`),xa=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),a=[];let s="";return t.forEach(n=>{if(n!==""&&!/\:/.test(n))s+="/"+n;else if(/\:/.test(n))if(/\?/.test(n)){a.length===0&&s===""?a.push("/"):a.push(s);const i=n.replace("?","");s+="/"+i,a.push(s)}else s+="/"+n}),a.filter((n,i,r)=>r.indexOf(n)===i)},Rt=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?Ft(e,wa):e):e,Ea=(e,t,a)=>{let s;if(!a&&t&&!/[%+]/.test(t)){let r=e.indexOf("?",8);if(r===-1)return;for(e.startsWith(t,r+1)||(r=e.indexOf(`&${t}`,r+1));r!==-1;){const o=e.charCodeAt(r+t.length+1);if(o===61){const d=r+t.length+2,l=e.indexOf("&",d);return Rt(e.slice(d,l===-1?void 0:l))}else if(o==38||isNaN(o))return"";r=e.indexOf(`&${t}`,r+1)}if(s=/[%+]/.test(e),!s)return}const n={};s??(s=/[%+]/.test(e));let i=e.indexOf("?",8);for(;i!==-1;){const r=e.indexOf("&",i+1);let o=e.indexOf("=",i);o>r&&r!==-1&&(o=-1);let d=e.slice(i+1,o===-1?r===-1?void 0:r:o);if(s&&(d=Rt(d)),i=r,d==="")continue;let l;o===-1?l="":(l=e.slice(o+1,r===-1?void 0:r),s&&(l=Rt(l))),a?(n[d]&&Array.isArray(n[d])||(n[d]=[]),n[d].push(l)):n[d]??(n[d]=l)}return t?n[t]:n},Es=Ea,ws=(e,t)=>Ea(e,t,!0),wa=decodeURIComponent,Zt=e=>Ft(e,wa),Me,z,oe,Sa,Ta,Ct,de,ua,ka=(ua=class{constructor(e,t="/",a=[[]]){E(this,oe);_(this,"raw");E(this,Me);E(this,z);_(this,"routeIndex",0);_(this,"path");_(this,"bodyCache",{});E(this,de,e=>{const{bodyCache:t,raw:a}=this,s=t[e];if(s)return s;const n=Object.keys(t)[0];return n?t[n].then(i=>(n==="json"&&(i=JSON.stringify(i)),new Response(i)[e]())):t[e]=a[e]()});this.raw=e,this.path=t,b(this,z,a),b(this,Me,{})}param(e){return e?S(this,oe,Sa).call(this,e):S(this,oe,Ta).call(this)}query(e){return Es(this.url,e)}queries(e){return ws(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((a,s)=>{t[s]=a}),t}async parseBody(e){return us(this,e)}json(){return u(this,de).call(this,"text").then(e=>JSON.parse(e))}text(){return u(this,de).call(this,"text")}arrayBuffer(){return u(this,de).call(this,"arrayBuffer")}blob(){return u(this,de).call(this,"blob")}formData(){return u(this,de).call(this,"formData")}addValidatedData(e,t){u(this,Me)[e]=t}valid(e){return u(this,Me)[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[ps](){return u(this,z)}get matchedRoutes(){return u(this,z)[0].map(([[,e]])=>e)}get routePath(){return u(this,z)[0].map(([[,e]])=>e)[this.routeIndex].path}},Me=new WeakMap,z=new WeakMap,oe=new WeakSet,Sa=function(e){const t=u(this,z)[0][this.routeIndex][1][e],a=S(this,oe,Ct).call(this,t);return a&&/\%/.test(a)?Zt(a):a},Ta=function(){const e={},t=Object.keys(u(this,z)[0][this.routeIndex][1]);for(const a of t){const s=S(this,oe,Ct).call(this,u(this,z)[0][this.routeIndex][1][a]);s!==void 0&&(e[a]=/\%/.test(s)?Zt(s):s)}return e},Ct=function(e){return u(this,z)[1]?u(this,z)[1][e]:e},de=new WeakMap,ua),ks={Stringify:1},Ia=async(e,t,a,s,n)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const i=e.callbacks;return i!=null&&i.length?(n?n[0]+=e:n=[e],Promise.all(i.map(o=>o({phase:t,buffer:n,context:s}))).then(o=>Promise.all(o.filter(Boolean).map(d=>Ia(d,t,!1,s,n))).then(()=>n[0]))):Promise.resolve(e)},Ss="text/plain; charset=UTF-8",Bt=(e,t)=>({"Content-Type":e,...t}),Je=(e,t)=>new Response(e,t),at,st,te,Fe,ae,$,nt,$e,Pe,ve,it,rt,le,Ce,ma,Ts=(ma=class{constructor(e,t){E(this,le);E(this,at);E(this,st);_(this,"env",{});E(this,te);_(this,"finalized",!1);_(this,"error");E(this,Fe);E(this,ae);E(this,$);E(this,nt);E(this,$e);E(this,Pe);E(this,ve);E(this,it);E(this,rt);_(this,"render",(...e)=>(u(this,$e)??b(this,$e,t=>this.html(t)),u(this,$e).call(this,...e)));_(this,"setLayout",e=>b(this,nt,e));_(this,"getLayout",()=>u(this,nt));_(this,"setRenderer",e=>{b(this,$e,e)});_(this,"header",(e,t,a)=>{this.finalized&&b(this,$,Je(u(this,$).body,u(this,$)));const s=u(this,$)?u(this,$).headers:u(this,ve)??b(this,ve,new Headers);t===void 0?s.delete(e):a!=null&&a.append?s.append(e,t):s.set(e,t)});_(this,"status",e=>{b(this,Fe,e)});_(this,"set",(e,t)=>{u(this,te)??b(this,te,new Map),u(this,te).set(e,t)});_(this,"get",e=>u(this,te)?u(this,te).get(e):void 0);_(this,"newResponse",(...e)=>S(this,le,Ce).call(this,...e));_(this,"body",(e,t,a)=>S(this,le,Ce).call(this,e,t,a));_(this,"text",(e,t,a)=>!u(this,ve)&&!u(this,Fe)&&!t&&!a&&!this.finalized?new Response(e):S(this,le,Ce).call(this,e,t,Bt(Ss,a)));_(this,"json",(e,t,a)=>S(this,le,Ce).call(this,JSON.stringify(e),t,Bt("application/json",a)));_(this,"html",(e,t,a)=>{const s=n=>S(this,le,Ce).call(this,n,t,Bt("text/html; charset=UTF-8",a));return typeof e=="object"?Ia(e,ks.Stringify,!1,{}).then(s):s(e)});_(this,"redirect",(e,t)=>{const a=String(e);return this.header("Location",/[^\x00-\xFF]/.test(a)?encodeURI(a):a),this.newResponse(null,t??302)});_(this,"notFound",()=>(u(this,Pe)??b(this,Pe,()=>Je()),u(this,Pe).call(this,this)));b(this,at,e),t&&(b(this,ae,t.executionCtx),this.env=t.env,b(this,Pe,t.notFoundHandler),b(this,rt,t.path),b(this,it,t.matchResult))}get req(){return u(this,st)??b(this,st,new ka(u(this,at),u(this,rt),u(this,it))),u(this,st)}get event(){if(u(this,ae)&&"respondWith"in u(this,ae))return u(this,ae);throw Error("This context has no FetchEvent")}get executionCtx(){if(u(this,ae))return u(this,ae);throw Error("This context has no ExecutionContext")}get res(){return u(this,$)||b(this,$,Je(null,{headers:u(this,ve)??b(this,ve,new Headers)}))}set res(e){if(u(this,$)&&e){e=Je(e.body,e);for(const[t,a]of u(this,$).headers.entries())if(t!=="content-type")if(t==="set-cookie"){const s=u(this,$).headers.getSetCookie();e.headers.delete("set-cookie");for(const n of s)e.headers.append("set-cookie",n)}else e.headers.set(t,a)}b(this,$,e),this.finalized=!0}get var(){return u(this,te)?Object.fromEntries(u(this,te)):{}}},at=new WeakMap,st=new WeakMap,te=new WeakMap,Fe=new WeakMap,ae=new WeakMap,$=new WeakMap,nt=new WeakMap,$e=new WeakMap,Pe=new WeakMap,ve=new WeakMap,it=new WeakMap,rt=new WeakMap,le=new WeakSet,Ce=function(e,t,a){const s=u(this,$)?new Headers(u(this,$).headers):u(this,ve)??new Headers;if(typeof t=="object"&&"headers"in t){const i=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[r,o]of i)r.toLowerCase()==="set-cookie"?s.append(r,o):s.set(r,o)}if(a)for(const[i,r]of Object.entries(a))if(typeof r=="string")s.set(i,r);else{s.delete(i);for(const o of r)s.append(i,o)}const n=typeof t=="number"?t:(t==null?void 0:t.status)??u(this,Fe);return Je(e,{status:n,headers:s})},ma),R="ALL",Is="all",As=["get","post","put","delete","options","patch"],Aa="Can not add a route since the matcher is already built.",Da=class extends Error{},Ds="__COMPOSED_HANDLER",js=e=>e.text("404 Not Found",404),Qt=(e,t)=>{if("getResponse"in e){const a=e.getResponse();return t.newResponse(a.body,a)}return console.error(e),t.text("Internal Server Error",500)},K,B,ja,J,_e,ht,gt,qe,Os=(qe=class{constructor(t={}){E(this,B);_(this,"get");_(this,"post");_(this,"put");_(this,"delete");_(this,"options");_(this,"patch");_(this,"all");_(this,"on");_(this,"use");_(this,"router");_(this,"getPath");_(this,"_basePath","/");E(this,K,"/");_(this,"routes",[]);E(this,J,js);_(this,"errorHandler",Qt);_(this,"onError",t=>(this.errorHandler=t,this));_(this,"notFound",t=>(b(this,J,t),this));_(this,"fetch",(t,...a)=>S(this,B,gt).call(this,t,a[1],a[0],t.method));_(this,"request",(t,a,s,n)=>t instanceof Request?this.fetch(a?new Request(t,a):t,s,n):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${Be("/",t)}`,a),s,n)));_(this,"fire",()=>{addEventListener("fetch",t=>{t.respondWith(S(this,B,gt).call(this,t.request,t,void 0,t.request.method))})});[...As,Is].forEach(i=>{this[i]=(r,...o)=>(typeof r=="string"?b(this,K,r):S(this,B,_e).call(this,i,u(this,K),r),o.forEach(d=>{S(this,B,_e).call(this,i,u(this,K),d)}),this)}),this.on=(i,r,...o)=>{for(const d of[r].flat()){b(this,K,d);for(const l of[i].flat())o.map(c=>{S(this,B,_e).call(this,l.toUpperCase(),u(this,K),c)})}return this},this.use=(i,...r)=>(typeof i=="string"?b(this,K,i):(b(this,K,"*"),r.unshift(i)),r.forEach(o=>{S(this,B,_e).call(this,R,u(this,K),o)}),this);const{strict:s,...n}=t;Object.assign(this,n),this.getPath=s??!0?t.getPath??ya:xs}route(t,a){const s=this.basePath(t);return a.routes.map(n=>{var r;let i;a.errorHandler===Qt?i=n.handler:(i=async(o,d)=>(await Xt([],a.errorHandler)(o,()=>n.handler(o,d))).res,i[Ds]=n.handler),S(r=s,B,_e).call(r,n.method,n.path,i)}),this}basePath(t){const a=S(this,B,ja).call(this);return a._basePath=Be(this._basePath,t),a}mount(t,a,s){let n,i;s&&(typeof s=="function"?i=s:(i=s.optionHandler,s.replaceRequest===!1?n=d=>d:n=s.replaceRequest));const r=i?d=>{const l=i(d);return Array.isArray(l)?l:[l]}:d=>{let l;try{l=d.executionCtx}catch{}return[d.env,l]};n||(n=(()=>{const d=Be(this._basePath,t),l=d==="/"?0:d.length;return c=>{const p=new URL(c.url);return p.pathname=p.pathname.slice(l)||"/",new Request(p,c)}})());const o=async(d,l)=>{const c=await a(n(d.req.raw),...r(d));if(c)return c;await l()};return S(this,B,_e).call(this,R,Be(t,"*"),o),this}},K=new WeakMap,B=new WeakSet,ja=function(){const t=new qe({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,b(t,J,u(this,J)),t.routes=this.routes,t},J=new WeakMap,_e=function(t,a,s){t=t.toUpperCase(),a=Be(this._basePath,a);const n={basePath:this._basePath,path:a,method:t,handler:s};this.router.add(t,a,[s,n]),this.routes.push(n)},ht=function(t,a){if(t instanceof Error)return this.errorHandler(t,a);throw t},gt=function(t,a,s,n){if(n==="HEAD")return(async()=>new Response(null,await S(this,B,gt).call(this,t,a,s,"GET")))();const i=this.getPath(t,{env:s}),r=this.router.match(n,i),o=new Ts(t,{path:i,matchResult:r,env:s,executionCtx:a,notFoundHandler:u(this,J)});if(r[0].length===1){let l;try{l=r[0][0][0][0](o,async()=>{o.res=await u(this,J).call(this,o)})}catch(c){return S(this,B,ht).call(this,c,o)}return l instanceof Promise?l.then(c=>c||(o.finalized?o.res:u(this,J).call(this,o))).catch(c=>S(this,B,ht).call(this,c,o)):l??u(this,J).call(this,o)}const d=Xt(r[0],this.errorHandler,u(this,J));return(async()=>{try{const l=await d(o);if(!l.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return l.res}catch(l){return S(this,B,ht).call(this,l,o)}})()},qe),Oa=[];function Rs(e,t){const a=this.buildAllMatchers(),s=((n,i)=>{const r=a[n]||a[R],o=r[2][i];if(o)return o;const d=i.match(r[0]);if(!d)return[[],Oa];const l=d.indexOf("",1);return[r[1][l],d]});return this.match=s,s(e,t)}var vt="[^/]+",Xe=".*",Ze="(?:|/.*)",Ne=Symbol(),Bs=new Set(".\\+*[^]$()");function Cs(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===Xe||e===Ze?1:t===Xe||t===Ze?-1:e===vt?1:t===vt?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var ye,xe,V,ke,Ns=(ke=class{constructor(){E(this,ye);E(this,xe);E(this,V,Object.create(null))}insert(t,a,s,n,i){if(t.length===0){if(u(this,ye)!==void 0)throw Ne;if(i)return;b(this,ye,a);return}const[r,...o]=t,d=r==="*"?o.length===0?["","",Xe]:["","",vt]:r==="/*"?["","",Ze]:r.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let l;if(d){const c=d[1];let p=d[2]||vt;if(c&&d[2]&&(p===".*"||(p=p.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(p))))throw Ne;if(l=u(this,V)[p],!l){if(Object.keys(u(this,V)).some(m=>m!==Xe&&m!==Ze))throw Ne;if(i)return;l=u(this,V)[p]=new ke,c!==""&&b(l,xe,n.varIndex++)}!i&&c!==""&&s.push([c,u(l,xe)])}else if(l=u(this,V)[r],!l){if(Object.keys(u(this,V)).some(c=>c.length>1&&c!==Xe&&c!==Ze))throw Ne;if(i)return;l=u(this,V)[r]=new ke}l.insert(o,a,s,n,i)}buildRegExpStr(){const a=Object.keys(u(this,V)).sort(Cs).map(s=>{const n=u(this,V)[s];return(typeof u(n,xe)=="number"?`(${s})@${u(n,xe)}`:Bs.has(s)?`\\${s}`:s)+n.buildRegExpStr()});return typeof u(this,ye)=="number"&&a.unshift(`#${u(this,ye)}`),a.length===0?"":a.length===1?a[0]:"(?:"+a.join("|")+")"}},ye=new WeakMap,xe=new WeakMap,V=new WeakMap,ke),xt,ot,fa,Ls=(fa=class{constructor(){E(this,xt,{varIndex:0});E(this,ot,new Ns)}insert(e,t,a){const s=[],n=[];for(let r=0;;){let o=!1;if(e=e.replace(/\{[^}]+\}/g,d=>{const l=`@\\${r}`;return n[r]=[l,d],r++,o=!0,l}),!o)break}const i=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let r=n.length-1;r>=0;r--){const[o]=n[r];for(let d=i.length-1;d>=0;d--)if(i[d].indexOf(o)!==-1){i[d]=i[d].replace(o,n[r][1]);break}}return u(this,ot).insert(i,t,s,u(this,xt),a),s}buildRegExp(){let e=u(this,ot).buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const a=[],s=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(n,i,r)=>i!==void 0?(a[++t]=Number(i),"$()"):(r!==void 0&&(s[Number(r)]=++t),"")),[new RegExp(`^${e}`),a,s]}},xt=new WeakMap,ot=new WeakMap,fa),Ms=[/^$/,[],Object.create(null)],_t=Object.create(null);function Ra(e){return _t[e]??(_t[e]=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,a)=>a?`\\${a}`:"(?:|/.*)")}$`))}function Fs(){_t=Object.create(null)}function $s(e){var l;const t=new Ls,a=[];if(e.length===0)return Ms;const s=e.map(c=>[!/\*|\/:/.test(c[0]),...c]).sort(([c,p],[m,h])=>c?1:m?-1:p.length-h.length),n=Object.create(null);for(let c=0,p=-1,m=s.length;c<m;c++){const[h,g,k]=s[c];h?n[g]=[k.map(([w])=>[w,Object.create(null)]),Oa]:p++;let y;try{y=t.insert(g,p,h)}catch(w){throw w===Ne?new Da(g):w}h||(a[p]=k.map(([w,v])=>{const j=Object.create(null);for(v-=1;v>=0;v--){const[O,A]=y[v];j[O]=A}return[w,j]}))}const[i,r,o]=t.buildRegExp();for(let c=0,p=a.length;c<p;c++)for(let m=0,h=a[c].length;m<h;m++){const g=(l=a[c][m])==null?void 0:l[1];if(!g)continue;const k=Object.keys(g);for(let y=0,w=k.length;y<w;y++)g[k[y]]=o[g[k[y]]]}const d=[];for(const c in r)d[c]=a[r[c]];return[i,d,n]}function Re(e,t){if(e){for(const a of Object.keys(e).sort((s,n)=>n.length-s.length))if(Ra(a).test(t))return[...e[a]]}}var ce,pe,Et,Ba,ha,Ps=(ha=class{constructor(){E(this,Et);_(this,"name","RegExpRouter");E(this,ce);E(this,pe);_(this,"match",Rs);b(this,ce,{[R]:Object.create(null)}),b(this,pe,{[R]:Object.create(null)})}add(e,t,a){var o;const s=u(this,ce),n=u(this,pe);if(!s||!n)throw new Error(Aa);s[e]||[s,n].forEach(d=>{d[e]=Object.create(null),Object.keys(d[R]).forEach(l=>{d[e][l]=[...d[R][l]]})}),t==="/*"&&(t="*");const i=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const d=Ra(t);e===R?Object.keys(s).forEach(l=>{var c;(c=s[l])[t]||(c[t]=Re(s[l],t)||Re(s[R],t)||[])}):(o=s[e])[t]||(o[t]=Re(s[e],t)||Re(s[R],t)||[]),Object.keys(s).forEach(l=>{(e===R||e===l)&&Object.keys(s[l]).forEach(c=>{d.test(c)&&s[l][c].push([a,i])})}),Object.keys(n).forEach(l=>{(e===R||e===l)&&Object.keys(n[l]).forEach(c=>d.test(c)&&n[l][c].push([a,i]))});return}const r=xa(t)||[t];for(let d=0,l=r.length;d<l;d++){const c=r[d];Object.keys(n).forEach(p=>{var m;(e===R||e===p)&&((m=n[p])[c]||(m[c]=[...Re(s[p],c)||Re(s[R],c)||[]]),n[p][c].push([a,i-l+d+1]))})}}buildAllMatchers(){const e=Object.create(null);return Object.keys(u(this,pe)).concat(Object.keys(u(this,ce))).forEach(t=>{e[t]||(e[t]=S(this,Et,Ba).call(this,t))}),b(this,ce,b(this,pe,void 0)),Fs(),e}},ce=new WeakMap,pe=new WeakMap,Et=new WeakSet,Ba=function(e){const t=[];let a=e===R;return[u(this,ce),u(this,pe)].forEach(s=>{const n=s[e]?Object.keys(s[e]).map(i=>[i,s[e][i]]):[];n.length!==0?(a||(a=!0),t.push(...n)):e!==R&&t.push(...Object.keys(s[R]).map(i=>[i,s[R][i]]))}),a?$s(t):null},ha),ue,se,ga,qs=(ga=class{constructor(e){_(this,"name","SmartRouter");E(this,ue,[]);E(this,se,[]);b(this,ue,e.routers)}add(e,t,a){if(!u(this,se))throw new Error(Aa);u(this,se).push([e,t,a])}match(e,t){if(!u(this,se))throw new Error("Fatal error");const a=u(this,ue),s=u(this,se),n=a.length;let i=0,r;for(;i<n;i++){const o=a[i];try{for(let d=0,l=s.length;d<l;d++)o.add(...s[d]);r=o.match(e,t)}catch(d){if(d instanceof Da)continue;throw d}this.match=o.match.bind(o),b(this,ue,[o]),b(this,se,void 0);break}if(i===n)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,r}get activeRouter(){if(u(this,se)||u(this,ue).length!==1)throw new Error("No active router has been determined yet.");return u(this,ue)[0]}},ue=new WeakMap,se=new WeakMap,ga),Ve=Object.create(null),Hs=e=>{for(const t in e)return!0;return!1},me,L,Ee,He,N,ne,be,Ue,Us=(Ue=class{constructor(t,a,s){E(this,ne);E(this,me);E(this,L);E(this,Ee);E(this,He,0);E(this,N,Ve);if(b(this,L,s||Object.create(null)),b(this,me,[]),t&&a){const n=Object.create(null);n[t]={handler:a,possibleKeys:[],score:0},b(this,me,[n])}b(this,Ee,[])}insert(t,a,s){b(this,He,++Gt(this,He)._);let n=this;const i=_s(a),r=[];for(let o=0,d=i.length;o<d;o++){const l=i[o],c=i[o+1],p=ys(l,c),m=Array.isArray(p)?p[0]:l;if(m in u(n,L)){n=u(n,L)[m],p&&r.push(p[1]);continue}u(n,L)[m]=new Ue,p&&(u(n,Ee).push(p),r.push(p[1])),n=u(n,L)[m]}return u(n,me).push({[t]:{handler:s,possibleKeys:r.filter((o,d,l)=>l.indexOf(o)===d),score:u(this,He)}}),n}search(t,a){var c;const s=[];b(this,N,Ve);let i=[this];const r=ba(a),o=[],d=r.length;let l=null;for(let p=0;p<d;p++){const m=r[p],h=p===d-1,g=[];for(let y=0,w=i.length;y<w;y++){const v=i[y],j=u(v,L)[m];j&&(b(j,N,u(v,N)),h?(u(j,L)["*"]&&S(this,ne,be).call(this,s,u(j,L)["*"],t,u(v,N)),S(this,ne,be).call(this,s,j,t,u(v,N))):g.push(j));for(let O=0,A=u(v,Ee).length;O<A;O++){const De=u(v,Ee)[O],G=u(v,N)===Ve?{}:{...u(v,N)};if(De==="*"){const je=u(v,L)["*"];je&&(S(this,ne,be).call(this,s,je,t,u(v,N)),b(je,N,G),g.push(je));continue}const[ds,Jt,Ye]=De;if(!m&&!(Ye instanceof RegExp))continue;const Q=u(v,L)[ds];if(Ye instanceof RegExp){if(l===null){l=new Array(d);let Oe=a[0]==="/"?1:0;for(let Ke=0;Ke<d;Ke++)l[Ke]=Oe,Oe+=r[Ke].length+1}const je=a.substring(l[p]),jt=Ye.exec(je);if(jt){if(G[Jt]=jt[0],S(this,ne,be).call(this,s,Q,t,u(v,N),G),Hs(u(Q,L))){b(Q,N,G);const Oe=((c=jt[0].match(/\//))==null?void 0:c.length)??0;(o[Oe]||(o[Oe]=[])).push(Q)}continue}}(Ye===!0||Ye.test(m))&&(G[Jt]=m,h?(S(this,ne,be).call(this,s,Q,t,G,u(v,N)),u(Q,L)["*"]&&S(this,ne,be).call(this,s,u(Q,L)["*"],t,G,u(v,N))):(b(Q,N,G),g.push(Q)))}}const k=o.shift();i=k?g.concat(k):g}return s.length>1&&s.sort((p,m)=>p.score-m.score),[s.map(({handler:p,params:m})=>[p,m])]}},me=new WeakMap,L=new WeakMap,Ee=new WeakMap,He=new WeakMap,N=new WeakMap,ne=new WeakSet,be=function(t,a,s,n,i){for(let r=0,o=u(a,me).length;r<o;r++){const d=u(a,me)[r],l=d[s]||d[R],c={};if(l!==void 0&&(l.params=Object.create(null),t.push(l),n!==Ve||i&&i!==Ve))for(let p=0,m=l.possibleKeys.length;p<m;p++){const h=l.possibleKeys[p],g=c[l.score];l.params[h]=i!=null&&i[h]&&!g?i[h]:n[h]??(i==null?void 0:i[h]),c[l.score]=!0}}},Ue),we,_a,Ws=(_a=class{constructor(){_(this,"name","TrieRouter");E(this,we);b(this,we,new Us)}add(e,t,a){const s=xa(t);if(s){for(let n=0,i=s.length;n<i;n++)u(this,we).insert(e,s[n],a);return}u(this,we).insert(e,t,a)}match(e,t){return u(this,we).search(e,t)}},we=new WeakMap,_a),D=class extends Os{constructor(e={}){super(e),this.router=e.router??new qs({routers:[new Ps,new Ws]})}},zs=/^\s*(?:text\/(?!event-stream(?:[;\s]|$))[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i,ea=(e,t=Ks)=>{const a=/\.([a-zA-Z0-9]+?)$/,s=e.match(a);if(!s)return;let n=t[s[1].toLowerCase()];return n&&n.startsWith("text")&&(n+="; charset=utf-8"),n},Ys={aac:"audio/aac",avi:"video/x-msvideo",avif:"image/avif",av1:"video/av1",bin:"application/octet-stream",bmp:"image/bmp",css:"text/css",csv:"text/csv",eot:"application/vnd.ms-fontobject",epub:"application/epub+zip",gif:"image/gif",gz:"application/gzip",htm:"text/html",html:"text/html",ico:"image/x-icon",ics:"text/calendar",jpeg:"image/jpeg",jpg:"image/jpeg",js:"text/javascript",json:"application/json",jsonld:"application/ld+json",map:"application/json",mid:"audio/x-midi",midi:"audio/x-midi",mjs:"text/javascript",mp3:"audio/mpeg",mp4:"video/mp4",mpeg:"video/mpeg",oga:"audio/ogg",ogv:"video/ogg",ogx:"application/ogg",opus:"audio/opus",otf:"font/otf",pdf:"application/pdf",png:"image/png",rtf:"application/rtf",svg:"image/svg+xml",tif:"image/tiff",tiff:"image/tiff",ts:"video/mp2t",ttf:"font/ttf",txt:"text/plain",wasm:"application/wasm",webm:"video/webm",weba:"audio/webm",webmanifest:"application/manifest+json",webp:"image/webp",woff:"font/woff",woff2:"font/woff2",xhtml:"application/xhtml+xml",xml:"application/xml",zip:"application/zip","3gp":"video/3gpp","3g2":"video/3gpp2",gltf:"model/gltf+json",glb:"model/gltf-binary"},Ks=Ys,Js=(...e)=>{let t=e.filter(n=>n!=="").join("/");t=t.replace(new RegExp("(?<=\\/)\\/+","g"),"");const a=t.split("/"),s=[];for(const n of a)n===".."&&s.length>0&&s.at(-1)!==".."?s.pop():n!=="."&&s.push(n);return s.join("/")||"."},Ca={br:".br",zstd:".zst",gzip:".gz"},Vs=Object.keys(Ca),Gs="index.html",Xs=e=>{const t=e.root??"./",a=e.path,s=e.join??Js;return async(n,i)=>{var c,p,m,h;if(n.finalized)return i();let r;if(e.path)r=e.path;else try{if(r=va(n.req.path),/(?:^|[\/\\])\.{1,2}(?:$|[\/\\])|[\/\\]{2,}/.test(r))throw new Error}catch{return await((c=e.onNotFound)==null?void 0:c.call(e,n.req.path,n)),i()}let o=s(t,!a&&e.rewriteRequestPath?e.rewriteRequestPath(r):r);e.isDir&&await e.isDir(o)&&(o=s(o,Gs));const d=e.getContent;let l=await d(o,n);if(l instanceof Response)return n.newResponse(l.body,l);if(l){const g=e.mimes&&ea(o,e.mimes)||ea(o);if(n.header("Content-Type",g||"application/octet-stream"),e.precompressed&&(!g||zs.test(g))){const k=new Set((p=n.req.header("Accept-Encoding"))==null?void 0:p.split(",").map(y=>y.trim()));for(const y of Vs){if(!k.has(y))continue;const w=await d(o+Ca[y],n);if(w){l=w,n.header("Content-Encoding",y),n.header("Vary","Accept-Encoding",{append:!0});break}}}return await((m=e.onFound)==null?void 0:m.call(e,o,n)),n.body(l)}await((h=e.onNotFound)==null?void 0:h.call(e,o,n)),await i()}},Zs=async(e,t)=>{let a;t&&t.manifest?typeof t.manifest=="string"?a=JSON.parse(t.manifest):a=t.manifest:typeof __STATIC_CONTENT_MANIFEST=="string"?a=JSON.parse(__STATIC_CONTENT_MANIFEST):a=__STATIC_CONTENT_MANIFEST;let s;t&&t.namespace?s=t.namespace:s=__STATIC_CONTENT;const n=a[e];if(!n)return null;const i=await s.get(n,{type:"stream"});return i||null},Qs=e=>async function(a,s){return Xs({...e,getContent:async i=>Zs(i,{manifest:e.manifest,namespace:e.namespace?e.namespace:a.env?a.env.__STATIC_CONTENT:void 0})})(a,s)},en=e=>Qs(e);const H={name:"Growth-engine365X",version:"ver1.00",tagline:"X (Twitter) 自動投稿プラットフォーム",longName:"X (Twitter) 自動投稿プラットフォーム",icon:"fa-bolt"},tn=`
+var Zs=Object.defineProperty;var Ut=e=>{throw TypeError(e)};var Qs=(e,t,s)=>t in e?Zs(e,t,{enumerable:!0,configurable:!0,writable:!0,value:s}):e[t]=s;var h=(e,t,s)=>Qs(e,typeof t!="symbol"?t+"":t,s),xt=(e,t,s)=>t.has(e)||Ut("Cannot "+s);var u=(e,t,s)=>(xt(e,t,"read from private field"),s?s.call(e):t.get(e)),y=(e,t,s)=>t.has(e)?Ut("Cannot add the same private member more than once"):t instanceof WeakSet?t.add(e):t.set(e,s),f=(e,t,s,a)=>(xt(e,t,"write to private field"),a?a.call(e,s):t.set(e,s),s),x=(e,t,s)=>(xt(e,t,"access private method"),s);var Wt=(e,t,s,a)=>({set _(n){f(e,t,n,s)},get _(){return u(e,t,a)}});var Yt=(e,t,s)=>(a,n)=>{let i=-1;return r(0);async function r(o){if(o<=i)throw new Error("next() called multiple times");i=o;let d,l=!1,c;if(e[o]?(c=e[o][0][0],a.req.routeIndex=o):c=o===e.length&&n||void 0,c)try{d=await c(a,()=>r(o+1))}catch(p){if(p instanceof Error&&t)a.error=p,d=await t(p,a),l=!0;else throw p}else a.finalized===!1&&s&&(d=await s(a));return d&&(a.finalized===!1||l)&&(a.res=d),a}},ea=Symbol(),ta=async(e,t=Object.create(null))=>{const{all:s=!1,dot:a=!1}=t,i=(e instanceof ys?e.raw.headers:e.headers).get("Content-Type");return i!=null&&i.startsWith("multipart/form-data")||i!=null&&i.startsWith("application/x-www-form-urlencoded")?sa(e,{all:s,dot:a}):{}};async function sa(e,t){const s=await e.formData();return s?aa(s,t):{}}function aa(e,t){const s=Object.create(null);return e.forEach((a,n)=>{t.all||n.endsWith("[]")?na(s,n,a):s[n]=a}),t.dot&&Object.entries(s).forEach(([a,n])=>{a.includes(".")&&(ia(s,a,n),delete s[a])}),s}var na=(e,t,s)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(s):e[t]=[e[t],s]:t.endsWith("[]")?e[t]=[s]:e[t]=s},ia=(e,t,s)=>{if(/(?:^|\.)__proto__\./.test(t))return;let a=e;const n=t.split(".");n.forEach((i,r)=>{r===n.length-1?a[i]=s:((!a[i]||typeof a[i]!="object"||Array.isArray(a[i])||a[i]instanceof File)&&(a[i]=Object.create(null)),a=a[i])})},_s=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},ra=e=>{const{groups:t,path:s}=oa(e),a=_s(s);return da(a,t)},oa=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(s,a)=>{const n=`@${a}`;return t.push([n,s]),n}),{groups:t,path:e}},da=(e,t)=>{for(let s=t.length-1;s>=0;s--){const[a]=t[s];for(let n=e.length-1;n>=0;n--)if(e[n].includes(a)){e[n]=e[n].replace(a,t[s][1]);break}}return e},it={},la=(e,t)=>{if(e==="*")return"*";const s=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(s){const a=`${e}#${t}`;return it[a]||(s[2]?it[a]=t&&t[0]!==":"&&t[0]!=="*"?[a,s[1],new RegExp(`^${s[2]}(?=/${t})`)]:[e,s[1],new RegExp(`^${s[2]}$`)]:it[a]=[e,s[1],!0]),it[a]}return null},jt=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,s=>{try{return t(s)}catch{return s}})}},hs=e=>jt(e,decodeURI),fs=e=>{const t=e.url,s=t.indexOf("/",t.indexOf(":")+4);let a=s;for(;a<t.length;a++){const n=t.charCodeAt(a);if(n===37){const i=t.indexOf("?",a),r=t.indexOf("#",a),o=i===-1?r===-1?void 0:r:r===-1?i:Math.min(i,r),d=t.slice(s,o);return hs(d.includes("%25")?d.replace(/%25/g,"%2525"):d)}else if(n===63||n===35)break}return t.slice(s,a)},ca=e=>{const t=fs(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},Ie=(e,t,...s)=>(s.length&&(t=Ie(t,...s)),`${(e==null?void 0:e[0])==="/"?"":"/"}${e}${t==="/"?"":`${(e==null?void 0:e.at(-1))==="/"?"":"/"}${(t==null?void 0:t[0])==="/"?t.slice(1):t}`}`),bs=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),s=[];let a="";return t.forEach(n=>{if(n!==""&&!/\:/.test(n))a+="/"+n;else if(/\:/.test(n))if(/\?/.test(n)){s.length===0&&a===""?s.push("/"):s.push(a);const i=n.replace("?","");a+="/"+i,s.push(a)}else a+="/"+n}),s.filter((n,i,r)=>r.indexOf(n)===i)},wt=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?jt(e,vs):e):e,gs=(e,t,s)=>{let a;if(!s&&t&&!/[%+]/.test(t)){let r=e.indexOf("?",8);if(r===-1)return;for(e.startsWith(t,r+1)||(r=e.indexOf(`&${t}`,r+1));r!==-1;){const o=e.charCodeAt(r+t.length+1);if(o===61){const d=r+t.length+2,l=e.indexOf("&",d);return wt(e.slice(d,l===-1?void 0:l))}else if(o==38||isNaN(o))return"";r=e.indexOf(`&${t}`,r+1)}if(a=/[%+]/.test(e),!a)return}const n={};a??(a=/[%+]/.test(e));let i=e.indexOf("?",8);for(;i!==-1;){const r=e.indexOf("&",i+1);let o=e.indexOf("=",i);o>r&&r!==-1&&(o=-1);let d=e.slice(i+1,o===-1?r===-1?void 0:r:o);if(a&&(d=wt(d)),i=r,d==="")continue;let l;o===-1?l="":(l=e.slice(o+1,r===-1?void 0:r),a&&(l=wt(l))),s?(n[d]&&Array.isArray(n[d])||(n[d]=[]),n[d].push(l)):n[d]??(n[d]=l)}return t?n[t]:n},ua=gs,pa=(e,t)=>gs(e,t,!0),vs=decodeURIComponent,Jt=e=>jt(e,vs),Ne,J,re,Es,xs,Dt,de,ds,ys=(ds=class{constructor(e,t="/",s=[[]]){y(this,re);h(this,"raw");y(this,Ne);y(this,J);h(this,"routeIndex",0);h(this,"path");h(this,"bodyCache",{});y(this,de,e=>{const{bodyCache:t,raw:s}=this,a=t[e];if(a)return a;const n=Object.keys(t)[0];return n?t[n].then(i=>(n==="json"&&(i=JSON.stringify(i)),new Response(i)[e]())):t[e]=s[e]()});this.raw=e,this.path=t,f(this,J,s),f(this,Ne,{})}param(e){return e?x(this,re,Es).call(this,e):x(this,re,xs).call(this)}query(e){return ua(this.url,e)}queries(e){return pa(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((s,a)=>{t[a]=s}),t}async parseBody(e){return ta(this,e)}json(){return u(this,de).call(this,"text").then(e=>JSON.parse(e))}text(){return u(this,de).call(this,"text")}arrayBuffer(){return u(this,de).call(this,"arrayBuffer")}blob(){return u(this,de).call(this,"blob")}formData(){return u(this,de).call(this,"formData")}addValidatedData(e,t){u(this,Ne)[e]=t}valid(e){return u(this,Ne)[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[ea](){return u(this,J)}get matchedRoutes(){return u(this,J)[0].map(([[,e]])=>e)}get routePath(){return u(this,J)[0].map(([[,e]])=>e)[this.routeIndex].path}},Ne=new WeakMap,J=new WeakMap,re=new WeakSet,Es=function(e){const t=u(this,J)[0][this.routeIndex][1][e],s=x(this,re,Dt).call(this,t);return s&&/\%/.test(s)?Jt(s):s},xs=function(){const e={},t=Object.keys(u(this,J)[0][this.routeIndex][1]);for(const s of t){const a=x(this,re,Dt).call(this,u(this,J)[0][this.routeIndex][1][s]);a!==void 0&&(e[s]=/\%/.test(a)?Jt(a):a)}return e},Dt=function(e){return u(this,J)[1]?u(this,J)[1][e]:e},de=new WeakMap,ds),ma={Stringify:1},ws=async(e,t,s,a,n)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const i=e.callbacks;return i!=null&&i.length?(n?n[0]+=e:n=[e],Promise.all(i.map(o=>o({phase:t,buffer:n,context:a}))).then(o=>Promise.all(o.filter(Boolean).map(d=>ws(d,t,!1,a,n))).then(()=>n[0]))):Promise.resolve(e)},_a="text/plain; charset=UTF-8",kt=(e,t)=>({"Content-Type":e,...t}),Ye=(e,t)=>new Response(e,t),Ve,Xe,te,Le,se,M,Ge,Me,$e,xe,Ze,Qe,le,Ce,ls,ha=(ls=class{constructor(e,t){y(this,le);y(this,Ve);y(this,Xe);h(this,"env",{});y(this,te);h(this,"finalized",!1);h(this,"error");y(this,Le);y(this,se);y(this,M);y(this,Ge);y(this,Me);y(this,$e);y(this,xe);y(this,Ze);y(this,Qe);h(this,"render",(...e)=>(u(this,Me)??f(this,Me,t=>this.html(t)),u(this,Me).call(this,...e)));h(this,"setLayout",e=>f(this,Ge,e));h(this,"getLayout",()=>u(this,Ge));h(this,"setRenderer",e=>{f(this,Me,e)});h(this,"header",(e,t,s)=>{this.finalized&&f(this,M,Ye(u(this,M).body,u(this,M)));const a=u(this,M)?u(this,M).headers:u(this,xe)??f(this,xe,new Headers);t===void 0?a.delete(e):s!=null&&s.append?a.append(e,t):a.set(e,t)});h(this,"status",e=>{f(this,Le,e)});h(this,"set",(e,t)=>{u(this,te)??f(this,te,new Map),u(this,te).set(e,t)});h(this,"get",e=>u(this,te)?u(this,te).get(e):void 0);h(this,"newResponse",(...e)=>x(this,le,Ce).call(this,...e));h(this,"body",(e,t,s)=>x(this,le,Ce).call(this,e,t,s));h(this,"text",(e,t,s)=>!u(this,xe)&&!u(this,Le)&&!t&&!s&&!this.finalized?new Response(e):x(this,le,Ce).call(this,e,t,kt(_a,s)));h(this,"json",(e,t,s)=>x(this,le,Ce).call(this,JSON.stringify(e),t,kt("application/json",s)));h(this,"html",(e,t,s)=>{const a=n=>x(this,le,Ce).call(this,n,t,kt("text/html; charset=UTF-8",s));return typeof e=="object"?ws(e,ma.Stringify,!1,{}).then(a):a(e)});h(this,"redirect",(e,t)=>{const s=String(e);return this.header("Location",/[^\x00-\xFF]/.test(s)?encodeURI(s):s),this.newResponse(null,t??302)});h(this,"notFound",()=>(u(this,$e)??f(this,$e,()=>Ye()),u(this,$e).call(this,this)));f(this,Ve,e),t&&(f(this,se,t.executionCtx),this.env=t.env,f(this,$e,t.notFoundHandler),f(this,Qe,t.path),f(this,Ze,t.matchResult))}get req(){return u(this,Xe)??f(this,Xe,new ys(u(this,Ve),u(this,Qe),u(this,Ze))),u(this,Xe)}get event(){if(u(this,se)&&"respondWith"in u(this,se))return u(this,se);throw Error("This context has no FetchEvent")}get executionCtx(){if(u(this,se))return u(this,se);throw Error("This context has no ExecutionContext")}get res(){return u(this,M)||f(this,M,Ye(null,{headers:u(this,xe)??f(this,xe,new Headers)}))}set res(e){if(u(this,M)&&e){e=Ye(e.body,e);for(const[t,s]of u(this,M).headers.entries())if(t!=="content-type")if(t==="set-cookie"){const a=u(this,M).headers.getSetCookie();e.headers.delete("set-cookie");for(const n of a)e.headers.append("set-cookie",n)}else e.headers.set(t,s)}f(this,M,e),this.finalized=!0}get var(){return u(this,te)?Object.fromEntries(u(this,te)):{}}},Ve=new WeakMap,Xe=new WeakMap,te=new WeakMap,Le=new WeakMap,se=new WeakMap,M=new WeakMap,Ge=new WeakMap,Me=new WeakMap,$e=new WeakMap,xe=new WeakMap,Ze=new WeakMap,Qe=new WeakMap,le=new WeakSet,Ce=function(e,t,s){const a=u(this,M)?new Headers(u(this,M).headers):u(this,xe)??new Headers;if(typeof t=="object"&&"headers"in t){const i=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[r,o]of i)r.toLowerCase()==="set-cookie"?a.append(r,o):a.set(r,o)}if(s)for(const[i,r]of Object.entries(s))if(typeof r=="string")a.set(i,r);else{a.delete(i);for(const o of r)a.append(i,o)}const n=typeof t=="number"?t:(t==null?void 0:t.status)??u(this,Le);return Ye(e,{status:n,headers:a})},ls),O="ALL",fa="all",ba=["get","post","put","delete","options","patch"],ks="Can not add a route since the matcher is already built.",Ss=class extends Error{},ga="__COMPOSED_HANDLER",va=e=>e.text("404 Not Found",404),Kt=(e,t)=>{if("getResponse"in e){const s=e.getResponse();return t.newResponse(s.body,s)}return console.error(e),t.text("Internal Server Error",500)},z,j,Ts,V,ye,rt,ot,Fe,ya=(Fe=class{constructor(t={}){y(this,j);h(this,"get");h(this,"post");h(this,"put");h(this,"delete");h(this,"options");h(this,"patch");h(this,"all");h(this,"on");h(this,"use");h(this,"router");h(this,"getPath");h(this,"_basePath","/");y(this,z,"/");h(this,"routes",[]);y(this,V,va);h(this,"errorHandler",Kt);h(this,"onError",t=>(this.errorHandler=t,this));h(this,"notFound",t=>(f(this,V,t),this));h(this,"fetch",(t,...s)=>x(this,j,ot).call(this,t,s[1],s[0],t.method));h(this,"request",(t,s,a,n)=>t instanceof Request?this.fetch(s?new Request(t,s):t,a,n):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${Ie("/",t)}`,s),a,n)));h(this,"fire",()=>{addEventListener("fetch",t=>{t.respondWith(x(this,j,ot).call(this,t.request,t,void 0,t.request.method))})});[...ba,fa].forEach(i=>{this[i]=(r,...o)=>(typeof r=="string"?f(this,z,r):x(this,j,ye).call(this,i,u(this,z),r),o.forEach(d=>{x(this,j,ye).call(this,i,u(this,z),d)}),this)}),this.on=(i,r,...o)=>{for(const d of[r].flat()){f(this,z,d);for(const l of[i].flat())o.map(c=>{x(this,j,ye).call(this,l.toUpperCase(),u(this,z),c)})}return this},this.use=(i,...r)=>(typeof i=="string"?f(this,z,i):(f(this,z,"*"),r.unshift(i)),r.forEach(o=>{x(this,j,ye).call(this,O,u(this,z),o)}),this);const{strict:a,...n}=t;Object.assign(this,n),this.getPath=a??!0?t.getPath??fs:ca}route(t,s){const a=this.basePath(t);return s.routes.map(n=>{var r;let i;s.errorHandler===Kt?i=n.handler:(i=async(o,d)=>(await Yt([],s.errorHandler)(o,()=>n.handler(o,d))).res,i[ga]=n.handler),x(r=a,j,ye).call(r,n.method,n.path,i)}),this}basePath(t){const s=x(this,j,Ts).call(this);return s._basePath=Ie(this._basePath,t),s}mount(t,s,a){let n,i;a&&(typeof a=="function"?i=a:(i=a.optionHandler,a.replaceRequest===!1?n=d=>d:n=a.replaceRequest));const r=i?d=>{const l=i(d);return Array.isArray(l)?l:[l]}:d=>{let l;try{l=d.executionCtx}catch{}return[d.env,l]};n||(n=(()=>{const d=Ie(this._basePath,t),l=d==="/"?0:d.length;return c=>{const p=new URL(c.url);return p.pathname=p.pathname.slice(l)||"/",new Request(p,c)}})());const o=async(d,l)=>{const c=await s(n(d.req.raw),...r(d));if(c)return c;await l()};return x(this,j,ye).call(this,O,Ie(t,"*"),o),this}},z=new WeakMap,j=new WeakSet,Ts=function(){const t=new Fe({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,f(t,V,u(this,V)),t.routes=this.routes,t},V=new WeakMap,ye=function(t,s,a){t=t.toUpperCase(),s=Ie(this._basePath,s);const n={basePath:this._basePath,path:s,method:t,handler:a};this.router.add(t,s,[a,n]),this.routes.push(n)},rt=function(t,s){if(t instanceof Error)return this.errorHandler(t,s);throw t},ot=function(t,s,a,n){if(n==="HEAD")return(async()=>new Response(null,await x(this,j,ot).call(this,t,s,a,"GET")))();const i=this.getPath(t,{env:a}),r=this.router.match(n,i),o=new ha(t,{path:i,matchResult:r,env:a,executionCtx:s,notFoundHandler:u(this,V)});if(r[0].length===1){let l;try{l=r[0][0][0][0](o,async()=>{o.res=await u(this,V).call(this,o)})}catch(c){return x(this,j,rt).call(this,c,o)}return l instanceof Promise?l.then(c=>c||(o.finalized?o.res:u(this,V).call(this,o))).catch(c=>x(this,j,rt).call(this,c,o)):l??u(this,V).call(this,o)}const d=Yt(r[0],this.errorHandler,u(this,V));return(async()=>{try{const l=await d(o);if(!l.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return l.res}catch(l){return x(this,j,rt).call(this,l,o)}})()},Fe),Ds=[];function Ea(e,t){const s=this.buildAllMatchers(),a=((n,i)=>{const r=s[n]||s[O],o=r[2][i];if(o)return o;const d=i.match(r[0]);if(!d)return[[],Ds];const l=d.indexOf("",1);return[r[1][l],d]});return this.match=a,a(e,t)}var ct="[^/]+",Ke=".*",ze="(?:|/.*)",Be=Symbol(),xa=new Set(".\\+*[^]$()");function wa(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===Ke||e===ze?1:t===Ke||t===ze?-1:e===ct?1:t===ct?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var we,ke,X,De,ka=(De=class{constructor(){y(this,we);y(this,ke);y(this,X,Object.create(null))}insert(t,s,a,n,i){if(t.length===0){if(u(this,we)!==void 0)throw Be;if(i)return;f(this,we,s);return}const[r,...o]=t,d=r==="*"?o.length===0?["","",Ke]:["","",ct]:r==="/*"?["","",ze]:r.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let l;if(d){const c=d[1];let p=d[2]||ct;if(c&&d[2]&&(p===".*"||(p=p.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(p))))throw Be;if(l=u(this,X)[p],!l){if(Object.keys(u(this,X)).some(_=>_!==Ke&&_!==ze))throw Be;if(i)return;l=u(this,X)[p]=new De,c!==""&&f(l,ke,n.varIndex++)}!i&&c!==""&&a.push([c,u(l,ke)])}else if(l=u(this,X)[r],!l){if(Object.keys(u(this,X)).some(c=>c.length>1&&c!==Ke&&c!==ze))throw Be;if(i)return;l=u(this,X)[r]=new De}l.insert(o,s,a,n,i)}buildRegExpStr(){const s=Object.keys(u(this,X)).sort(wa).map(a=>{const n=u(this,X)[a];return(typeof u(n,ke)=="number"?`(${a})@${u(n,ke)}`:xa.has(a)?`\\${a}`:a)+n.buildRegExpStr()});return typeof u(this,we)=="number"&&s.unshift(`#${u(this,we)}`),s.length===0?"":s.length===1?s[0]:"(?:"+s.join("|")+")"}},we=new WeakMap,ke=new WeakMap,X=new WeakMap,De),ht,et,cs,Sa=(cs=class{constructor(){y(this,ht,{varIndex:0});y(this,et,new ka)}insert(e,t,s){const a=[],n=[];for(let r=0;;){let o=!1;if(e=e.replace(/\{[^}]+\}/g,d=>{const l=`@\\${r}`;return n[r]=[l,d],r++,o=!0,l}),!o)break}const i=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let r=n.length-1;r>=0;r--){const[o]=n[r];for(let d=i.length-1;d>=0;d--)if(i[d].indexOf(o)!==-1){i[d]=i[d].replace(o,n[r][1]);break}}return u(this,et).insert(i,t,a,u(this,ht),s),a}buildRegExp(){let e=u(this,et).buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const s=[],a=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(n,i,r)=>i!==void 0?(s[++t]=Number(i),"$()"):(r!==void 0&&(a[Number(r)]=++t),"")),[new RegExp(`^${e}`),s,a]}},ht=new WeakMap,et=new WeakMap,cs),Ta=[/^$/,[],Object.create(null)],dt=Object.create(null);function As(e){return dt[e]??(dt[e]=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,s)=>s?`\\${s}`:"(?:|/.*)")}$`))}function Da(){dt=Object.create(null)}function Aa(e){var l;const t=new Sa,s=[];if(e.length===0)return Ta;const a=e.map(c=>[!/\*|\/:/.test(c[0]),...c]).sort(([c,p],[_,b])=>c?1:_?-1:p.length-b.length),n=Object.create(null);for(let c=0,p=-1,_=a.length;c<_;c++){const[b,v,T]=a[c];b?n[v]=[T.map(([D])=>[D,Object.create(null)]),Ds]:p++;let E;try{E=t.insert(v,p,b)}catch(D){throw D===Be?new Ss(v):D}b||(s[p]=T.map(([D,k])=>{const N=Object.create(null);for(k-=1;k>=0;k--){const[P,L]=E[k];N[P]=L}return[D,N]}))}const[i,r,o]=t.buildRegExp();for(let c=0,p=s.length;c<p;c++)for(let _=0,b=s[c].length;_<b;_++){const v=(l=s[c][_])==null?void 0:l[1];if(!v)continue;const T=Object.keys(v);for(let E=0,D=T.length;E<D;E++)v[T[E]]=o[v[T[E]]]}const d=[];for(const c in r)d[c]=s[r[c]];return[i,d,n]}function je(e,t){if(e){for(const s of Object.keys(e).sort((a,n)=>n.length-a.length))if(As(s).test(t))return[...e[s]]}}var ce,ue,ft,Rs,us,Ra=(us=class{constructor(){y(this,ft);h(this,"name","RegExpRouter");y(this,ce);y(this,ue);h(this,"match",Ea);f(this,ce,{[O]:Object.create(null)}),f(this,ue,{[O]:Object.create(null)})}add(e,t,s){var o;const a=u(this,ce),n=u(this,ue);if(!a||!n)throw new Error(ks);a[e]||[a,n].forEach(d=>{d[e]=Object.create(null),Object.keys(d[O]).forEach(l=>{d[e][l]=[...d[O][l]]})}),t==="/*"&&(t="*");const i=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const d=As(t);e===O?Object.keys(a).forEach(l=>{var c;(c=a[l])[t]||(c[t]=je(a[l],t)||je(a[O],t)||[])}):(o=a[e])[t]||(o[t]=je(a[e],t)||je(a[O],t)||[]),Object.keys(a).forEach(l=>{(e===O||e===l)&&Object.keys(a[l]).forEach(c=>{d.test(c)&&a[l][c].push([s,i])})}),Object.keys(n).forEach(l=>{(e===O||e===l)&&Object.keys(n[l]).forEach(c=>d.test(c)&&n[l][c].push([s,i]))});return}const r=bs(t)||[t];for(let d=0,l=r.length;d<l;d++){const c=r[d];Object.keys(n).forEach(p=>{var _;(e===O||e===p)&&((_=n[p])[c]||(_[c]=[...je(a[p],c)||je(a[O],c)||[]]),n[p][c].push([s,i-l+d+1]))})}}buildAllMatchers(){const e=Object.create(null);return Object.keys(u(this,ue)).concat(Object.keys(u(this,ce))).forEach(t=>{e[t]||(e[t]=x(this,ft,Rs).call(this,t))}),f(this,ce,f(this,ue,void 0)),Da(),e}},ce=new WeakMap,ue=new WeakMap,ft=new WeakSet,Rs=function(e){const t=[];let s=e===O;return[u(this,ce),u(this,ue)].forEach(a=>{const n=a[e]?Object.keys(a[e]).map(i=>[i,a[e][i]]):[];n.length!==0?(s||(s=!0),t.push(...n)):e!==O&&t.push(...Object.keys(a[O]).map(i=>[i,a[O][i]]))}),s?Aa(t):null},us),pe,ae,ps,Oa=(ps=class{constructor(e){h(this,"name","SmartRouter");y(this,pe,[]);y(this,ae,[]);f(this,pe,e.routers)}add(e,t,s){if(!u(this,ae))throw new Error(ks);u(this,ae).push([e,t,s])}match(e,t){if(!u(this,ae))throw new Error("Fatal error");const s=u(this,pe),a=u(this,ae),n=s.length;let i=0,r;for(;i<n;i++){const o=s[i];try{for(let d=0,l=a.length;d<l;d++)o.add(...a[d]);r=o.match(e,t)}catch(d){if(d instanceof Ss)continue;throw d}this.match=o.match.bind(o),f(this,pe,[o]),f(this,ae,void 0);break}if(i===n)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,r}get activeRouter(){if(u(this,ae)||u(this,pe).length!==1)throw new Error("No active router has been determined yet.");return u(this,pe)[0]}},pe=new WeakMap,ae=new WeakMap,ps),Je=Object.create(null),ja=e=>{for(const t in e)return!0;return!1},me,C,Se,qe,I,ne,Ee,Pe,Ia=(Pe=class{constructor(t,s,a){y(this,ne);y(this,me);y(this,C);y(this,Se);y(this,qe,0);y(this,I,Je);if(f(this,C,a||Object.create(null)),f(this,me,[]),t&&s){const n=Object.create(null);n[t]={handler:s,possibleKeys:[],score:0},f(this,me,[n])}f(this,Se,[])}insert(t,s,a){f(this,qe,++Wt(this,qe)._);let n=this;const i=ra(s),r=[];for(let o=0,d=i.length;o<d;o++){const l=i[o],c=i[o+1],p=la(l,c),_=Array.isArray(p)?p[0]:l;if(_ in u(n,C)){n=u(n,C)[_],p&&r.push(p[1]);continue}u(n,C)[_]=new Pe,p&&(u(n,Se).push(p),r.push(p[1])),n=u(n,C)[_]}return u(n,me).push({[t]:{handler:a,possibleKeys:r.filter((o,d,l)=>l.indexOf(o)===d),score:u(this,qe)}}),n}search(t,s){var c;const a=[];f(this,I,Je);let i=[this];const r=_s(s),o=[],d=r.length;let l=null;for(let p=0;p<d;p++){const _=r[p],b=p===d-1,v=[];for(let E=0,D=i.length;E<D;E++){const k=i[E],N=u(k,C)[_];N&&(f(N,I,u(k,I)),b?(u(N,C)["*"]&&x(this,ne,Ee).call(this,a,u(N,C)["*"],t,u(k,I)),x(this,ne,Ee).call(this,a,N,t,u(k,I))):v.push(N));for(let P=0,L=u(k,Se).length;P<L;P++){const nt=u(k,Se)[P],Q=u(k,I)===Je?{}:{...u(k,I)};if(nt==="*"){const Re=u(k,C)["*"];Re&&(x(this,ne,Ee).call(this,a,Re,t,u(k,I)),f(Re,I,Q),v.push(Re));continue}const[Gs,Ht,Ue]=nt;if(!_&&!(Ue instanceof RegExp))continue;const ee=u(k,C)[Gs];if(Ue instanceof RegExp){if(l===null){l=new Array(d);let Oe=s[0]==="/"?1:0;for(let We=0;We<d;We++)l[We]=Oe,Oe+=r[We].length+1}const Re=s.substring(l[p]),Et=Ue.exec(Re);if(Et){if(Q[Ht]=Et[0],x(this,ne,Ee).call(this,a,ee,t,u(k,I),Q),ja(u(ee,C))){f(ee,I,Q);const Oe=((c=Et[0].match(/\//))==null?void 0:c.length)??0;(o[Oe]||(o[Oe]=[])).push(ee)}continue}}(Ue===!0||Ue.test(_))&&(Q[Ht]=_,b?(x(this,ne,Ee).call(this,a,ee,t,Q,u(k,I)),u(ee,C)["*"]&&x(this,ne,Ee).call(this,a,u(ee,C)["*"],t,Q,u(k,I))):(f(ee,I,Q),v.push(ee)))}}const T=o.shift();i=T?v.concat(T):v}return a.length>1&&a.sort((p,_)=>p.score-_.score),[a.map(({handler:p,params:_})=>[p,_])]}},me=new WeakMap,C=new WeakMap,Se=new WeakMap,qe=new WeakMap,I=new WeakMap,ne=new WeakSet,Ee=function(t,s,a,n,i){for(let r=0,o=u(s,me).length;r<o;r++){const d=u(s,me)[r],l=d[a]||d[O],c={};if(l!==void 0&&(l.params=Object.create(null),t.push(l),n!==Je||i&&i!==Je))for(let p=0,_=l.possibleKeys.length;p<_;p++){const b=l.possibleKeys[p],v=c[l.score];l.params[b]=i!=null&&i[b]&&!v?i[b]:n[b]??(i==null?void 0:i[b]),c[l.score]=!0}}},Pe),Te,ms,Ca=(ms=class{constructor(){h(this,"name","TrieRouter");y(this,Te);f(this,Te,new Ia)}add(e,t,s){const a=bs(t);if(a){for(let n=0,i=a.length;n<i;n++)u(this,Te).insert(e,a[n],s);return}u(this,Te).insert(e,t,s)}match(e,t){return u(this,Te).search(e,t)}},Te=new WeakMap,ms),A=class extends ya{constructor(e={}){super(e),this.router=e.router??new Oa({routers:[new Ra,new Ca]})}},Ba=/^\s*(?:text\/(?!event-stream(?:[;\s]|$))[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i,zt=(e,t=La)=>{const s=/\.([a-zA-Z0-9]+?)$/,a=e.match(s);if(!a)return;let n=t[a[1].toLowerCase()];return n&&n.startsWith("text")&&(n+="; charset=utf-8"),n},Na={aac:"audio/aac",avi:"video/x-msvideo",avif:"image/avif",av1:"video/av1",bin:"application/octet-stream",bmp:"image/bmp",css:"text/css",csv:"text/csv",eot:"application/vnd.ms-fontobject",epub:"application/epub+zip",gif:"image/gif",gz:"application/gzip",htm:"text/html",html:"text/html",ico:"image/x-icon",ics:"text/calendar",jpeg:"image/jpeg",jpg:"image/jpeg",js:"text/javascript",json:"application/json",jsonld:"application/ld+json",map:"application/json",mid:"audio/x-midi",midi:"audio/x-midi",mjs:"text/javascript",mp3:"audio/mpeg",mp4:"video/mp4",mpeg:"video/mpeg",oga:"audio/ogg",ogv:"video/ogg",ogx:"application/ogg",opus:"audio/opus",otf:"font/otf",pdf:"application/pdf",png:"image/png",rtf:"application/rtf",svg:"image/svg+xml",tif:"image/tiff",tiff:"image/tiff",ts:"video/mp2t",ttf:"font/ttf",txt:"text/plain",wasm:"application/wasm",webm:"video/webm",weba:"audio/webm",webmanifest:"application/manifest+json",webp:"image/webp",woff:"font/woff",woff2:"font/woff2",xhtml:"application/xhtml+xml",xml:"application/xml",zip:"application/zip","3gp":"video/3gpp","3g2":"video/3gpp2",gltf:"model/gltf+json",glb:"model/gltf-binary"},La=Na,Ma=(...e)=>{let t=e.filter(n=>n!=="").join("/");t=t.replace(new RegExp("(?<=\\/)\\/+","g"),"");const s=t.split("/"),a=[];for(const n of s)n===".."&&a.length>0&&a.at(-1)!==".."?a.pop():n!=="."&&a.push(n);return a.join("/")||"."},Os={br:".br",zstd:".zst",gzip:".gz"},$a=Object.keys(Os),Fa="index.html",qa=e=>{const t=e.root??"./",s=e.path,a=e.join??Ma;return async(n,i)=>{var c,p,_,b;if(n.finalized)return i();let r;if(e.path)r=e.path;else try{if(r=hs(n.req.path),/(?:^|[\/\\])\.{1,2}(?:$|[\/\\])|[\/\\]{2,}/.test(r))throw new Error}catch{return await((c=e.onNotFound)==null?void 0:c.call(e,n.req.path,n)),i()}let o=a(t,!s&&e.rewriteRequestPath?e.rewriteRequestPath(r):r);e.isDir&&await e.isDir(o)&&(o=a(o,Fa));const d=e.getContent;let l=await d(o,n);if(l instanceof Response)return n.newResponse(l.body,l);if(l){const v=e.mimes&&zt(o,e.mimes)||zt(o);if(n.header("Content-Type",v||"application/octet-stream"),e.precompressed&&(!v||Ba.test(v))){const T=new Set((p=n.req.header("Accept-Encoding"))==null?void 0:p.split(",").map(E=>E.trim()));for(const E of $a){if(!T.has(E))continue;const D=await d(o+Os[E],n);if(D){l=D,n.header("Content-Encoding",E),n.header("Vary","Accept-Encoding",{append:!0});break}}}return await((_=e.onFound)==null?void 0:_.call(e,o,n)),n.body(l)}await((b=e.onNotFound)==null?void 0:b.call(e,o,n)),await i()}},Pa=async(e,t)=>{let s;t&&t.manifest?typeof t.manifest=="string"?s=JSON.parse(t.manifest):s=t.manifest:typeof __STATIC_CONTENT_MANIFEST=="string"?s=JSON.parse(__STATIC_CONTENT_MANIFEST):s=__STATIC_CONTENT_MANIFEST;let a;t&&t.namespace?a=t.namespace:a=__STATIC_CONTENT;const n=s[e];if(!n)return null;const i=await a.get(n,{type:"stream"});return i||null},Ha=e=>async function(s,a){return qa({...e,getContent:async i=>Pa(i,{manifest:e.manifest,namespace:e.namespace?e.namespace:s.env?s.env.__STATIC_CONTENT:void 0})})(s,a)},Ua=e=>Ha(e);const G={name:"Growth-engine365X",version:"ver1.00",tagline:"X (Twitter) 自動投稿プラットフォーム",longName:"X (Twitter) 自動投稿プラットフォーム",icon:"fa-bolt"},Wa=`
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@ var ls=Object.defineProperty;var Vt=e=>{throw TypeError(e)};var cs=(e,t,a)=>t in
   --ink:#1F2937;--ink-muted:#6B7280;--ink-faint:#9CA3AF;--line:#E5E7EB;
 }
 *,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans JP',Inter,system-ui,sans-serif;font-size:15px;line-height:1.55;min-height:100vh}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans JP',Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
 
 /* ===== レイアウト ===== */
 .min-h-screen{min-height:100vh}
@@ -53,8 +53,8 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
 
 /* ===== テキスト ===== */
-.text-xs{font-size:.78rem;line-height:1.1rem}
-.text-sm{font-size:.9rem;line-height:1.3rem}
+.text-xs{font-size:.75rem;line-height:1rem}
+.text-sm{font-size:.875rem;line-height:1.25rem}
 .text-base{font-size:1rem;line-height:1.5rem}
 .text-lg{font-size:1.125rem;line-height:1.75rem}
 .text-xl{font-size:1.25rem;line-height:1.75rem}
@@ -118,7 +118,7 @@ select.inp{cursor:pointer}
 .btn{
   display:inline-flex;align-items:center;gap:.375rem;
   padding:.5rem .875rem;border-radius:.375rem;
-  font-size:.9rem;font-weight:500;font-family:inherit;
+  font-size:.875rem;font-weight:500;font-family:inherit;
   cursor:pointer;transition:all .15s;border:1px solid transparent;
   line-height:1.25;white-space:nowrap;text-decoration:none;
 }
@@ -143,8 +143,8 @@ aside.w-56{
 }
 .nav-item{
   display:flex;align-items:center;gap:.625rem;
-  padding:.55rem .75rem;border-radius:.375rem;
-  font-size:.8rem;font-weight:500;color:#A7B6CE;
+  padding:.5rem .75rem;border-radius:.375rem;
+  font-size:.75rem;font-weight:500;color:#A7B6CE;
   cursor:pointer;transition:background .15s,color .15s;
   margin:2px .5rem;text-decoration:none;
 }
@@ -183,7 +183,7 @@ table.data tbody tr:hover{background:#F9FAFB}
 .fab:hover{transform:scale(1.05);background:var(--accent-hover)}
 
 /* ===== 使用例ボタン ===== */
-.example-btn{display:inline-flex;align-items:center;gap:.375rem;padding:.45rem 1rem;border-radius:.375rem;background:var(--accent-light);color:var(--accent-hover);border:1px solid rgba(37,99,235,.25);font-size:.84rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.example-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .625rem;border-radius:.25rem;background:var(--accent-light);color:var(--accent-hover);border:1px solid rgba(239,246,255,.8);font-size:.75rem;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s}
 .example-btn:hover{background:rgba(37,99,235,.1)}
 
 /* ===== セクションタイトル ===== */
@@ -256,44 +256,28 @@ table.data tbody td { padding:.5rem .75rem; }
   .flex-wrap{ flex-wrap:wrap }
   aside.w-56{ width:12rem !important; min-width:12rem !important }
 }
-
-/* ===== レスポンシブ（モバイル対応） ===== */
-@media(max-width:768px){
-  aside.w-56{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);transition:transform .25s ease}
-  aside.w-56.open{transform:translateX(0)}
-  .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
-  .mobile-overlay.open{display:block!important}
-  main{margin-left:0!important}
-  .mobile-menu-btn{display:flex!important}
-  .p-6{padding:1rem}
-  .card{padding:1rem}
-  table.data thead th:nth-child(n+4){display:none}
-  table.data tbody td:nth-child(n+4){display:none}
-}
-@media(min-width:769px){.mobile-menu-btn{display:none!important}}
-.mobile-menu-btn{display:none;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:1.1rem;padding:0}
 </style>
-`,an="bg-paper text-ink min-h-screen font-sans antialiased";function $t(e,t,a={}){return`<!DOCTYPE html>
+`,Ya="bg-paper text-ink min-h-screen font-sans antialiased";function It(e,t,s={}){return`<!DOCTYPE html>
 <html lang="ja">
 <head>
-${tn}
-<title>${e} — ${H.name}</title>
+${Wa}
+<title>${e} — ${G.name}</title>
 </head>
-<body class="${a.bodyClass??an}">
+<body class="${s.bodyClass??Ya}">
 ${t}
 </body>
-</html>`}const Na=new D;Na.get("/login",e=>{const t=`
+</html>`}const js=new A;js.get("/login",e=>{const t=`
 <main class="min-h-screen flex items-center justify-center px-4 py-12 bg-paper">
   <div class="w-full max-w-md">
     <!-- ブランドロゴ -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center gap-2 mb-3">
         <div class="w-11 h-11 rounded-xl bg-sidebar flex items-center justify-center">
-          <i class="fas ${H.icon} text-white text-xl"></i>
+          <i class="fas ${G.icon} text-white text-xl"></i>
         </div>
         <div class="text-left">
-          <div class="text-xl font-bold text-ink tracking-tight">${H.name}</div>
-          <div class="text-xs text-ink-muted">${H.tagline}</div>
+          <div class="text-xl font-bold text-ink tracking-tight">${G.name}</div>
+          <div class="text-xs text-ink-muted">${G.tagline}</div>
         </div>
       </div>
     </div>
@@ -363,12 +347,7 @@ ${t}
     </div>
 
     <p class="text-center text-ink-faint text-xs mt-6">
-      © ${new Date().getFullYear()} ${H.name}
-    </p>
-    <p style="text-align:center;margin-top:.75rem">
-      <a href="/license-request" style="font-size:.78rem;color:var(--accent);text-decoration:none">
-        <i class="fas fa-id-card"></i> 新規ライセンス申請はこちら
-      </a>
+      © ${new Date().getFullYear()} ${G.name}
     </p>
   </div>
 </main>
@@ -414,9 +393,8 @@ async function doLogin(e) {
         invalid_credentials: 'メールアドレスまたはパスワードが違います',
         not_approved: '管理者による承認待ちです',
         invalid_input: '入力内容を確認してください',
-        trial_expired: '無料お試し期間が終了いたしました。',
       };
-      showError('login-error', j.message || map[j.error] || 'ログインに失敗しました');
+      showError('login-error', map[j.error] || 'ログインに失敗しました');
       return false;
     }
     location.href = j.is_admin ? '/admin' : '/dashboard';
@@ -481,26 +459,26 @@ async function doLicenseActivate(e) {
   return false;
 }
 <\/script>
-`;return e.html($t("ログイン",t))});const re=new TextEncoder,La=new TextDecoder;function Qe(e){let t="";for(let a=0;a<e.length;a++)t+=String.fromCharCode(e[a]);return btoa(t)}function et(e){const t=atob(e),a=new Uint8Array(t.length);for(let s=0;s<t.length;s++)a[s]=t.charCodeAt(s);return a}function bt(e){return Qe(e).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}function Nt(e){const t="=".repeat((4-e.length%4)%4);return et((e+t).replace(/-/g,"+").replace(/_/g,"/"))}function dt(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),t}function sn(e){return[...dt(e)].map(t=>t.toString(16).padStart(2,"0")).join("")}const ta=1e5,nn=32;async function wt(e){const t=dt(16),a=await crypto.subtle.importKey("raw",re.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),s=await crypto.subtle.deriveBits({name:"PBKDF2",salt:t,iterations:ta,hash:"SHA-256"},a,nn*8);return`pbkdf2$${ta}$${Qe(t)}$${Qe(new Uint8Array(s))}`}async function Pt(e,t){try{const[a,s,n,i]=t.split("$");if(a!=="pbkdf2")return!1;const r=parseInt(s,10),o=et(n),d=et(i),l=await crypto.subtle.importKey("raw",re.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),c=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:o,iterations:r,hash:"SHA-256"},l,d.length*8));return Ma(c,d)}catch{return!1}}function Ma(e,t){if(e.length!==t.length)return!1;let a=0;for(let s=0;s<e.length;s++)a|=e[s]^t[s];return a===0}async function Fa(e){return crypto.subtle.importKey("raw",re.encode(e),{name:"HMAC",hash:"SHA-256"},!1,["sign","verify"])}async function $a(e,t,a=3600*24*7){const s=Math.floor(Date.now()/1e3),n={iat:s,exp:s+a,...e},i=bt(re.encode(JSON.stringify({alg:"HS256",typ:"JWT"}))),r=bt(re.encode(JSON.stringify(n))),o=`${i}.${r}`,d=await Fa(t),l=new Uint8Array(await crypto.subtle.sign("HMAC",d,re.encode(o)));return`${o}.${bt(l)}`}async function Pa(e,t){try{const[a,s,n]=e.split(".");if(!a||!s||!n)return null;const i=await Fa(t);if(!await crypto.subtle.verify("HMAC",i,Nt(n),re.encode(`${a}.${s}`)))return null;const o=JSON.parse(La.decode(Nt(s)));return o.exp&&o.exp<Math.floor(Date.now()/1e3)?null:o}catch{return null}}async function qa(e){const t=re.encode(e),a=t.length>=32?t.slice(0,32):new Uint8Array(await crypto.subtle.digest("SHA-256",t));return crypto.subtle.importKey("raw",a,{name:"AES-GCM"},!1,["encrypt","decrypt"])}async function X(e,t){const a=dt(12),s=await qa(t),n=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:a},s,re.encode(e))),i=new Uint8Array(a.length+n.length);return i.set(a),i.set(n,a.length),Qe(i)}async function tt(e,t){const a=et(e),s=a.slice(0,12),n=a.slice(12),i=await qa(t),r=await crypto.subtle.decrypt({name:"AES-GCM",iv:s},i,n);return La.decode(r)}const aa="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";function rn(e="VPS-GE365X"){const t=dt(8);let a="";for(let s=0;s<8;s++)a+=aa[t[s]%aa.length];return`${e}-${a}`}function Ha(e){return/^VPS-GE365X-[A-Z0-9]{6,12}$/i.test(e.trim())}function x(){return new Date(Date.now()+324e5).toISOString().replace("T"," ").slice(0,19)}function on(e,t){return new Response(JSON.stringify(e),{...t,headers:{"content-type":"application/json; charset=utf-8",...(t==null?void 0:t.headers)||{}}})}function Ua(e,t){const s=(e.headers.get("cookie")||"").split(";").map(n=>n.trim()).find(n=>n.startsWith(t+"="));return s?decodeURIComponent(s.slice(t.length+1)):null}function qt(e,t,a={}){const s=[`${e}=${encodeURIComponent(t)}`];return s.push(`Path=${a.path??"/"}`),a.maxAge!==void 0&&s.push(`Max-Age=${a.maxAge}`),a.httpOnly!==!1&&s.push("HttpOnly"),a.secure!==!1&&s.push("Secure"),s.push(`SameSite=${a.sameSite??"Lax"}`),s.join("; ")}const lt=Object.freeze(Object.defineProperty({__proto__:null,aesDecrypt:tt,aesEncrypt:X,b64decode:et,b64encode:Qe,b64urlDecode:Nt,b64urlEncode:bt,buildSetCookie:qt,generateLicenseKey:rn,getCookie:Ua,hashPassword:wt,isValidLicenseKeyFormat:Ha,json:on,nowJst:x,randomBytes:dt,randomHex:sn,signJWT:$a,timingSafeEqual:Ma,verifyJWT:Pa,verifyPassword:Pt},Symbol.toStringTag,{value:"Module"})),Ht="ge365x_session";function dn(e){const t=e.req.header("Authorization")||e.req.header("authorization");return t&&t.startsWith("Bearer ")?t.slice(7):Ua(e.req.raw,Ht)}async function f(e,t){const a=dn(e);if(!a)return e.json({error:"unauthenticated"},401);const s=await Pa(a,e.env.JWT_SECRET);if(!(s!=null&&s.uid))return e.json({error:"invalid_token"},401);const n=await e.env.DB.prepare("SELECT id,email,is_approved,is_admin,trial_start,trial_end FROM users WHERE id = ?").bind(s.uid).first();if(!n)return e.json({error:"user_not_found"},401);if(n.is_approved===0)return e.json({error:"not_approved"},403);if(n.is_admin===0&&n.trial_end){const o=new Date,d=new Date(n.trial_end.replace(" ","T")+(n.trial_end.includes("+")?"":"+09:00"));if(!await e.env.DB.prepare("SELECT status FROM user_subscriptions WHERE user_id = ? AND status='active' LIMIT 1").bind(n.id).first()&&o>d)return e.json({error:"trial_expired",message:"無料お試し期間が終了いたしました。"},403)}const i=await e.env.DB.prepare("SELECT plan_code,status FROM user_subscriptions WHERE user_id = ?").bind(n.id).first(),r={id:n.id,email:n.email,is_admin:n.is_admin===1,is_approved:n.is_approved===1,plan_code:i==null?void 0:i.plan_code,subscription_status:i==null?void 0:i.status};e.set("user",r),await t()}async function Te(e,t){const a=e.get("user");if(!a)return e.json({error:"unauthenticated"},401);if(!a.is_admin)return e.json({error:"forbidden"},403);await t()}async function ie(e,t,a={}){const s=e.req.header("cf-connecting-ip")||e.req.header("x-forwarded-for")||"",n=e.req.header("user-agent")||"";await e.env.DB.prepare(`INSERT INTO auth_logs (user_id, email, event_type, ip_address, user_agent, metadata)
-     VALUES (?, ?, ?, ?, ?, ?)`).bind(a.userId??null,a.email??null,t,s,n,a.metadata?JSON.stringify(a.metadata):null).run()}const ln=[{key:"dashboard",label:"ダッシュボード",icon:"fa-gauge-high",path:"/dashboard"},{key:"target",label:"ターゲット設定",icon:"fa-bullseye",path:"/dashboard/target"},{key:"voice",label:"ブランドボイス",icon:"fa-palette",path:"/dashboard/voice"},{key:"pattern",label:"パターン別AI生成",icon:"fa-wand-magic-sparkles",path:"/dashboard/pattern"},{key:"generate",label:"AI生成2",icon:"fa-robot",path:"/dashboard/generate"},{key:"posts",label:"X投稿管理",icon:"fa-brands fa-x-twitter",path:"/dashboard/posts"},{key:"thread",label:"ツリー投稿",icon:"fa-reply",path:"/dashboard/thread"},{key:"scheduled",label:"予約状況",icon:"fa-calendar",path:"/dashboard/scheduled"},{key:"autopilot",label:"オートパイロット",icon:"fa-plane-departure",path:"/dashboard/autopilot"},{key:"accounts",label:"アカウント管理",icon:"fa-users-gear",path:"/dashboard/accounts"},{key:"api",label:"API設定",icon:"fa-key",path:"/dashboard/api"},{key:"export",label:"一括ダウンロード",icon:"fa-download",path:"/dashboard/export"}];function cn(e,t){return`
+`;return e.html(It("ログイン",t))});const ie=new TextEncoder,Is=new TextDecoder;function ut(e){let t="";for(let s=0;s<e.length;s++)t+=String.fromCharCode(e[s]);return btoa(t)}function pt(e){const t=atob(e),s=new Uint8Array(t.length);for(let a=0;a<t.length;a++)s[a]=t.charCodeAt(a);return s}function St(e){return ut(e).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}function Vt(e){const t="=".repeat((4-e.length%4)%4);return pt((e+t).replace(/-/g,"+").replace(/_/g,"/"))}function Ct(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),t}const Xt=1e5,Ja=32;async function Bt(e){const t=Ct(16),s=await crypto.subtle.importKey("raw",ie.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),a=await crypto.subtle.deriveBits({name:"PBKDF2",salt:t,iterations:Xt,hash:"SHA-256"},s,Ja*8);return`pbkdf2$${Xt}$${ut(t)}$${ut(new Uint8Array(a))}`}async function Cs(e,t){try{const[s,a,n,i]=t.split("$");if(s!=="pbkdf2")return!1;const r=parseInt(a,10),o=pt(n),d=pt(i),l=await crypto.subtle.importKey("raw",ie.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),c=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:o,iterations:r,hash:"SHA-256"},l,d.length*8));return Ka(c,d)}catch{return!1}}function Ka(e,t){if(e.length!==t.length)return!1;let s=0;for(let a=0;a<e.length;a++)s|=e[a]^t[a];return s===0}async function Bs(e){return crypto.subtle.importKey("raw",ie.encode(e),{name:"HMAC",hash:"SHA-256"},!1,["sign","verify"])}async function za(e,t,s=3600*24*7){const a=Math.floor(Date.now()/1e3),n={iat:a,exp:a+s,...e},i=St(ie.encode(JSON.stringify({alg:"HS256",typ:"JWT"}))),r=St(ie.encode(JSON.stringify(n))),o=`${i}.${r}`,d=await Bs(t),l=new Uint8Array(await crypto.subtle.sign("HMAC",d,ie.encode(o)));return`${o}.${St(l)}`}async function Va(e,t){try{const[s,a,n]=e.split(".");if(!s||!a||!n)return null;const i=await Bs(t);if(!await crypto.subtle.verify("HMAC",i,Vt(n),ie.encode(`${s}.${a}`)))return null;const o=JSON.parse(Is.decode(Vt(a)));return o.exp&&o.exp<Math.floor(Date.now()/1e3)?null:o}catch{return null}}async function Ns(e){const t=ie.encode(e),s=t.length>=32?t.slice(0,32):new Uint8Array(await crypto.subtle.digest("SHA-256",t));return crypto.subtle.importKey("raw",s,{name:"AES-GCM"},!1,["encrypt","decrypt"])}async function _e(e,t){const s=Ct(12),a=await Ns(t),n=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:s},a,ie.encode(e))),i=new Uint8Array(s.length+n.length);return i.set(s),i.set(n,s.length),ut(i)}async function At(e,t){const s=pt(e),a=s.slice(0,12),n=s.slice(12),i=await Ns(t),r=await crypto.subtle.decrypt({name:"AES-GCM",iv:a},i,n);return Is.decode(r)}const Gt="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";function Zt(e="VPS-GE365X"){const t=Ct(8);let s="";for(let a=0;a<8;a++)s+=Gt[t[a]%Gt.length];return`${e}-${s}`}function Xa(e){return/^VPS-GE365X-[A-Z0-9]{6,12}$/i.test(e.trim())}function g(){return new Date(Date.now()+324e5).toISOString().replace("T"," ").slice(0,19)}function Ga(e,t){const a=(e.headers.get("cookie")||"").split(";").map(n=>n.trim()).find(n=>n.startsWith(t+"="));return a?decodeURIComponent(a.slice(t.length+1)):null}function Ls(e,t,s={}){const a=[`${e}=${encodeURIComponent(t)}`];return a.push(`Path=${s.path??"/"}`),s.maxAge!==void 0&&a.push(`Max-Age=${s.maxAge}`),s.httpOnly!==!1&&a.push("HttpOnly"),s.secure!==!1&&a.push("Secure"),a.push(`SameSite=${s.sameSite??"Lax"}`),a.join("; ")}const Nt="ge365x_session";function Za(e){const t=e.req.header("Authorization")||e.req.header("authorization");return t&&t.startsWith("Bearer ")?t.slice(7):Ga(e.req.raw,Nt)}async function m(e,t){const s=Za(e);if(!s)return e.json({error:"unauthenticated"},401);const a=await Va(s,e.env.JWT_SECRET);if(!(a!=null&&a.uid))return e.json({error:"invalid_token"},401);const n=await e.env.DB.prepare("SELECT id,email,is_approved,is_admin,trial_start,trial_end FROM users WHERE id = ?").bind(a.uid).first();if(!n)return e.json({error:"user_not_found"},401);if(n.is_approved===0)return e.json({error:"not_approved"},403);const i=await e.env.DB.prepare("SELECT plan_code,status FROM user_subscriptions WHERE user_id = ?").bind(n.id).first(),r={id:n.id,email:n.email,is_admin:n.is_admin===1,is_approved:n.is_approved===1,plan_code:i==null?void 0:i.plan_code,subscription_status:i==null?void 0:i.status};e.set("user",r),await t()}async function R(e,t){const s=e.get("user");if(!s)return e.json({error:"unauthenticated"},401);if(!s.is_admin)return e.json({error:"forbidden"},403);await t()}async function Z(e,t,s={}){const a=e.req.header("cf-connecting-ip")||e.req.header("x-forwarded-for")||"",n=e.req.header("user-agent")||"";await e.env.DB.prepare(`INSERT INTO auth_logs (user_id, email, event_type, ip_address, user_agent, metadata)
+     VALUES (?, ?, ?, ?, ?, ?)`).bind(s.userId??null,s.email??null,t,a,n,s.metadata?JSON.stringify(s.metadata):null).run()}const Qa=[{key:"dashboard",label:"ダッシュボード",icon:"fa-gauge-high",path:"/dashboard"},{key:"target",label:"ターゲット設定",icon:"fa-bullseye",path:"/dashboard/target"},{key:"voice",label:"ブランドボイス",icon:"fa-palette",path:"/dashboard/voice"},{key:"pattern",label:"パターン別AI生成",icon:"fa-wand-magic-sparkles",path:"/dashboard/pattern"},{key:"generate",label:"AI生成2",icon:"fa-robot",path:"/dashboard/generate"},{key:"posts",label:"X投稿管理",icon:"fa-brands fa-x-twitter",path:"/dashboard/posts"},{key:"thread",label:"ツリー投稿",icon:"fa-reply",path:"/dashboard/thread"},{key:"scheduled",label:"予約状況",icon:"fa-calendar",path:"/dashboard/scheduled"},{key:"autopilot",label:"オートパイロット",icon:"fa-plane-departure",path:"/dashboard/autopilot"},{key:"accounts",label:"アカウント管理",icon:"fa-users-gear",path:"/dashboard/accounts"},{key:"api",label:"API設定",icon:"fa-key",path:"/dashboard/api"},{key:"export",label:"一括ダウンロード",icon:"fa-download",path:"/dashboard/export"}];function en(e,t){return`
 <aside class="w-56 bg-sidebar flex-shrink-0 flex flex-col">
   <div class="px-4 py-4 border-b border-[#2A3B52]">
     <div class="flex items-center gap-2">
       <div class="w-8 h-8 rounded-md bg-[#2F4A7A] flex items-center justify-center">
-        <i class="fas ${H.icon} text-white text-sm"></i>
+        <i class="fas ${G.icon} text-white text-sm"></i>
       </div>
       <div class="min-w-0">
-        <div class="text-white font-bold text-sm truncate">${H.name}</div>
-        <div style="font-size:11px;color:#A7B6CE;margin-top:2px;font-weight:400;letter-spacing:.02em">${H.version}</div>
+        <div class="text-white font-bold text-sm truncate">${G.name}</div>
+        <div class="text-[10px] text-[#A7B6CE]">${G.version}</div>
       </div>
     </div>
   </div>
 
   <nav class="flex-1 py-3 overflow-y-auto">
-    ${ln.map(a=>`
-      <a href="${a.path}" class="nav-item ${a.key===e?"active":""}">
-        <i class="fas ${a.icon}"></i>
-        <span>${a.label}</span>
+    ${Qa.map(s=>`
+      <a href="${s.path}" class="nav-item ${s.key===e?"active":""}">
+        <i class="fas ${s.icon}"></i>
+        <span>${s.label}</span>
       </a>
     `).join("")}
   </nav>
@@ -515,13 +493,12 @@ async function doLicenseActivate(e) {
       </div>
     </div>
   </div>
-</aside>`}function pn(e,t){return`
-<div class="bg-white border-b border-line px-6 py-3 flex items-center justify-between gap-4" style="position:sticky;top:0;z-index:10">
+</aside>`}function tn(e,t){return`
+<div class="bg-white border-b border-line px-6 py-3 flex items-center justify-between gap-4">
   <div class="flex items-center gap-3">
-    <button class="mobile-menu-btn" onclick="toggleSidebar()" title="メニュー"><i class="fas fa-bars"></i></button>
     <label class="text-xs text-ink-muted">現在のアカウント:</label>
     <select class="inp" style="width:auto;min-width:12rem" id="acct-sw" onchange="switchAccount(this.value)">
-      ${e.length===0?'<option value="">（未登録）</option>':e.map(a=>`<option value="${a.id}" ${t===a.id?"selected":""}>@${a.x_username||a.account_name}</option>`).join("")}
+      ${e.length===0?'<option value="">（未登録）</option>':e.map(s=>`<option value="${s.id}" ${t===s.id?"selected":""}>@${s.x_username||s.account_name}</option>`).join("")}
     </select>
   </div>
   <div class="flex items-center gap-2 text-xs text-ink-muted">
@@ -538,73 +515,12 @@ async function doLicenseActivate(e) {
     updateClock();
     setInterval(updateClock, 30000);
   })();
-<\/script>`}const un=`
-<!-- AIチャットボット -->
-<button class="fab" onclick="toggleChatbot()" title="AIチャットボット" id="chat-fab">
-  <i class="fas fa-comment-dots" style="font-size:1.25rem"></i>
+<\/script>`}const sn=`
+<button class="fab" onclick="toast && toast('Chatbot は次フェーズで実装','info')" title="AIチャットボット">
+  <i class="fas fa-comment-dots text-xl"></i>
 </button>
-<div id="chatbot-panel" style="display:none;position:fixed;bottom:5.5rem;right:1.5rem;width:22rem;max-height:32rem;background:#fff;border:1px solid var(--line);border-radius:.75rem;box-shadow:0 20px 40px rgba(0,0,0,.15);z-index:50;flex-direction:column;overflow:hidden">
-  <div style="background:var(--sidebar);color:#fff;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-radius:.75rem .75rem 0 0">
-    <span style="font-weight:600;font-size:.9rem"><i class="fas fa-robot" style="margin-right:.375rem"></i>AI アシスタント</span>
-    <button onclick="toggleChatbot()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1rem"><i class="fas fa-times"></i></button>
-  </div>
-  <div id="chat-messages" style="flex:1;overflow-y:auto;padding:.75rem;max-height:20rem;display:flex;flex-direction:column;gap:.5rem">
-    <div style="background:var(--paper-soft);border-radius:.5rem;padding:.5rem .75rem;font-size:.82rem;color:var(--ink);max-width:85%">
-      こんにちは！AIアシスタントです。各設定や使い方についてご質問ください。初めての方も安心して使えるよう、設定手順や機能の使い方を丁寧にご説明します。
-    </div>
-  </div>
-  <div style="padding:.5rem .75rem;border-top:1px solid var(--line);display:flex;gap:.375rem">
-    <input type="text" id="chat-input" placeholder="メッセージを入力..." style="flex:1;padding:.4rem .6rem;border:1px solid var(--line);border-radius:.375rem;font-size:.82rem;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')sendChat()">
-    <button onclick="sendChat()" style="padding:.4rem .75rem;background:var(--accent);color:#fff;border:none;border-radius:.375rem;cursor:pointer;font-size:.82rem"><i class="fas fa-paper-plane"></i></button>
-  </div>
-</div>
 <div id="toast-host"></div>
-<div id="mobile-overlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
 <script>
-  function toggleChatbot() {
-    const panel = document.getElementById('chatbot-panel');
-    const fab = document.getElementById('chat-fab');
-    const isOpen = panel.style.display === 'flex';
-    panel.style.display = isOpen ? 'none' : 'flex';
-    fab.style.background = isOpen ? 'var(--accent)' : 'var(--sidebar)';
-  }
-  async function sendChat() {
-    const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if (!msg) return;
-    input.value = '';
-    const msgs = document.getElementById('chat-messages');
-    // ユーザーメッセージ
-    msgs.innerHTML += '<div style="background:var(--accent);color:#fff;border-radius:.5rem;padding:.5rem .75rem;font-size:.82rem;max-width:85%;align-self:flex-end;margin-left:auto">' + msg.replace(/</g,'&lt;') + '</div>';
-    msgs.scrollTop = msgs.scrollHeight;
-    // AI応答
-    const thinking = document.createElement('div');
-    thinking.style.cssText = 'background:var(--paper-soft);border-radius:.5rem;padding:.5rem .75rem;font-size:.82rem;color:var(--ink-muted);max-width:85%';
-    thinking.textContent = '考え中...';
-    msgs.appendChild(thinking);
-    msgs.scrollTop = msgs.scrollHeight;
-    try {
-      const r = await fetch('/api/admin/chatbot', {
-        method: 'POST',
-        headers: {'content-type': 'application/json'},
-        body: JSON.stringify({ message: msg })
-      });
-      const j = await r.json();
-      thinking.style.color = 'var(--ink)';
-      thinking.textContent = j.reply || j.message || '応答を取得できませんでした';
-    } catch(e) {
-      thinking.textContent = 'エラーが発生しました。OpenAI APIキーを設定してください。';
-    }
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-  function toggleSidebar() {
-    const sidebar = document.querySelector('aside.w-56');
-    const overlay = document.getElementById('mobile-overlay');
-    if (!sidebar) return;
-    const isOpen = sidebar.classList.contains('open');
-    sidebar.classList.toggle('open', !isOpen);
-    if (overlay) overlay.classList.toggle('open', !isOpen);
-  }
   function doLogout() {
     fetch('/api/auth/logout', { method: 'POST' })
       .then(() => { location.href = '/login'; });
@@ -627,28 +543,28 @@ async function doLicenseActivate(e) {
     setTimeout(() => t.remove(), 3000);
   }
 <\/script>
-`;function mn(e){return`
+`;function an(e){return`
 <div class="min-h-screen flex bg-paper">
-  ${cn(e.active,e.user)}
+  ${en(e.active,e.user)}
 
   <main class="flex-1 min-w-0 flex flex-col">
-    ${pn(e.accounts,e.currentAccountId)}
+    ${tn(e.accounts,e.currentAccountId)}
     <div class="flex-1 p-6 overflow-y-auto">
       ${e.pageBody}
     </div>
   </main>
 
-  ${un}
-</div>`}const Ie=`
+  ${sn}
+</div>`}const he=`
 <div class="alert alert-warn">
   <i class="fas fa-triangle-exclamation mt-0.5"></i>
   <div>アカウントが選択されていません。<a href="/dashboard/accounts" class="underline font-semibold">アカウント管理</a>で登録してください。</div>
 </div>
-`;function I(e){return(e||"").replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[t])}function Wa(e){return{pending:'<span class="pill pill-warn">未承認</span>',approved:'<span class="pill pill-blue">承認済</span>',publishing:'<span class="pill pill-blue">送信中</span>',posted:'<span class="pill pill-ok">投稿済</span>',failed:'<span class="pill pill-err">失敗</span>',cancelled:'<span class="pill pill-soft">キャンセル</span>'}[e||""]||`<span class="pill pill-soft">${e||"—"}</span>`}function fn(e){const{stats:t,recentLogs:a}=e;return`
+`;function w(e){return(e||"").replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[t])}function Lt(e){return{pending:'<span class="pill pill-warn">未承認</span>',approved:'<span class="pill pill-blue">承認済</span>',publishing:'<span class="pill pill-blue">送信中</span>',posted:'<span class="pill pill-ok">投稿済</span>',failed:'<span class="pill pill-err">失敗</span>',cancelled:'<span class="pill pill-soft">キャンセル</span>'}[e||""]||`<span class="pill pill-soft">${e||"—"}</span>`}function nn(e){const{stats:t,health:s,recentLogs:a}=e;return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-gauge-high"></i>ダッシュボード</h1>
-    <p class="section-desc">今日の投稿状況を一覧できます。</p>
+    <p class="section-desc">今日の投稿状況とアカウント健全性を一覧できます。</p>
   </div>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -658,19 +574,37 @@ async function doLicenseActivate(e) {
     <div class="card card-sm"><div class="text-xs text-ink-muted">本日失敗</div><div class="text-2xl font-bold text-red-600 mt-1">${t.failed}</div></div>
   </div>
 
-  <div class="card">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="card">
+      <h3 class="font-bold text-ink mb-3"><i class="fas fa-heart-pulse text-red-500"></i> アカウント健全性</h3>
+      ${s.length===0?`
+        <div class="text-ink-muted text-sm text-center py-6">アカウント未登録</div>
+      `:s.map(n=>`
+        <div class="flex items-center justify-between py-2 border-b border-line/50 last:border-0">
+          <div>
+            <div class="text-sm font-semibold text-ink">@${w(n.x_username||n.account_name)}</div>
+            <div class="text-xs text-ink-muted">${n.is_active?"稼働中":"停止中"}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-xl font-bold ${n.account_health_score>=80?"text-emerald-600":n.account_health_score>=60?"text-amber-600":"text-red-600"}">${n.account_health_score??100}</div>
+            <span class="pill ${n.health_status==="risk"?"pill-err":n.health_status==="caution"?"pill-warn":"pill-ok"}">${n.health_status||"healthy"}</span>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+    <div class="card">
       <h3 class="font-bold text-ink mb-3"><i class="fas fa-clock-rotate-left text-accent"></i> 直近の投稿ログ</h3>
       ${a.length===0?`
         <div class="text-ink-muted text-sm text-center py-6">投稿ログなし</div>
-      `:a.map(s=>`
+      `:a.map(n=>`
         <div class="py-2 border-b border-line/50 last:border-0">
-          <div class="text-sm text-ink truncate">${I((s.content||"").slice(0,80))}...</div>
-          <div class="text-xs text-ink-muted mt-0.5">@${I(s.x_username||"-")} · ${s.posted_at||"-"}</div>
+          <div class="text-sm text-ink truncate">${w((n.content||"").slice(0,80))}...</div>
+          <div class="text-xs text-ink-muted mt-0.5">@${w(n.x_username||"-")} · ${n.posted_at||"-"}</div>
         </div>
       `).join("")}
     </div>
   </div>
-</div>`}function hn(e){const t=e.target||{};return`
+</div>`}function rn(e){const t=e.target||{};return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-bullseye"></i>ターゲット設定</h1>
@@ -685,7 +619,7 @@ async function doLicenseActivate(e) {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <div>
         <label class="field-label"><i class="fas fa-child icon-purple"></i>年齢層</label>
-        <input type="text" id="tg-age" class="inp" value="${I(t.age_range)}" placeholder="例: 25~40代">
+        <input type="text" id="tg-age" class="inp" value="${w(t.age_range)}" placeholder="例: 25~40代">
       </div>
       <div>
         <label class="field-label"><i class="fas fa-venus-mars icon-purple"></i>性別</label>
@@ -698,20 +632,20 @@ async function doLicenseActivate(e) {
       </div>
       <div>
         <label class="field-label"><i class="fas fa-briefcase icon-yellow"></i>職業</label>
-        <input type="text" id="tg-occ" class="inp" value="${I(t.occupation)}" placeholder="例: 会社員 / フリーランス">
+        <input type="text" id="tg-occ" class="inp" value="${w(t.occupation)}" placeholder="例: 会社員 / フリーランス">
       </div>
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-heart icon-red"></i>痛み・悩み</label>
-      <textarea id="tg-pains" class="inp" placeholder="読者が抱えている具体的な悩み・痛みを書く">${I(t.pains)}</textarea>
+      <textarea id="tg-pains" class="inp" placeholder="読者が抱えている具体的な悩み・痛みを書く">${w(t.pains)}</textarea>
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-star icon-yellow"></i>欲求・願望</label>
-      <textarea id="tg-desires" class="inp" placeholder="読者が「こうなりたい」と思っている理想像">${I(t.desires)}</textarea>
+      <textarea id="tg-desires" class="inp" placeholder="読者が「こうなりたい」と思っている理想像">${w(t.desires)}</textarea>
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-bolt icon-yellow"></i>行動トリガー（反応するきっかけ）</label>
-      <textarea id="tg-trigger" class="inp" placeholder="この読者がアクションを起こす瞬間・キーワード">${I(t.purchase_triggers)}</textarea>
+      <textarea id="tg-trigger" class="inp" placeholder="この読者がアクションを起こす瞬間・キーワード">${w(t.purchase_triggers)}</textarea>
     </div>
     <button class="btn btn-primary" onclick="saveTarget()"><i class="fas fa-save"></i>保存</button>
     <span id="tg-msg" class="text-xs ml-2"></span>
@@ -741,7 +675,7 @@ async function saveTarget() {
   if (j.success) { msg.textContent = '保存しました'; msg.className = 'text-xs ml-2 text-emerald-600'; }
   else { msg.textContent = '保存失敗: ' + (j.error || ''); msg.className = 'text-xs ml-2 text-red-600'; }
 }
-<\/script>`}function gn(e){const t=e.voice||{},a=[{k:"authority",l:"権威型",t:"専門家として断定的に、簡潔に、根拠を示して書く。"},{k:"empathy",l:"共感型",t:"読者の悩みに寄り添い、共感を起点に語りかけるように書く。"},{k:"provocative",l:"煽り型",t:"問題を鋭く突き、危機感を持たせる書き方にする。"},{k:"story",l:"ストーリー型",t:"体験談や変化の流れを感じさせる構成で書く。"},{k:"problem_raise",l:"問題提起型",t:"最初に課題を提示し、その原因と解決策を示す。"}];return`
+<\/script>`}function on(e){const t=e.voice||{},s=[{k:"authority",l:"権威型",t:"専門家として断定的に、簡潔に、根拠を示して書く。"},{k:"empathy",l:"共感型",t:"読者の悩みに寄り添い、共感を起点に語りかけるように書く。"},{k:"provocative",l:"煽り型",t:"問題を鋭く突き、危機感を持たせる書き方にする。"},{k:"story",l:"ストーリー型",t:"体験談や変化の流れを感じさせる構成で書く。"},{k:"problem_raise",l:"問題提起型",t:"最初に課題を提示し、その原因と解決策を示す。"}];return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-palette"></i>ブランドボイス</h1>
@@ -749,28 +683,27 @@ async function saveTarget() {
   </div>
   ${e.hasAccount?"":e.noAccountAlert}
   <div class="card">
-    <div style="margin-bottom:1.25rem">
-      <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:0 0 .875rem">ボイスプロファイル</h3>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;padding:.75rem 1rem;background:var(--paper-soft);border-radius:.5rem;border:1px solid var(--line)">
-        <span style="font-size:.78rem;color:var(--ink-muted);align-self:center">プリセット→</span>
-        ${a.map(s=>`<button style="padding:.45rem 1rem;border-radius:.375rem;background:var(--accent-light);color:var(--accent-hover);border:1px solid rgba(37,99,235,.3);font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="loadVoicePreset('${s.k}','${s.t.replace(/'/g,"\\'")}')">${s.l}</button>`).join("")}
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <h3 class="font-bold text-ink">ボイスプロファイル</h3>
+      <div class="flex gap-1 flex-wrap">
+        ${s.map(a=>`<button class="example-btn" onclick="loadVoicePreset('${a.k}','${a.t.replace(/'/g,"\\'")}')">${a.l}</button>`).join("")}
       </div>
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-microphone icon-blue"></i>口調</label>
-      <input type="text" id="vc-tone" class="inp" value="${I(t.tone)}" placeholder="例: 専門家として断定的に、簡潔に、根拠を示して書く">
+      <input type="text" id="vc-tone" class="inp" value="${w(t.tone)}" placeholder="例: 専門家として断定的に、簡潔に、根拠を示して書く">
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-globe icon-green"></i>世界観</label>
-      <textarea id="vc-world" class="inp" placeholder="あなたが見ている世界、伝えたい価値観">${I(t.worldview)}</textarea>
+      <textarea id="vc-world" class="inp" placeholder="あなたが見ている世界、伝えたい価値観">${w(t.worldview)}</textarea>
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-book icon-purple"></i>個人ストーリー（任意）</label>
-      <textarea id="vc-story" class="inp" placeholder="過去の体験や転機。AI が自然に織り交ぜます">${I(t.personal_story)}</textarea>
+      <textarea id="vc-story" class="inp" placeholder="過去の体験や転機。AI が自然に織り交ぜます">${w(t.personal_story)}</textarea>
     </div>
     <div class="mb-4">
       <label class="field-label"><i class="fas fa-ban icon-red"></i>禁止ワード（改行区切り）</label>
-      <textarea id="vc-ng" class="inp" placeholder="絶対に使わないワード">${I(t.prohibited_words)}</textarea>
+      <textarea id="vc-ng" class="inp" placeholder="絶対に使わないワード">${w(t.prohibited_words)}</textarea>
     </div>
     <button class="btn btn-primary" onclick="saveVoice()"><i class="fas fa-save"></i>保存</button>
     <span id="vc-msg" class="text-xs ml-2"></span>
@@ -794,315 +727,276 @@ async function saveVoice() {
   if (j.success) { msg.textContent = '保存しました'; msg.className = 'text-xs ml-2 text-emerald-600'; }
   else { msg.textContent = '保存失敗'; msg.className = 'text-xs ml-2 text-red-600'; }
 }
-<\/script>`}function _n(e){const t=[["problem","問題提起型","fa-triangle-exclamation","痛みを突く"],["before_after","ビフォーアフター型","fa-arrows-left-right","変化を見せる"],["contrarian","逆張り型","fa-rotate-left","常識を覆す"],["howto","How To 実演型","fa-list-ol","手順で見せる"],["numbers","数字インパクト型","fa-hashtag","数字で訴く"]];return`
-<div>
-  ${e.hasAccount?"":e.noAccountAlert}
-
-  <div style="margin-bottom:1.5rem">
+<\/script>`}function dn(e){var s,a,n;const t=[["problem","問題提起型","fa-circle-question"],["before_after","ビフォーアフター型","fa-right-left"],["contrarian","逆張り型","fa-rotate-left"],["howto","HowTo実演型","fa-list-ol"],["numbers","数字インパクト型","fa-hashtag"]];return`
+<div class="space-y-4">
+  <div>
     <h1 class="section-title"><i class="fas fa-wand-magic-sparkles"></i>パターン別AI生成</h1>
-    <p class="section-desc">5つの投稿パターンから選んでAI生成。生成後の各カードに画像・動画を個別設定して投稿。</p>
+    <p class="section-desc">5種類の投稿パターンから選んで、テーマに沿った投稿案を複数生成します。</p>
   </div>
-
-  <!-- パターン選択 -->
-  <div class="card" style="margin-bottom:1.25rem">
-    <div class="field-label" style="margin-bottom:.875rem"><i class="fas fa-palette icon-blue"></i>投稿パターンを選択</div>
-    <div id="patt-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:.625rem">
-      ${t.map(([a,s,n,i],r)=>`
-        <div onclick="selectPatt(this,'${a}')"
-          style="display:flex;flex-direction:column;align-items:center;gap:.375rem;
-            padding:.875rem .5rem;border:2px solid ${r===0?"var(--accent)":"var(--line)"};
-            border-radius:.625rem;cursor:pointer;text-align:center;
-            background:${r===0?"var(--accent-light)":"#fff"};
-            color:${r===0?"var(--accent)":"var(--ink)"};
-            transition:all .15s">
-          <i class="fas ${n}" style="font-size:1.35rem"></i>
-          <span style="font-size:.82rem;font-weight:700;line-height:1.2">${s}</span>
-          <span style="font-size:.7rem;color:${r===0?"var(--accent-hover)":"var(--ink-muted)"}">${i}</span>
-        </div>
-      `).join("")}
-    </div>
-    <input type="hidden" id="patt-val" value="problem">
-  </div>
-
-  <!-- 入力フォーム -->
-  <div class="card" style="margin-bottom:1.25rem">
-    <!-- テーマ・キーワード横並び -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+  ${e.hasAccount?"":e.noAccountAlert}
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="card lg:col-span-2 space-y-4">
       <div>
-        <label class="field-label"><i class="fas fa-heading icon-blue"></i>テーマ <span style="color:#ef4444">*</span></label>
-        <input type="text" id="pa-theme" class="inp" placeholder="例: AI自動化で1日15分運用">
+        <label class="field-label"><i class="fas fa-shapes icon-purple"></i>投稿パターン</label>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem" id="patt-grid">
+          ${t.map(([i,r,o],d)=>`
+            <div onclick="selectPatt(this,'${i}')" data-val="${i}"
+              style="display:flex;flex-direction:column;align-items:center;gap:.375rem;padding:.75rem .5rem;border:2px solid ${d===0?"var(--accent)":"var(--line)"};border-radius:.5rem;cursor:pointer;background:${d===0?"var(--accent-light)":"#fff"};color:${d===0?"var(--accent)":"var(--ink)"};transition:all .15s;text-align:center">
+              <i class="fas ${o}" style="font-size:1.1rem"></i>
+              <span style="font-size:.72rem;font-weight:600;line-height:1.2">${r}</span>
+            </div>
+          `).join("")}
+        </div>
+        <input type="hidden" id="patt-val" value="problem">
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="field-label"><i class="fas fa-heading icon-blue"></i>テーマ</label>
+          <input type="text" id="pa-theme" class="inp" placeholder="例: FXで月10万円稼ぐ方法">
+        </div>
+        <div>
+          <label class="field-label"><i class="fas fa-tags icon-green"></i>キーワード</label>
+          <input type="text" id="pa-kw" class="inp" placeholder="例: 自動売買, EA, システムトレード">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="field-label"><i class="fas fa-align-left icon-blue"></i>投稿モード</label>
+          <select id="pa-mode" class="inp">
+            <option value="body">フル文章</option>
+            <option value="140">140文字以内</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label"><i class="fas fa-link icon-blue"></i>リンクURL（任意）</label>
+          <input type="url" id="pa-link" class="inp" placeholder="https://...">
+        </div>
+        <div>
+          <label class="field-label"><i class="fas fa-hashtag icon-green"></i>ハッシュタグ（任意）</label>
+          <input type="text" id="pa-tag" class="inp" placeholder="#FX #システムトレード">
+        </div>
       </div>
       <div>
-        <label class="field-label"><i class="fas fa-tags icon-green"></i>キーワード</label>
-        <input type="text" id="pa-kw" class="inp" placeholder="例: AI, 自動化, 時短, 仕組み">
+        <label class="field-label"><i class="fas fa-list-ol icon-yellow"></i>生成件数</label>
+        <select id="pa-count" class="inp" style="width:8rem">
+          <option value="1">1件</option><option value="3" selected>3件</option>
+          <option value="5">5件</option><option value="10">10件</option>
+        </select>
       </div>
+      <button class="btn btn-primary" onclick="doPatternGenerate()"><i class="fas fa-wand-magic-sparkles"></i>AI生成</button>
     </div>
-
-    <!-- 生成数 -->
-    <div style="margin-bottom:1rem">
-      <label class="field-label"><i class="fas fa-list-ol icon-purple"></i>生成数</label>
-      <select id="pa-count" class="inp" style="width:10rem">
-        <option value="1">1件</option>
-        <option value="2">2件</option>
-        <option value="3" selected>3件</option>
-        <option value="4">4件</option>
-        <option value="5">5件</option>
-        <option value="6">6件</option>
-        <option value="7">7件</option>
-        <option value="8">8件</option>
-        <option value="9">9件</option>
-        <option value="10">10件</option>
-      </select>
-    </div>
-
-    <!-- 投稿オプション -->
-    <div style="background:var(--accent-light);border-radius:.5rem;padding:1rem;border:1px solid rgba(37,99,235,.15)">
-      <div class="field-label" style="margin-bottom:.75rem"><i class="fas fa-sliders icon-blue"></i>投稿オプション</div>
-      <div style="display:grid;gap:.75rem">
-        <div>
-          <label class="field-label"><i class="fas fa-pen-nib icon-blue"></i>投稿末尾の追記（任意）</label>
-          <input type="text" id="pa-footer" class="inp" placeholder="例: 詳しくはプロフリンクから">
+    <div class="card">
+      <h3 class="font-bold text-ink mb-3"><i class="fas fa-circle-info text-accent"></i> 現在の設定</h3>
+      <div class="space-y-2 text-sm">
+        <div class="p-2 bg-paper-soft rounded-md">
+          <div class="text-xs text-ink-muted">ターゲット</div>
+          <div class="text-ink">${w(((s=e.target)==null?void 0:s.age_range)||"未設定")} / ${w(((a=e.target)==null?void 0:a.gender)||"-")}</div>
         </div>
-        <div>
-          <label class="field-label"><i class="fas fa-link icon-blue"></i>URL（任意）</label>
-          <input type="url" id="pa-url" class="inp" placeholder="https://...">
+        <div class="p-2 bg-paper-soft rounded-md">
+          <div class="text-xs text-ink-muted">ブランドボイス</div>
+          <div class="text-ink text-xs">${w((((n=e.voice)==null?void 0:n.tone)||"未設定").slice(0,50))}...</div>
         </div>
-        <div>
-          <label class="field-label"><i class="fas fa-align-left icon-blue"></i>本文モード</label>
-          <div style="display:flex;gap:1.5rem;align-items:center">
-            <label style="display:flex;align-items:center;gap:.375rem;cursor:pointer;font-size:.875rem">
-              <input type="radio" name="pa-mode" value="body" checked> 本文（生成そのまま）
-            </label>
-            <label style="display:flex;align-items:center;gap:.375rem;cursor:pointer;font-size:.875rem">
-              <input type="radio" name="pa-mode" value="140"> 140文字以内
-            </label>
-          </div>
+        <div class="p-2 bg-paper-soft rounded-md">
+          <div class="text-xs text-ink-muted">投稿先アカウント</div>
+          <div class="text-ink">${e.currentAcct?"@"+w(e.currentAcct.x_username||e.currentAcct.account_name):"未選択"}</div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- メディア -->
-  <div class="card" style="margin-bottom:1.25rem">
-    <label class="field-label" style="margin-bottom:.75rem"><i class="fas fa-photo-film icon-purple"></i>メディア（任意）</label>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-      <label class="btn btn-ghost" style="cursor:pointer;margin:0">
-        <i class="fas fa-image"></i>画像
-        <input type="file" id="pa-img" accept="image/*" multiple class="hide" onchange="previewPaMedia(this,'image')">
-      </label>
-      <label class="btn btn-ghost" style="cursor:pointer;margin:0">
-        <i class="fas fa-video"></i>動画
-        <input type="file" id="pa-vid" accept="video/*" class="hide" onchange="previewPaMedia(this,'video')">
-      </label>
-      <span id="pa-media-name" style="font-size:.78rem;color:var(--ink-muted)"></span>
-      <button class="btn btn-danger btn-sm hide" id="pa-media-clear" onclick="clearPaMedia()"><i class="fas fa-times"></i></button>
-    </div>
-    <div id="pa-media-preview" style="margin-top:.5rem;display:flex;gap:.375rem;flex-wrap:wrap"></div>
-  </div>
-
-  <!-- 生成ボタン -->
-  <button class="btn btn-primary" onclick="doPatternGenerate()"
-    style="width:100%;justify-content:center;padding:.875rem;font-size:1rem;font-weight:700">
-    <i class="fas fa-wand-magic-sparkles"></i>選択パターンでAI生成
-  </button>
-
-  <div id="pa-results" style="margin-top:1.5rem"></div>
-
-  <!-- 現在の設定 -->
-  <div class="card" style="margin-top:1.25rem;background:var(--paper-soft)">
-    <div class="field-label" style="margin-bottom:.5rem"><i class="fas fa-circle-info icon-blue"></i>現在の設定</div>
-    <div style="font-size:.78rem;color:var(--ink-muted)">
-      ターゲット・ブランドボイスが設定されている場合、自動的にAI生成に反映されます。
-      設定は各設定ページから変更できます。
-    </div>
-  </div>
+  <div id="pa-results"></div>
 </div>
 <script>
 function selectPatt(el, val) {
-  document.querySelectorAll('#patt-grid > div').forEach(function(d) {
+  document.querySelectorAll('#patt-grid > div').forEach(d => {
     d.style.borderColor = 'var(--line)';
     d.style.background = '#fff';
     d.style.color = 'var(--ink)';
-    var sub = d.querySelector('span:last-child');
-    if (sub) sub.style.color = 'var(--ink-muted)';
+    d.dataset.selected = '0';
   });
-  el.style.borderColor = 'var(--accent)';
-  el.style.background = 'var(--accent-light)';
-  el.style.color = 'var(--accent)';
-  var sub = el.querySelector('span:last-child');
-  if (sub) sub.style.color = 'var(--accent-hover)';
+  el.style.borderColor = 'var(--accent, #2563EB)';
+  el.style.background = 'var(--accent-light, #EFF6FF)';
+  el.style.color = 'var(--accent, #2563EB)';
+  el.dataset.selected = '1';
   document.getElementById('patt-val').value = val;
 }
-function previewPaMedia(input, type) {
-  var files = input.files; if (!files.length) return;
-  var prev = document.getElementById('pa-media-preview');
-  var name = document.getElementById('pa-media-name');
-  var clr = document.getElementById('pa-media-clear');
-  if (type === 'image') {
-    var html = '';
-    for (var i = 0; i < files.length; i++) {
-      html += '<img src="' + URL.createObjectURL(files[i]) + '" style="height:60px;border-radius:4px;border:1px solid var(--line)">';
-    }
-    prev.innerHTML = html;
-    name.textContent = files.length + '枚';
-  } else {
-    prev.innerHTML = '<span style="font-size:.78rem;color:var(--ink-muted)"><i class="fas fa-video"></i> ' + files[0].name + '</span>';
-    name.textContent = '動画選択済';
-  }
-  clr.classList.remove('hide');
+window.selectPatt = selectPatt;
+
+function paResultCardHtml(g) {
+  const id = g.id;
+  const body = (g.body || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const patt = g.pattern_type || '';
+  const pattLabels = {problem:'問題提起型',before_after:'ビフォーアフター型',contrarian:'逆張り型',howto:'HowTo実演型',numbers:'数字インパクト型'};
+  const pattLabel = pattLabels[patt] || patt || '';
+  return '<div class="card card-sm" id="pa-card-'+id+'" data-pid="'+id+'" style="margin-bottom:.75rem;padding:1rem;border:1px solid var(--line);border-radius:.5rem;background:#fff">' +
+    (pattLabel?'<div style="font-size:.7rem;color:#2563EB;background:#EFF6FF;display:inline-block;padding:.15rem .5rem;border-radius:.25rem;margin-bottom:.5rem;font-weight:600">'+pattLabel+'</div>':'') +
+    '<div class="whitespace-pre-line text-sm leading-relaxed text-ink" style="white-space:pre-line">' + body + '</div>' +
+    '<div class="text-xs text-ink-muted mt-2">' + (g.body||'').length + ' 文字</div>' +
+    '<div id="pa-media-'+id+'" style="margin-top:.5rem;display:flex;gap:.25rem;flex-wrap:wrap"></div>' +
+    '<div style="display:flex;gap:.4rem;margin-top:.75rem;flex-wrap:wrap;align-items:center">' +
+      '<button class="btn btn-ghost btn-sm" type="button" onclick="paAttachImageUrl('+id+')"><i class="fas fa-image"></i>画像URL</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" onclick="paAttachImageFile('+id+')"><i class="fas fa-upload"></i>画像アップ</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" onclick="paAttachVideoUrl('+id+')"><i class="fas fa-film"></i>動画URL</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" onclick="paAttachVideoFile('+id+')"><i class="fas fa-upload"></i>動画アップ</button>' +
+      '<input type="datetime-local" id="pa-sched-'+id+'" class="inp" style="width:13rem;padding:.4rem .5rem;font-size:.85rem">' +
+      '<button class="btn btn-primary btn-sm" type="button" onclick="paSchedule('+id+')"><i class="fas fa-calendar-plus"></i>日時予約</button>' +
+      '<button class="btn btn-primary btn-sm" type="button" onclick="paPostNow('+id+')" style="background:#059669;border-color:#059669"><i class="fa-brands fa-x-twitter"></i>今すぐ投稿</button>' +
+      '<span id="pa-status-'+id+'" class="text-xs"></span>' +
+    '</div>' +
+  '</div>';
 }
-function clearPaMedia() {
-  document.getElementById('pa-img').value = '';
-  document.getElementById('pa-vid').value = '';
-  document.getElementById('pa-media-preview').innerHTML = '';
-  document.getElementById('pa-media-name').textContent = '';
-  document.getElementById('pa-media-clear').classList.add('hide');
+window.paResultCardHtml = paResultCardHtml;
+
+window.paAttachedMedia = window.paAttachedMedia || {};
+
+function paRenderMedia(pid) {
+  const el = document.getElementById('pa-media-'+pid); if (!el) return;
+  const arr = window.paAttachedMedia[pid] || [];
+  el.innerHTML = arr.map(m =>
+    '<div style="display:flex;align-items:center;gap:.25rem;background:#F3F4F6;border-radius:.25rem;padding:.15rem .4rem;font-size:.7rem">' +
+      '<i class="fas '+(m.type==='video'?'fa-film':'fa-image')+'"></i>' +
+      '<span style="max-width:10rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(m.name||'').replace(/"/g,'&quot;')+'">'+(m.name||'media')+'</span>' +
+      '<button type="button" onclick="paRemoveMedia('+pid+','+m.id+')" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="fas fa-xmark"></i></button>' +
+    '</div>'
+  ).join('');
 }
+window.paRenderMedia = paRenderMedia;
+
+window.paRemoveMedia = function(pid, mid) {
+  const arr = window.paAttachedMedia[pid] || [];
+  window.paAttachedMedia[pid] = arr.filter(m => m.id !== mid);
+  paRenderMedia(pid);
+  paSyncMediaToPost(pid);
+};
+
+async function paSyncMediaToPost(pid) {
+  const arr = window.paAttachedMedia[pid] || [];
+  const ids = arr.map(m => m.id);
+  await fetch('/api/admin/posts/'+pid+'/attach-media', {
+    method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({media_ids: ids})
+  });
+}
+window.paSyncMediaToPost = paSyncMediaToPost;
+
+window.paAttachImageUrl = function(pid) {
+  const u = prompt('画像のURLを入力してください'); if (!u) return;
+  paAddRemoteMedia(pid, u, 'image');
+};
+window.paAttachVideoUrl = function(pid) {
+  const u = prompt('動画のURLを入力してください'); if (!u) return;
+  paAddRemoteMedia(pid, u, 'video');
+};
+async function paAddRemoteMedia(pid, url, ftype) {
+  try {
+    const r = await fetch('/api/admin/media/url', {
+      method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({url, file_type: ftype})
+    });
+    const j = await r.json();
+    if (!j.success) { toast('登録失敗: '+(j.error||''),'err'); return; }
+    window.paAttachedMedia[pid] = window.paAttachedMedia[pid] || [];
+    if (window.paAttachedMedia[pid].length >= 4) { toast('添付は最大4件まで','err'); return; }
+    window.paAttachedMedia[pid].push({id: j.id, type: ftype, name: url.split('/').pop()||'remote'});
+    paRenderMedia(pid);
+    await paSyncMediaToPost(pid);
+    toast('添付しました','ok');
+  } catch (e) { toast('エラー: '+e.message,'err'); }
+}
+
+function paPickFile(accept) {
+  return new Promise(res => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = accept;
+    inp.onchange = () => res(inp.files && inp.files[0] || null);
+    inp.click();
+  });
+}
+window.paAttachImageFile = async function(pid) {
+  const f = await paPickFile('image/*'); if (!f) return;
+  paUploadFile(pid, f, 'image');
+};
+window.paAttachVideoFile = async function(pid) {
+  const f = await paPickFile('video/*'); if (!f) return;
+  paUploadFile(pid, f, 'video');
+};
+async function paUploadFile(pid, file, ftype) {
+  try {
+    const fd = new FormData(); fd.append('file', file);
+    toast('アップロード中...','info');
+    const r = await fetch('/api/admin/media', {method:'POST', body: fd});
+    const j = await r.json();
+    if (!j.success) { toast('アップロード失敗: '+(j.error||''),'err'); return; }
+    window.paAttachedMedia[pid] = window.paAttachedMedia[pid] || [];
+    if (window.paAttachedMedia[pid].length >= 4) { toast('添付は最大4件まで','err'); return; }
+    window.paAttachedMedia[pid].push({id: j.id, type: ftype, name: file.name});
+    paRenderMedia(pid);
+    await paSyncMediaToPost(pid);
+    toast('添付しました','ok');
+  } catch (e) { toast('エラー: '+e.message,'err'); }
+}
+
+window.paSchedule = async function(pid) {
+  const dt = document.getElementById('pa-sched-'+pid).value;
+  if (!dt) { toast('予約日時を入力してください','err'); return; }
+  const stEl = document.getElementById('pa-status-'+pid);
+  stEl.textContent = '予約中...'; stEl.style.color='#6B7280';
+  await paSyncMediaToPost(pid);
+  const scheduledAt = dt.replace('T',' ') + ':00';
+  const r = await fetch('/api/admin/posts/'+pid+'/schedule', {
+    method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({scheduled_at: scheduledAt})
+  });
+  const j = await r.json();
+  if (j.success) { stEl.textContent='予約完了 ('+(j.effective_scheduled_at||scheduledAt)+')'; stEl.style.color='#059669'; toast('予約完了','ok'); }
+  else { stEl.textContent='失敗: '+(j.error||''); stEl.style.color='#dc2626'; toast('予約失敗: '+(j.error||''),'err'); }
+};
+
+window.paPostNow = async function(pid) {
+  if (!confirm('この投稿を今すぐXに投稿しますか？')) return;
+  const stEl = document.getElementById('pa-status-'+pid);
+  stEl.textContent = '投稿中...'; stEl.style.color='#6B7280';
+  await paSyncMediaToPost(pid);
+  const r = await fetch('/api/admin/posts/'+pid+'/post-now', {
+    method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({})
+  });
+  const j = await r.json();
+  if (j.success) { stEl.textContent='投稿完了 (ID:'+(j.tweet_id||'-')+')'; stEl.style.color='#059669'; toast('投稿しました','ok'); }
+  else { stEl.textContent='失敗: '+(j.error||''); stEl.style.color='#dc2626'; toast('投稿失敗: '+(j.error||''),'err'); }
+};
+
 async function doPatternGenerate() {
-  var theme = document.getElementById('pa-theme').value.trim();
+  const patt = document.getElementById('patt-val').value;
+  const theme = document.getElementById('pa-theme').value.trim();
   if (!theme) { toast('テーマを入力してください', 'err'); return; }
-  var patt = document.getElementById('patt-val').value;
-  var kw = document.getElementById('pa-kw').value;
-  var count = parseInt(document.getElementById('pa-count').value, 10) || 3;
-  var mode = document.querySelector('input[name="pa-mode"]:checked').value;
-  var footer = document.getElementById('pa-footer').value;
-  var url = document.getElementById('pa-url').value;
-  // メディア収集
-  var mediaImages = [];
-  var imgInput = document.getElementById('pa-img');
-  if (imgInput && imgInput.files && imgInput.files.length) {
-    for (var i = 0; i < imgInput.files.length; i++) {
-      var b64 = await fileToBase64(imgInput.files[i]);
-      mediaImages.push({ name: imgInput.files[i].name, type: imgInput.files[i].type, data: b64 });
-    }
-  }
-  var resultsDiv = document.getElementById('pa-results');
-  resultsDiv.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--ink-muted)"><i class="fas fa-spinner fa-spin"></i> 生成中...</div>';
-  var r = await fetch('/api/admin/posts/generate', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ theme: theme, count: count, pattern_type: patt, keywords: kw, post_mode: mode, footer_text: footer, link_url: url, media_images: mediaImages }),
-  });
-  var j = await r.json();
-  if (!j.success) { toast('生成失敗: ' + (j.error || ''), 'err'); resultsDiv.innerHTML = ''; return; }
-  var postsData = j.posts || [];
-  resultsDiv.innerHTML = postsData.map(function(p, i) {
-    var mediaId = 'media-' + p.id;
-    var schedId = 'sched-' + p.id;
-    return '<div class="card" style="margin-bottom:.875rem;border:1px solid var(--line)">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">' +
-        '<span class="pill pill-blue">' + (i+1) + '/' + postsData.length + ' | ' + (p.pattern_type || '') + '</span>' +
-        '<div style="display:flex;gap:.375rem;flex-wrap:wrap">' +
-          '<button onclick="postNowFromGen(' + p.id + ','' + mediaId + '')" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i>今すぐ投稿</button>' +
-          '<button onclick="toggleScheduleForGen('' + schedId + '')" class="btn btn-ghost btn-sm"><i class="fas fa-calendar"></i>予約</button>' +
-        '</div>' +
-      '</div>' +
-      '<div style="white-space:pre-wrap;font-size:.9rem;line-height:1.75;margin-bottom:.75rem;padding:.75rem;background:var(--paper-soft);border-radius:.375rem">' + (p.body || '').replace(/</g,'&lt;') + '</div>' +
-      (p.word_count ? '<div style="font-size:.72rem;color:var(--ink-muted);margin-bottom:.5rem">' + p.word_count + '文字</div>' : '') +
-      // メディア添付エリア
-      '<div style="background:var(--accent-light);border-radius:.375rem;padding:.625rem;border:1px solid rgba(37,99,235,.15)">' +
-        '<div style="font-size:.78rem;font-weight:600;margin-bottom:.375rem"><i class="fas fa-photo-film" style="color:var(--accent)"></i> メディア添付（任意）</div>' +
-        '<div style="display:flex;gap:.375rem;flex-wrap:wrap;align-items:center;margin-bottom:.375rem">' +
-          '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;padding:.3rem .625rem"><i class="fas fa-image"></i>画像' +
-            '<input type="file" id="img-' + mediaId + '" accept="image/*" multiple style="position:absolute;opacity:0;width:0;height:0" onchange="previewResultMedia(this,'' + mediaId + '','image')">' +
-          '</label>' +
-          '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;padding:.3rem .625rem"><i class="fas fa-video"></i>動画' +
-            '<input type="file" id="vid-' + mediaId + '" accept="video/*" style="position:absolute;opacity:0;width:0;height:0" onchange="previewResultMedia(this,'' + mediaId + '','video')">' +
-          '</label>' +
-          '<input type="url" id="imgurl-' + mediaId + '" placeholder="画像URL（任意）" style="height:1.9rem;padding:.25rem .5rem;border:1px solid var(--line);border-radius:.375rem;font-size:.75rem;width:12rem;outline:none">' +
-        '</div>' +
-        '<div id="prev-' + mediaId + '" style="display:flex;gap:.375rem;flex-wrap:wrap"></div>' +
-      '</div>' +
-      // 予約日時エリア
-      '<div id="' + schedId + '" style="display:none;margin-top:.5rem;padding:.5rem;background:var(--paper-soft);border-radius:.375rem;display:none">' +
-        '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">' +
-          '<input type="datetime-local" id="dt-' + schedId + '" style="padding:.3rem .5rem;border:1px solid var(--line);border-radius:.375rem;font-size:.82rem;outline:none">' +
-          '<button onclick="scheduleFromGen(' + p.id + ','' + mediaId + '','' + schedId + '')" class="btn btn-primary btn-sm"><i class="fas fa-calendar-check"></i>予約確定</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-async function fileToBase64(file) {
-  return new Promise(function(res) {
-    var fr = new FileReader();
-    fr.onload = function(e) { res(e.target.result); };
-    fr.readAsDataURL(file);
-  });
-}
-function previewResultMedia(input, mediaId, type) {
-  var files = input.files; if (!files.length) return;
-  var prev = document.getElementById('prev-' + mediaId);
-  if (!prev) return;
-  if (type === 'image') {
-    var html = '';
-    for (var i = 0; i < Math.min(files.length, 4); i++) {
-      html += '<img src="' + URL.createObjectURL(files[i]) + '" style="height:56px;border-radius:4px;border:1px solid var(--line)">';
-    }
-    prev.innerHTML = html;
-  } else {
-    prev.innerHTML = '<span style="font-size:.75rem;color:var(--ink-muted)"><i class="fas fa-video"></i> ' + files[0].name + '</span>';
-  }
-}
-function toggleScheduleForGen(schedId) {
-  var el = document.getElementById(schedId);
-  if (el) el.style.display = el.style.display === 'none' || el.style.display === '' ? 'block' : 'none';
-}
-async function collectMediaForPost(mediaId) {
-  var images = [];
-  var imgInput = document.getElementById('img-' + mediaId);
-  var urlInput = document.getElementById('imgurl-' + mediaId);
-  if (imgInput && imgInput.files && imgInput.files.length) {
-    for (var i = 0; i < imgInput.files.length; i++) {
-      var b64 = await fileToBase64(imgInput.files[i]);
-      images.push({ name: imgInput.files[i].name, type: imgInput.files[i].type, data: b64 });
-    }
-  }
-  if (urlInput && urlInput.value.trim()) {
-    images.push({ url: urlInput.value.trim() });
-  }
-  var vidInput = document.getElementById('vid-' + mediaId);
-  var video = null;
-  if (vidInput && vidInput.files && vidInput.files[0]) {
-    var vb64 = await fileToBase64(vidInput.files[0]);
-    video = { name: vidInput.files[0].name, type: vidInput.files[0].type, data: vb64 };
-  }
-  return { images: images, video: video };
-}
-async function postNowFromGen(id, mediaId) {
-  var media = mediaId ? await collectMediaForPost(mediaId) : { images: [], video: null };
-  var payload = { media_images: media.images };
-  if (media.video) { payload.media_video = media.video.data; payload.media_video_name = media.video.name; payload.media_video_type = media.video.type; }
-  var r = await fetch('/api/admin/posts/' + id + '/post-now', {
-    method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify(payload)
-  });
-  var j = await r.json();
-  if (j.success) toast('投稿しました', 'ok');
-  else toast('失敗: ' + (j.error || ''), 'err');
-}
-async function scheduleFromGen(id, mediaId, schedId) {
-  var dtEl = document.getElementById('dt-' + schedId);
-  if (!dtEl || !dtEl.value) { toast('予約日時を選択してください', 'err'); return; }
-  var media = await collectMediaForPost(mediaId);
-  var payload = {
-    scheduled_at: dtEl.value.replace('T', ' '),
-    media_images: media.images,
+  const cntVal = parseInt(document.getElementById('pa-count').value, 10) || 1;
+  const cnt = Math.min(Math.max(cntVal, 1), 10);
+  const body = {
+    theme,
+    keywords: document.getElementById('pa-kw').value,
+    pattern_type: patt,
+    post_mode: document.getElementById('pa-mode').value,
+    link_url: document.getElementById('pa-link').value,
+    hashtags: document.getElementById('pa-tag').value,
+    count: cnt,
   };
-  if (media.video) { payload.media_video = media.video.data; }
-  var r = await fetch('/api/admin/posts/' + id + '/schedule-update', {
-    method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify(payload)
-  });
-  var j = await r.json();
-  if (j.success || j.ok) {
-    toast('予約しました', 'ok');
-    document.getElementById(schedId).style.display = 'none';
-  } else toast('失敗: ' + (j.error || ''), 'err');
+  const root = document.getElementById('pa-results');
+  root.innerHTML = '<div class="text-sm text-ink-muted" style="padding:.5rem"><i class="fas fa-spinner fa-spin"></i> 生成中... ('+cnt+'件)</div>';
+  try {
+    const r = await fetch('/api/admin/posts/generate', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body)});
+    const j = await r.json();
+    if (!j.success) { root.innerHTML='<div class="text-sm" style="color:#dc2626;padding:.5rem">生成失敗: ' + (j.error || '') + '</div>'; toast('生成失敗: ' + (j.error || ''), 'err'); return; }
+    root.innerHTML = '<div class="mt-4"><h3 class="font-bold text-ink mb-3"><i class="fas fa-circle-check text-emerald-600"></i> 生成結果 ' + j.generated.length + '件</h3><div>' +
+      j.generated.map(g => paResultCardHtml(Object.assign({pattern_type: patt}, g))).join('') +
+    '</div></div>';
+    toast(j.generated.length + '件生成しました', 'ok');
+  } catch(e) {
+    root.innerHTML='<div class="text-sm" style="color:#dc2626;padding:.5rem">エラー: '+e.message+'</div>';
+    toast('エラー: '+e.message,'err');
+  }
 }
-async function addToQueue(id) {
-  toast('キューに追加済みです', 'ok');
-}
-<\/script>
-`}function bn(e){return`
+window.doPatternGenerate = doPatternGenerate;
+<\/script>`}function ln(e){return`
 <div class="space-y-4">
   ${e.hasAccount?"":e.noAccountAlert}
   <div>
@@ -1116,17 +1010,8 @@ async function addToQueue(id) {
     </div>
     <div>
       <label class="field-label"><i class="fas fa-list-ol icon-yellow"></i>生成数</label>
-      <select id="ge-count" class="inp" style="width:8rem" onchange="this.dataset.val=this.value">
-        <option value="1">1件</option>
-        <option value="2">2件</option>
-        <option value="3" selected>3件</option>
-        <option value="4">4件</option>
-        <option value="5">5件</option>
-        <option value="6">6件</option>
-        <option value="7">7件</option>
-        <option value="8">8件</option>
-        <option value="9">9件</option>
-        <option value="10">10件</option>
+      <select id="ge-count" class="inp" style="width:8rem">
+        <option>1件</option><option selected>3件</option><option>5件</option>
       </select>
     </div>
     <div class="border border-line rounded-lg p-4 bg-paper-soft">
@@ -1149,57 +1034,19 @@ async function addToQueue(id) {
         </div>
       </div>
     </div>
-    <div>
-      <label class="field-label"><i class="fas fa-photo-film icon-purple"></i>メディア（任意）</label>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-        <label class="btn btn-ghost" style="cursor:pointer"><i class="fas fa-image"></i>画像を追加
-          <input type="file" id="ge-img" accept="image/*" multiple class="hide" onchange="previewGenMedia(this,'image')">
-        </label>
-        <label class="btn btn-ghost" style="cursor:pointer"><i class="fas fa-video"></i>動画を追加
-          <input type="file" id="ge-vid" accept="video/*" class="hide" onchange="previewGenMedia(this,'video')">
-        </label>
-        <span id="ge-media-name" style="font-size:.8rem;color:var(--ink-muted)"></span>
-        <button class="btn btn-danger btn-sm hide" id="ge-media-clear" onclick="clearGenMedia()"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="ge-media-preview" style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap"></div>
-    </div>
     <div class="flex gap-2 items-stretch">
       <button class="btn btn-primary flex-1 justify-center" style="padding:.85rem 1rem;font-size:.95rem;font-weight:600" onclick="doGen2()"><i class="fas fa-pencil"></i>AI生成</button>
       <button class="btn btn-ghost" onclick="toast('下書き保存:実装中','info')"><i class="fas fa-save"></i>下書き保存</button>
+      <button class="btn btn-ghost" onclick="toast('下書き再開:実装中','info')"><i class="fas fa-folder-open"></i>下書き再開</button>
     </div>
     <div id="ge-results"></div>
   </div>
 </div>
 <script>
-function previewGenMedia(input, type) {
-  const files = input.files; if (!files.length) return;
-  const prev = document.getElementById('ge-media-preview');
-  const name = document.getElementById('ge-media-name');
-  const clr = document.getElementById('ge-media-clear');
-  if (type === 'image') {
-    let html = '';
-    for (const f of files) {
-      html += '<img src="'+URL.createObjectURL(f)+'" style="height:72px;border-radius:4px;border:1px solid var(--line)">';
-    }
-    prev.innerHTML = html;
-    name.textContent = files.length + '枚選択';
-  } else {
-    prev.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;background:var(--paper-soft);padding:.5rem .75rem;border-radius:.5rem"><i class="fas fa-video" style="color:var(--accent)"></i><span style="font-size:.8rem">'+files[0].name+'</span></div>';
-    name.textContent = '動画選択済';
-  }
-  clr.classList.remove('hide');
-}
-function clearGenMedia() {
-  document.getElementById('ge-img').value='';
-  document.getElementById('ge-vid').value='';
-  document.getElementById('ge-media-preview').innerHTML='';
-  document.getElementById('ge-media-name').textContent='';
-  document.getElementById('ge-media-clear').classList.add('hide');
-}
 async function doGen2() {
   const prompt = document.getElementById('ge-prompt').value.trim();
   if (!prompt) { toast('プロンプトを入力してください','err'); return; }
-  const count = parseInt(document.getElementById('ge-count').value.replace('件',''), 10) || 3;
+  const count = parseInt(document.getElementById('ge-count').value, 10) || 3;
   const mode = document.querySelector('input[name="ge-mode"]:checked').value;
   const footer = document.getElementById('ge-footer').value;
   const url = document.getElementById('ge-url').value;
@@ -1213,7 +1060,7 @@ async function doGen2() {
     j.generated.map(g => '<div class="card card-sm"><div class="whitespace-pre-line text-sm text-ink">' + (g.body||'').replace(/</g,'&lt;') + '</div></div>').join('') + '</div>';
   toast(j.generated.length + '件生成しました','ok');
 }
-<\/script>`}function vn(e){const{month:t,y:a,m:s,posts:n,stats:i}=e;return`
+<\/script>`}function cn(e){const{month:t,y:s,m:a,posts:n,stats:i}=e;return`
 <div class="space-y-4">
   ${e.hasAccount?"":e.noAccountAlert}
   <div>
@@ -1222,12 +1069,11 @@ async function doGen2() {
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <button class="btn btn-ghost" onclick="navMonth(-1)"><i class="fas fa-chevron-left"></i></button>
-      <span class="text-lg font-bold text-ink px-2">${a}年 ${s}月</span>
+      <span class="text-lg font-bold text-ink px-2">${s}年 ${a}月</span>
       <button class="btn btn-ghost" onclick="navMonth(1)"><i class="fas fa-chevron-right"></i></button>
       <button class="btn btn-primary btn-sm" onclick="thisMonth()">当月</button>
     </div>
     <div class="flex gap-2">
-      <button class="btn btn-primary btn-sm" onclick="document.getElementById('new-post-panel').style.display=document.getElementById('new-post-panel').style.display==='none'?'block':'none'"><i class="fas fa-plus"></i>新規作成</button>
       <button class="btn btn-ghost" onclick="dlExportPosts()" title="投稿データをCSVダウンロード"><i class="fas fa-download"></i>CSV</button>
       <button class="btn btn-danger" onclick="bulkDel()" id="bulk-del-btn" disabled><i class="fas fa-trash"></i>一括削除</button>
     </div>
@@ -1249,10 +1095,10 @@ async function doGen2() {
             <tr>
               <td><input type="checkbox" class="post-chk" value="${r.id}" onchange="updateBulk()"></td>
               <td class="font-mono text-xs text-ink-faint">${r.id}</td>
-              <td class="max-w-md"><div class="truncate">${I((r.body||"").slice(0,80))}</div></td>
+              <td class="max-w-md"><div class="truncate">${w((r.body||"").slice(0,80))}</div></td>
               <td>${r.post_mode==="140"?"140文字":r.post_mode==="thread"?"スレッド":"フル文章"}</td>
-              <td>${Wa(r.status)}</td>
-              <td class="text-xs">@${I(r.x_username||"-")}</td>
+              <td>${Lt(r.status)}</td>
+              <td class="text-xs">@${w(r.x_username||"-")}</td>
               <td class="text-right">
                 ${r.status!=="posted"?`<button class="btn btn-subtle btn-sm" onclick="postNow(${r.id})" title="今すぐ投稿"><i class="fa-brands fa-x-twitter"></i></button>`:""}
                 <button class="btn btn-danger btn-sm" onclick="delPost(${r.id})"><i class="fas fa-trash"></i></button>
@@ -1263,73 +1109,7 @@ async function doGen2() {
     </table>
   </div>
 </div>
-
-<!-- 新規投稿作成パネル -->
-<div class="card" id="new-post-panel" style="display:none">
-  <h3 style="font-size:.95rem;font-weight:700;margin:0 0 1rem;color:var(--ink)">
-    <i class="fas fa-pen" style="color:var(--accent)"></i> 新規投稿作成
-  </h3>
-  <div class="space-y-3">
-    <div>
-      <label class="field-label"><i class="fas fa-align-left icon-blue"></i>投稿本文</label>
-      <textarea id="new-post-body" class="inp" rows="4" placeholder="投稿内容を入力（最大140文字またはフル文章）"></textarea>
-      <div style="font-size:.75rem;color:var(--ink-muted);margin-top:.25rem" id="new-post-count">0文字</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div>
-        <label class="field-label"><i class="fas fa-link icon-blue"></i>URL（任意）</label>
-        <input type="url" id="new-post-url" class="inp" placeholder="https://...">
-      </div>
-      <div>
-        <label class="field-label"><i class="fas fa-hashtag icon-blue"></i>ハッシュタグ（任意）</label>
-        <input type="text" id="new-post-tags" class="inp" placeholder="#FX #自動売買">
-      </div>
-    </div>
-    <div>
-      <label class="field-label"><i class="fas fa-calendar icon-purple"></i>予約日時（空欄=今すぐ投稿）</label>
-      <input type="datetime-local" id="new-post-scheduled" class="inp" style="max-width:20rem">
-    </div>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="submitNewPost()"><i class="fas fa-paper-plane"></i>投稿 / 予約</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('new-post-panel').style.display='none'"><i class="fas fa-times"></i>閉じる</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// 新規投稿パネルの文字数カウント
-document.addEventListener('DOMContentLoaded', function() {
-  var ta = document.getElementById('new-post-body');
-  var cnt = document.getElementById('new-post-count');
-  if (ta && cnt) ta.addEventListener('input', function() {
-    cnt.textContent = ta.value.length + '文字';
-    cnt.style.color = ta.value.length > 140 ? '#ef4444' : 'var(--ink-muted)';
-  });
-});
-async function submitNewPost() {
-  var body = (document.getElementById('new-post-body').value || '').trim();
-  if (!body) { toast('本文を入力してください', 'err'); return; }
-  var url = document.getElementById('new-post-url').value;
-  var tags = document.getElementById('new-post-tags').value;
-  var scheduledAt = document.getElementById('new-post-scheduled').value;
-  var endpoint = scheduledAt ? '/api/admin/posts/schedule' : '/api/admin/posts/publish';
-  var payload = {
-    body: body,
-    link_url: url || null,
-    hashtags: tags || null,
-    scheduled_at: scheduledAt ? scheduledAt.replace('T', ' ') : null,
-  };
-  var r = await fetch(endpoint, { method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify(payload) });
-  var j = await r.json();
-  if (j.success || j.ok) {
-    toast(scheduledAt ? '予約しました' : '投稿しました', 'ok');
-    document.getElementById('new-post-panel').style.display = 'none';
-    document.getElementById('new-post-body').value = '';
-    setTimeout(function() { location.reload(); }, 800);
-  } else {
-    toast('失敗: ' + (j.error || j.message || '不明なエラー'), 'err');
-  }
-}
 function dlExportPosts() {
   const url = '/api/admin/export/posts?month=${t}';
   fetch(url).then(r => {
@@ -1388,7 +1168,7 @@ function statusPill(s) {
   const txt = {pending:'未承認',approved:'承認済',publishing:'送信中',posted:'投稿済',failed:'失敗',cancelled:'キャンセル'}[s] || s;
   return '<span class="pill ' + (map[s]||'pill-soft') + '">' + txt + '</span>';
 }
-<\/script>`}function yn(e){return`
+<\/script>`}function un(e){return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-reply"></i>ツリー投稿（既存投稿へのコメント追加）</h1>
@@ -1411,7 +1191,7 @@ function statusPill(s) {
   <div class="card">
     <h3 class="font-bold text-ink mb-3"><i class="fas fa-comment-dots text-accent"></i> 返信本文 <span class="text-xs text-ink-muted font-normal">（1件以上）</span></h3>
     <div id="th-replies" class="space-y-4">
-      ${xn(1)}
+      ${pn(1)}
     </div>
     <div class="mt-4 flex items-center gap-2 flex-wrap">
       <button class="btn btn-ghost" onclick="addReply()"><i class="fas fa-plus"></i>返信追加</button>
@@ -1439,8 +1219,8 @@ function statusPill(s) {
       </div>
     `:e.history.map(t=>`
       <div class="border border-line rounded-lg p-3 mb-2">
-        <div class="text-xs text-ink-muted mb-1">Parent: <span class="font-mono text-accent">${t.thread_parent_id||"-"}</span> ${Wa(t.status)}</div>
-        <div class="text-sm whitespace-pre-line">${I((t.body||"").slice(0,200))}</div>
+        <div class="text-xs text-ink-muted mb-1">Parent: <span class="font-mono text-accent">${t.thread_parent_id||"-"}</span> ${Lt(t.status)}</div>
+        <div class="text-sm whitespace-pre-line">${w((t.body||"").slice(0,200))}</div>
       </div>
     `).join("")}
   </div>
@@ -1514,221 +1294,288 @@ async function submitSchedule() {
   toast('実装中: 予約は次フェーズで実装','info');
 }
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-<\/script>`}function xn(e){return`
+<\/script>`}function pn(e){return`
     <div class="reply-item">
       <div class="flex items-center justify-between mb-1">
         <label class="text-sm font-semibold text-accent">返信 ${e}</label>
       </div>
       <textarea class="inp th-reply" placeholder="返信${e}の本文を入力" maxlength="280"></textarea>
-    </div>`}function En(e){return`
+    </div>`}function mn(e){return`
 <div class="space-y-4">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
     <div>
       <h1 class="section-title"><i class="fas fa-calendar"></i>予約状況</h1>
-      <p class="section-desc">予約済み投稿・オートパイロットジョブ</p>
+      <p class="section-desc">予約済み投稿・オートパイロットジョブの確認</p>
     </div>
     <div style="display:flex;gap:.5rem">
-      <button id="btn-cal" class="btn btn-primary btn-sm" onclick="scSetView('cal')"><i class="fas fa-calendar"></i>カレンダー</button>
-      <button id="btn-list" class="btn btn-ghost btn-sm" onclick="scSetView('list')"><i class="fas fa-list"></i>一覧</button>
+      <button id="btn-cal" class="btn btn-primary btn-sm" onclick="setView('cal')"><i class="fas fa-calendar"></i>カレンダー</button>
+      <button id="btn-list" class="btn btn-ghost btn-sm" onclick="setView('list')"><i class="fas fa-list"></i>一覧</button>
+      <button class="btn btn-ghost btn-sm" onclick="reloadSchedule()"><i class="fas fa-rotate"></i>再読込</button>
     </div>
   </div>
-  <!-- アカウント未登録アラートはカレンダーでは表示しない -->
+  ${e.hasAccount?"":e.noAccountAlert}
 
-  <div id="sc-cal-view" style="display:block">
+  <div id="sc-cal-view">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm" onclick="scPrevMonth()"><i class="fas fa-chevron-left"></i></button>
-      <span id="sc-month-label" style="font-size:1rem;font-weight:700;min-width:8rem;text-align:center">--</span>
-      <button class="btn btn-ghost btn-sm" onclick="scNextMonth()"><i class="fas fa-chevron-right"></i></button>
-      <button class="btn btn-subtle btn-sm" onclick="scGoToday()">今日</button>
-      <button class="btn btn-primary btn-sm" onclick="scRefresh()"><i class="fas fa-rotate"></i>更新</button>
+      <button class="btn btn-ghost btn-sm" onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
+      <span id="sc-month-label" style="font-size:1rem;font-weight:700;min-width:7rem;text-align:center"></span>
+      <button class="btn btn-ghost btn-sm" onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+      <button class="btn btn-subtle btn-sm" onclick="goToday()">今日</button>
+      <span id="sc-status" style="font-size:.75rem;color:var(--ink-muted)"></span>
     </div>
     <div style="background:#fff;border:1px solid var(--line);border-radius:.75rem;overflow:hidden">
       <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--paper-soft);border-bottom:1px solid var(--line)">
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:#ef4444">日</div>
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--ink-muted)">月</div>
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--ink-muted)">火</div>
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--ink-muted)">水</div>
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--ink-muted)">木</div>
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--ink-muted)">金</div>
-        <div style="padding:.5rem;text-align:center;font-size:.78rem;font-weight:600;color:#2563EB">土</div>
+        ${["日","月","火","水","木","金","土"].map((s,a)=>`
+          <div style="padding:.5rem;text-align:center;font-size:.75rem;font-weight:600;color:${a===0?"#ef4444":a===6?"#2563EB":"var(--ink-muted)"}">${s}</div>
+        `).join("")}
       </div>
-      <div id="sc-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);min-height:200px">
-        <div id="sc-loading" style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--ink-muted)">読込中...</div>
-      </div>
+      <div id="sc-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr)"><div style="grid-column:1 / span 7;padding:2rem;text-align:center;color:var(--ink-muted);font-size:.85rem"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div></div>
     </div>
+    <div id="sc-empty-cal" style="display:none;padding:1rem;text-align:center;color:var(--ink-muted);font-size:.85rem">予約投稿はありません</div>
   </div>
 
   <div id="sc-list-view" style="display:none">
-    <div class="card" style="padding:0;overflow:auto">
-      <table class="data">
-        <thead><tr><th>予約日時</th><th>アカウント</th><th>本文</th><th>状態</th><th></th></tr></thead>
-        <tbody id="sc-list-body"></tbody>
+    <div class="card" style="padding:0">
+      <table class="data" style="width:100%">
+        <thead><tr><th>予約日時</th><th>種別</th><th>アカウント</th><th>本文</th><th>状態</th><th></th></tr></thead>
+        <tbody id="sc-list-body">
+          <tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:2.5rem"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</td></tr>
+        </tbody>
       </table>
     </div>
   </div>
 </div>
+
+<!-- 日付クリックモーダル -->
+<div id="sc-modal" style="display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.4);align-items:center;justify-content:center;padding:1rem">
+  <div style="background:#fff;border-radius:.75rem;max-width:42rem;width:100%;max-height:90vh;overflow:auto;padding:1.25rem;position:relative">
+    <button onclick="scCloseModal()" style="position:absolute;top:.75rem;right:.75rem;background:none;border:none;font-size:1.25rem;cursor:pointer;color:#6B7280"><i class="fas fa-xmark"></i></button>
+    <h3 id="sc-modal-title" style="font-size:1rem;font-weight:700;margin-bottom:1rem"></h3>
+    <div id="sc-modal-body"></div>
+  </div>
+</div>
+
 <script>
-(function() {
-  'use strict';
-  var _data = [];
-  var _year = new Date().getFullYear();
-  var _month = new Date().getMonth();
+(function(){
+  let SCHEDULED = [];
+  let curYear, curMonth, scLoaded = false;
+  const now = new Date();
+  curYear = now.getFullYear();
+  curMonth = now.getMonth();
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function setView(v) {
+    document.getElementById('sc-cal-view').style.display = v==='cal'?'block':'none';
+    document.getElementById('sc-list-view').style.display = v==='list'?'block':'none';
+    document.getElementById('btn-cal').className = v==='cal'?'btn btn-primary btn-sm':'btn btn-ghost btn-sm';
+    document.getElementById('btn-list').className = v==='list'?'btn btn-primary btn-sm':'btn btn-ghost btn-sm';
+  }
+  window.setView = setView;
 
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  async function loadSchedule() {
+    const stEl = document.getElementById('sc-status');
+    if (stEl) stEl.textContent = '読み込み中...';
+    try {
+      const r = await fetch('/api/admin/posts-scheduled');
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const j = await r.json();
+      SCHEDULED = j.posts || [];
+      scLoaded = true;
+      if (stEl) stEl.textContent = '';
+      buildCalendar();
+      buildList();
+    } catch(e) {
+      if (stEl) { stEl.textContent = '予約状況を取得できませんでした'; stEl.style.color='#dc2626'; }
+      const grid = document.getElementById('sc-cal-grid');
+      if (grid) grid.innerHTML = '<div style="grid-column:1 / span 7;padding:2rem;text-align:center;color:#dc2626;font-size:.85rem">予約状況を取得できませんでした</div>';
+      const lb = document.getElementById('sc-list-body');
+      if (lb) lb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:2.5rem">予約状況を取得できませんでした</td></tr>';
+    }
+  }
+  window.reloadSchedule = loadSchedule;
 
-  function load(cb) {
-    // タイムアウト付きで予約データを取得
-    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    var timer = controller ? setTimeout(function() { controller.abort(); }, 10000) : null;
-    fetch('/api/admin/posts-scheduled', {
-      credentials: 'include',
-      signal: controller ? controller.signal : undefined
-    })
-      .then(function(r) {
-        if (timer) clearTimeout(timer);
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(function(j) {
-        _data = (j.posts || j.scheduled || []);
-        cb(null);
-      })
-      .catch(function(e) {
-        if (timer) clearTimeout(timer);
-        _data = [];
-        cb(e && e.name === 'AbortError' ? new Error('タイムアウト') : e);
-      });
+  function statusBadge(s) {
+    const map = {posted:['投稿済','#065F46','#ECFDF5'],failed:['失敗','#991B1B','#FEF2F2'],pending:['予約','#1D4ED8','#EFF6FF'],approved:['承認済','#1D4ED8','#EFF6FF'],scheduled:['予約','#1D4ED8','#EFF6FF'],draft:['下書き','#6B7280','#F3F4F6'],cancelled:['取消','#6B7280','#F3F4F6'],canceled:['取消','#6B7280','#F3F4F6'],publishing:['投稿中','#92400E','#FFFBEB'],configured:['設定済','#1D4ED8','#EFF6FF']};
+    const m = map[s] || [s||'-','#6B7280','#F3F4F6'];
+    return '<span style="display:inline-block;padding:.1rem .5rem;font-size:.7rem;border-radius:.25rem;color:'+m[1]+';background:'+m[2]+';font-weight:600">'+m[0]+'</span>';
   }
 
-  function renderGrid() {
-    var lbl = document.getElementById('sc-month-label');
-    var grid = document.getElementById('sc-cal-grid');
+  function srcLabel(s) {
+    if (s==='autopilot') return '<span style="font-size:.65rem;background:#FEF3C7;color:#92400E;padding:.1rem .35rem;border-radius:.25rem;font-weight:600">AP</span>';
+    if (s==='pattern_generated_post'||s==='pattern_ai') return '<span style="font-size:.65rem;background:#EDE9FE;color:#6D28D9;padding:.1rem .35rem;border-radius:.25rem;font-weight:600">パターン</span>';
+    return '';
+  }
+
+  function buildCalendar() {
+    const lbl = document.getElementById('sc-month-label');
+    if (lbl) lbl.textContent = curYear + '年 ' + (curMonth+1) + '月';
+    const grid = document.getElementById('sc-cal-grid');
     if (!grid) return;
+    const first = new Date(curYear, curMonth, 1);
+    const lastDay = new Date(curYear, curMonth+1, 0).getDate();
+    const startDow = first.getDay();
+    const today = new Date();
+    const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
 
-    if (lbl) lbl.textContent = _year + '年 ' + (_month + 1) + '月';
-
-    var today = new Date();
-    var todayStr = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
-
-    var byDate = {};
-    _data.forEach(function(p) {
-      var d = ((p.scheduled_at || p.publish_at || '')).slice(0, 10);
+    const byDate = {};
+    SCHEDULED.forEach(p => {
+      const d = (p.scheduled_at||'').slice(0,10);
       if (!d) return;
       if (!byDate[d]) byDate[d] = [];
       byDate[d].push(p);
     });
 
-    var first = new Date(_year, _month, 1);
-    var lastDay = new Date(_year, _month + 1, 0).getDate();
-    var startDow = first.getDay();
+    const monthHasAny = Object.keys(byDate).some(k => k.startsWith(curYear+'-'+String(curMonth+1).padStart(2,'0')));
+    const emptyEl = document.getElementById('sc-empty-cal');
+    if (emptyEl) emptyEl.style.display = (scLoaded && !monthHasAny) ? 'block':'none';
 
-    var html = '';
-    var day = 1 - startDow;
-    for (var row = 0; row < 6; row++) {
-      for (var col = 0; col < 7; col++) {
-        var inMonth = day >= 1 && day <= lastDay;
-        var ds = inMonth ? _year + '-' + pad(_month + 1) + '-' + pad(day) : '';
-        var isToday = (ds === todayStr);
-        var posts = inMonth ? (byDate[ds] || []) : [];
-        var sunSat = col === 0 ? '#ef4444' : col === 6 ? '#2563EB' : 'var(--ink)';
-        var bg = isToday ? '#EFF6FF' : '#fff';
-
-        html += '<div style="min-height:5.5rem;border-right:1px solid #E5E7EB;border-bottom:1px solid #E5E7EB;padding:.375rem;background:' + bg + '">';
-        if (inMonth) {
+    let html = '';
+    let day = 1 - startDow;
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < 7; col++) {
+        const isCurrentMonth = day >= 1 && day <= lastDay;
+        const dateStr = isCurrentMonth ? curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(day).padStart(2,'0') : '';
+        const isToday = dateStr === todayStr;
+        const posts = byDate[dateStr] || [];
+        const textColor = col===0?'#ef4444':col===6?'#2563EB':'var(--ink)';
+        const cursor = isCurrentMonth ? 'cursor:pointer;' : '';
+        const click = isCurrentMonth ? ' onclick="scOpenDay(\\''+dateStr+'\\')"' : '';
+        html += '<div'+click+' style="min-height:5.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
+        if (isCurrentMonth) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">';
-          html += '<span style="font-size:.82rem;font-weight:' + (isToday ? '700' : '400') + ';color:' + sunSat + '">' + day + '</span>';
-          html += '<button onclick="scAddFromCal('' + ds + '')" style="width:18px;height:18px;border-radius:50%;background:#F3F4F6;border:1px solid #E5E7EB;cursor:pointer;font-size:11px;line-height:1;color:#6B7280">+</button>';
+          html += '<span style="font-size:.8rem;font-weight:'+(isToday?'700':'400')+';color:'+textColor+'">' + day + '</span>';
+          if (posts.length > 0) html += '<span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'</span>';
           html += '</div>';
-          for (var pi = 0; pi < Math.min(posts.length, 3); pi++) {
-            var p = posts[pi];
-            var st = p.status || 'pending';
-            var pbg = st === 'posted' ? '#ECFDF5' : st === 'failed' ? '#FEF2F2' : '#EFF6FF';
-            var pfc = st === 'posted' ? '#065F46' : st === 'failed' ? '#991B1B' : '#1D4ED8';
-            var txt = esc((p.body || p.theme || '投稿').slice(0, 18));
-            html += '<div style="background:' + pbg + ';color:' + pfc + ';font-size:.65rem;padding:2px 4px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" title="' + esc(p.body || p.theme || '') + '">' + txt + '</div>';
-          }
-          if (posts.length > 3) {
-            html += '<div style="font-size:.65rem;color:#6B7280">+' + (posts.length - 3) + '件</div>';
-          }
+          posts.slice(0,3).forEach(p => {
+            const color = p.status==='posted'?'#065F46':p.status==='failed'?'#991B1B':'#1D4ED8';
+            const bg = p.status==='posted'?'#ECFDF5':p.status==='failed'?'#FEF2F2':p.source_type==='autopilot'?'#FEF3C7':'#EFF6FF';
+            const label = p.source_type==='autopilot' ? '[AP] ' : '';
+            html += '<div style="background:'+bg+';color:'+color+';font-size:.65rem;padding:2px 4px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + label + ((p.body||'').slice(0,16)||'投稿') + '</div>';
+          });
+          if (posts.length > 3) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-3) + '件</div>';
         }
         html += '</div>';
         day++;
       }
       if (day > lastDay && row >= 3) break;
     }
-
-    grid.innerHTML = html || '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#6B7280">予約投稿はありません</div>';
+    grid.innerHTML = html;
   }
 
-  function renderList() {
-    var tbody = document.getElementById('sc-list-body');
-    if (!tbody) return;
-    if (!_data.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#6B7280">予約投稿はありません</td></tr>';
+  function buildList() {
+    const tb = document.getElementById('sc-list-body');
+    if (!tb) return;
+    if (SCHEDULED.length === 0) {
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:2.5rem">予約投稿はありません</td></tr>';
       return;
     }
-    tbody.innerHTML = _data.map(function(p) {
-      var st = p.status || 'pending';
-      var bg = st === 'posted' ? '#ECFDF5' : st === 'failed' ? '#FEF2F2' : '#EFF6FF';
-      var fc = st === 'posted' ? '#065F46' : st === 'failed' ? '#991B1B' : '#1D4ED8';
+    tb.innerHTML = SCHEDULED.map(p => {
+      const isAP = p.source_type==='autopilot' || (typeof p.id==='string' && p.id.indexOf('ap-')===0);
       return '<tr>' +
-        '<td style="font-size:.78rem;font-family:monospace">' + esc(p.scheduled_at || p.publish_at || '-') + '</td>' +
-        '<td style="font-size:.78rem">@' + esc(p.x_username || p.account_name || '-') + '</td>' +
-        '<td style="font-size:.78rem;max-width:20rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc((p.body || p.theme || '').slice(0, 80)) + '</td>' +
-        '<td><span style="font-size:.72rem;padding:2px 7px;border-radius:4px;background:' + bg + ';color:' + fc + '">' + esc(st) + '</span></td>' +
-        '<td><button onclick="scCancel(' + (p.id || 0) + ')" style="padding:2px 8px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:4px;cursor:pointer;font-size:.75rem">×</button></td>' +
+        '<td style="font-size:.75rem;font-family:monospace">'+(p.scheduled_at||'-')+'</td>' +
+        '<td style="font-size:.7rem">'+(isAP?'<span style="background:#FEF3C7;color:#92400E;padding:.1rem .35rem;border-radius:.25rem;font-weight:600">AP</span>':'<span style="background:#EFF6FF;color:#1D4ED8;padding:.1rem .35rem;border-radius:.25rem;font-weight:600">予約</span>')+'</td>' +
+        '<td style="font-size:.75rem">@'+(p.x_username||p.account_name||'-')+'</td>' +
+        '<td style="font-size:.75rem;max-width:18rem"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(p.body||'').slice(0,80).replace(/</g,'&lt;')+'</div></td>' +
+        '<td>'+statusBadge(p.status)+'</td>' +
+        '<td style="white-space:nowrap">' +
+          '<button class="btn btn-ghost btn-sm" onclick="scEditPost(\\''+p.id+'\\')"><i class="fas fa-pen"></i></button>' +
+          '<button class="btn btn-danger btn-sm" onclick="scDeletePost(\\''+p.id+'\\')"><i class="fas fa-trash"></i></button>' +
+        '</td>' +
       '</tr>';
     }).join('');
   }
 
-  window.scSetView = function(v) {
-    document.getElementById('sc-cal-view').style.display = v === 'cal' ? 'block' : 'none';
-    document.getElementById('sc-list-view').style.display = v === 'list' ? 'block' : 'none';
-    document.getElementById('btn-cal').className = v === 'cal' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
-    document.getElementById('btn-list').className = v === 'list' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
-    if (v === 'list') renderList();
-  };
-  window.scPrevMonth = function() { _month--; if (_month < 0) { _month = 11; _year--; } renderGrid(); };
-  window.scNextMonth = function() { _month++; if (_month > 11) { _month = 0; _year++; } renderGrid(); };
-  window.scGoToday = function() { var n = new Date(); _year = n.getFullYear(); _month = n.getMonth(); renderGrid(); };
-  window.scRefresh = function() { load(function() { renderGrid(); renderList(); if (window.toast) window.toast('更新しました', 'ok'); }); };
-  window.scCancel = function(id) {
-    if (!id || !confirm('この予約をキャンセルしますか？')) return;
-    fetch('/api/admin/posts/' + id + '/cancel', { method: 'POST', credentials: 'include' })
-      .then(function(r) { return r.json(); })
-      .then(function(j) {
-        if (j.success || j.ok) { window.scRefresh(); }
-        else if (window.toast) window.toast('失敗: ' + (j.error || ''), 'err');
-      });
-  };
-  window.scAddFromCal = function(dateStr) {
-    var modal = document.getElementById('ap-modal');
-    if (modal) {
-      var ga = document.getElementById('ap-generate-at');
-      var pa = document.getElementById('ap-publish-at');
-      if (ga) ga.value = dateStr + 'T09:00';
-      if (pa) pa.value = dateStr + 'T12:00';
-      modal.style.display = 'flex';
+  window.prevMonth = function() { curMonth--; if(curMonth<0){curMonth=11;curYear--;} buildCalendar(); };
+  window.nextMonth = function() { curMonth++; if(curMonth>11){curMonth=0;curYear++;} buildCalendar(); };
+  window.goToday = function() { const n=new Date(); curYear=n.getFullYear(); curMonth=n.getMonth(); buildCalendar(); };
+
+  window.scOpenDay = function(dateStr) {
+    const posts = SCHEDULED.filter(p => (p.scheduled_at||'').slice(0,10) === dateStr);
+    document.getElementById('sc-modal-title').textContent = dateStr + ' の予約 ('+posts.length+'件)';
+    const body = document.getElementById('sc-modal-body');
+    if (posts.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6B7280">この日に予約はありません</div>';
     } else {
-      sessionStorage.setItem('ap_prefill_date', dateStr);
-      location.href = '/dashboard/autopilot';
+      body.innerHTML = posts.map(p => {
+        const isAP = p.source_type==='autopilot' || (typeof p.id==='string' && p.id.indexOf('ap-')===0);
+        return '<div style="border:1px solid var(--line);border-radius:.5rem;padding:.75rem;margin-bottom:.5rem">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.5rem">' +
+            '<div style="font-size:.75rem;font-family:monospace;color:#6B7280">'+(p.scheduled_at||'-')+' '+srcLabel(p.source_type)+'</div>' +
+            '<div>'+statusBadge(p.status)+'</div>' +
+          '</div>' +
+          '<div style="font-size:.85rem;white-space:pre-wrap;color:#111827;margin-bottom:.5rem">'+(p.body||'').replace(/</g,'&lt;')+'</div>' +
+          '<div style="font-size:.7rem;color:#6B7280;margin-bottom:.5rem">@'+(p.x_username||p.account_name||'-')+(isAP?' (オートパイロット)':'')+'</div>' +
+          '<div style="display:flex;gap:.4rem;flex-wrap:wrap">' +
+            (isAP ? '' : '<button class="btn btn-ghost btn-sm" onclick="scEditPost(\\''+p.id+'\\')"><i class="fas fa-pen"></i>編集</button>') +
+            '<button class="btn btn-danger btn-sm" onclick="scDeletePost(\\''+p.id+'\\')"><i class="fas fa-trash"></i>削除</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
     }
+    const m = document.getElementById('sc-modal');
+    m.style.display = 'flex';
+  };
+  window.scCloseModal = function() { document.getElementById('sc-modal').style.display = 'none'; };
+
+  window.scEditPost = function(pid) {
+    const p = SCHEDULED.find(x => String(x.id) === String(pid));
+    if (!p) return;
+    if (typeof p.id==='string' && p.id.indexOf('ap-')===0) { toast('オートパイロットは編集不可','info'); return; }
+    const body = document.getElementById('sc-modal-body');
+    body.innerHTML = '<div>' +
+      '<label class="field-label">本文</label>' +
+      '<textarea id="sc-edit-body" class="inp" style="min-height:6rem">'+(p.body||'').replace(/</g,'&lt;')+'</textarea>' +
+      '<label class="field-label" style="margin-top:.75rem">予約日時</label>' +
+      '<input type="datetime-local" id="sc-edit-at" class="inp" value="'+(p.scheduled_at||'').replace(' ','T').slice(0,16)+'">' +
+      '<div style="display:flex;gap:.5rem;margin-top:.75rem">' +
+        '<button class="btn btn-primary" onclick="scSaveEdit('+p.id+')"><i class="fas fa-save"></i>保存</button>' +
+        '<button class="btn btn-ghost" onclick="scCloseModal()"><i class="fas fa-times"></i>閉じる</button>' +
+      '</div>' +
+    '</div>';
+    document.getElementById('sc-modal-title').textContent = '予約 #'+p.id+' の編集';
+    document.getElementById('sc-modal').style.display = 'flex';
   };
 
-  // 初期化
-  load(function(err) {
-    if (err) {
-      var g = document.getElementById('sc-cal-grid');
-      if (g) g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#DC2626">データ取得エラー: ' + String(err.message || err) + '</div>';
-    } else {
-      renderGrid();
-    }
-  });
+  window.scSaveEdit = async function(pid) {
+    const newBody = document.getElementById('sc-edit-body').value;
+    const newAt = document.getElementById('sc-edit-at').value;
+    const at = newAt ? newAt.replace('T',' ') + ':00' : null;
+    try {
+      const r = await fetch('/api/admin/posts/'+pid, {
+        method:'PUT', headers:{'content-type':'application/json'},
+        body: JSON.stringify({body: newBody, scheduled_at: at, post_mode: 'body'})
+      });
+      const j = await r.json();
+      if (j.success) { toast('保存しました','ok'); scCloseModal(); loadSchedule(); }
+      else toast('保存失敗: '+(j.error||''),'err');
+    } catch(e) { toast('エラー: '+e.message,'err'); }
+  };
+
+  window.scDeletePost = async function(pid) {
+    if (!confirm('この予約を削除しますか？')) return;
+    try {
+      const isAP = typeof pid==='string' && pid.indexOf('ap-')===0;
+      let url, opts;
+      if (isAP) {
+        const apid = pid.replace('ap-','');
+        url = '/api/admin/autopilot/jobs/'+apid;
+        opts = {method:'DELETE'};
+      } else {
+        url = '/api/admin/posts/'+pid+'/cancel';
+        opts = {method:'POST'};
+      }
+      const r = await fetch(url, opts);
+      const j = await r.json();
+      if (j.success || j.ok) { toast('削除しました','ok'); scCloseModal(); loadSchedule(); }
+      else toast('削除失敗: '+(j.error||''),'err');
+    } catch(e) { toast('エラー: '+e.message,'err'); }
+  };
+
+  window.cancelPost = function(id) { return scDeletePost(id); };
+
+  document.addEventListener('DOMContentLoaded', loadSchedule);
+  if (document.readyState !== 'loading') loadSchedule();
 })();
-<\/script>
-`}function wn(e){return`
+<\/script>`}function _n(e){return`
 <div class="space-y-4">
   ${e.hasAccount?"":e.noAccountAlert}
   <div>
@@ -1743,15 +1590,15 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     <table class="data">
       <thead><tr><th>No</th><th>生成日時</th><th>投稿日時</th><th>アカウント</th><th>生成方式</th><th>テーマ</th><th>状態</th><th></th></tr></thead>
       <tbody>
-        ${e.jobs.length===0?'<tr><td colspan="8" class="text-center text-ink-muted py-10">予約がまだありません</td></tr>':e.jobs.map((t,a)=>`
+        ${e.jobs.length===0?'<tr><td colspan="8" class="text-center text-ink-muted py-10">予約がまだありません</td></tr>':e.jobs.map((t,s)=>`
             <tr>
-              <td class="text-xs text-ink-faint">${t.reservation_no||String(a+1).padStart(4,"0")}</td>
+              <td class="text-xs text-ink-faint">${t.reservation_no||String(s+1).padStart(4,"0")}</td>
               <td class="text-xs">${t.generate_at||"—"}</td>
               <td class="text-xs">${t.publish_at||"—"}</td>
-              <td class="text-xs">@${I(t.x_username||"-")}</td>
-              <td><span class="pill pill-soft">${I(t.content_mode||"-")}</span></td>
-              <td class="text-xs max-w-xs truncate">${I(t.theme||"—")}</td>
-              <td><span class="pill ${t.status==="error"?"pill-err":t.status==="posted"?"pill-ok":"pill-blue"}">${I(t.status)}</span></td>
+              <td class="text-xs">@${w(t.x_username||"-")}</td>
+              <td><span class="pill pill-soft">${w(t.content_mode||"-")}</span></td>
+              <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}</td>
+              <td><span class="pill ${t.status==="error"?"pill-err":t.status==="posted"?"pill-ok":"pill-blue"}">${w(t.status)}</span></td>
               <td class="text-right">
                 <button class="btn btn-danger btn-sm" onclick="delApJob(${t.id})"><i class="fas fa-trash"></i></button>
               </td>
@@ -1762,7 +1609,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   </div>
 
   <!-- モーダル -->
-  <div id="ap-modal" style="display:none;position:fixed;inset:0;z-index:50;padding:1rem;overflow-y:auto;background:rgba(0,0,0,.5);align-items:flex-start;justify-content:center">
+  <div id="ap-modal" class="hide fixed inset-0 z-50 p-4" style="overflow-y:auto;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center">
     <div style="background:#fff;border-radius:.75rem;max-width:42rem;width:100%;padding:1.5rem;margin:2rem auto">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-bold">オートパイロット新規作成</h3>
@@ -1773,7 +1620,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
           <label class="field-label"><i class="fas fa-user-circle icon-blue"></i>アカウント</label>
           <select id="ap-account" class="inp">
             <option value="">—</option>
-            ${e.accounts.map(t=>`<option value="${t.id}">@${I(t.x_username||t.account_name)}</option>`).join("")}
+            ${e.accounts.map(t=>`<option value="${t.id}">@${w(t.x_username||t.account_name)}</option>`).join("")}
           </select>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -1816,22 +1663,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
             </div>
           </div>
         </div>
-        <div>
-          <label class="field-label"><i class="fas fa-photo-film icon-purple"></i>メディア（任意）</label>
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.5rem">
-            <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">
-              <i class="fas fa-image"></i>画像選択（複数可）
-              <input type="file" id="ap-img" accept="image/jpeg,image/png,image/gif,image/webp" multiple style="position:absolute;opacity:0;width:0;height:0" onchange="previewApMedia(this,'image')">
-            </label>
-            <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">
-              <i class="fas fa-video"></i>動画選択
-              <input type="file" id="ap-vid" accept="video/mp4,video/quicktime,video/x-msvideo" style="position:absolute;opacity:0;width:0;height:0" onchange="previewApMedia(this,'video')">
-            </label>
-            <span id="ap-media-name" style="font-size:.78rem;color:var(--ink-muted)"></span>
-            <button type="button" id="ap-media-clear" onclick="clearApMedia()" style="display:none;padding:.25rem .5rem;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:.25rem;cursor:pointer;font-size:.75rem"><i class="fas fa-times"></i></button>
-          </div>
-          <div id="ap-media-preview" style="display:flex;gap:.375rem;flex-wrap:wrap"></div>
-        </div>
         <div class="flex gap-2 pt-2 justify-end">
           <button class="btn btn-ghost" onclick="closeApModal()">キャンセル</button>
           <button class="btn btn-primary" onclick="submitApJob()"><i class="fas fa-check"></i>作成</button>
@@ -1841,28 +1672,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   </div>
 </div>
 <script>
-function previewApMedia(input, type) {
-  const files=input.files; if(!files.length) return;
-  const prev=document.getElementById('ap-media-preview');
-  const name=document.getElementById('ap-media-name');
-  const clr=document.getElementById('ap-media-clear');
-  if(type==='image'){
-    let html='';
-    for(const f of files){html+='<img src="'+URL.createObjectURL(f)+'" style="height:60px;border-radius:4px;border:1px solid var(--line)">';}
-    prev.innerHTML=html; name.textContent=files.length+'枚';
-  } else {
-    prev.innerHTML='<span style="font-size:.78rem;color:var(--ink-muted)"><i class="fas fa-video"></i> '+files[0].name+'</span>';
-    name.textContent='動画選択済';
-  }
-  clr.classList.remove('hide');
-}
-function clearApMedia(){
-  document.getElementById('ap-img').value='';
-  document.getElementById('ap-vid').value='';
-  document.getElementById('ap-media-preview').innerHTML='';
-  document.getElementById('ap-media-name').textContent='';
-  document.getElementById('ap-media-clear').classList.add('hide');
-}
 function openApModal() { const m=document.getElementById('ap-modal'); m.style.display='flex'; }
 function closeApModal() { document.getElementById('ap-modal').style.display='none'; }
 function deriveGenAt() {
@@ -1871,13 +1680,6 @@ function deriveGenAt() {
   const d = new Date(pub); d.setMinutes(d.getMinutes() - 2);
   const pad = n => String(n).padStart(2,'0');
   document.getElementById('ap-gen').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
-}
-async function fileToBase64(file) {
-  return new Promise(function(res) {
-    var fr = new FileReader();
-    fr.onload = function(e) { res(e.target.result); };
-    fr.readAsDataURL(file);
-  });
 }
 async function submitApJob() {
   const body = {
@@ -1888,25 +1690,8 @@ async function submitApJob() {
     theme: document.getElementById('ap-theme').value.trim(),
     keywords: document.getElementById('ap-kw').value,
     link_url: document.getElementById('ap-url').value,
-    footer_text: document.getElementById('ap-footer').value,
-    media_images: [],
-    media_video: null,
   };
   if (!body.theme) { toast('テーマを入力','err'); return; }
-  // 画像を base64 に変換して options_json に含める
-  var imgInput = document.getElementById('ap-img');
-  if (imgInput && imgInput.files && imgInput.files.length) {
-    for (var i = 0; i < imgInput.files.length; i++) {
-      var b64 = await fileToBase64(imgInput.files[i]);
-      body.media_images.push({ name: imgInput.files[i].name, type: imgInput.files[i].type, data: b64 });
-    }
-  }
-  var vidInput = document.getElementById('ap-vid');
-  if (vidInput && vidInput.files && vidInput.files[0]) {
-    body.media_video = await fileToBase64(vidInput.files[0]);
-    body.media_video_name = vidInput.files[0].name;
-    body.media_video_type = vidInput.files[0].type;
-  }
   const r = await fetch('/api/admin/autopilot/jobs', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
   const j = await r.json();
   if (j.success) { toast('作成しました','ok'); location.reload(); } else toast('失敗','err');
@@ -1917,7 +1702,7 @@ async function delApJob(id) {
   location.reload();
 }
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-<\/script>`}function kn(e){return`
+<\/script>`}function hn(e){return`
 <div class="space-y-4">
   <div class="flex items-center justify-between">
     <div>
@@ -1939,9 +1724,9 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         <tbody>
           ${e.accounts.map(t=>`
             <tr>
-              <td class="font-semibold">${I(t.account_name)}</td>
-              <td class="text-accent">@${I(t.x_username||"未認証")}</td>
-              <td><span class="font-bold ${t.account_health_score>=80?"text-emerald-600":t.account_health_score>=60?"text-amber-600":"text-red-600"}"></span> <span class="pill ${t.health_status==="risk"?"pill-err":t.health_status==="caution"?"pill-warn":"pill-ok"} ml-1">${t.health_status||"healthy"}</span></td>
+              <td class="font-semibold">${w(t.account_name)}</td>
+              <td class="text-accent">@${w(t.x_username||"未認証")}</td>
+              <td><span class="font-bold ${t.account_health_score>=80?"text-emerald-600":t.account_health_score>=60?"text-amber-600":"text-red-600"}">${t.account_health_score??100}</span> <span class="pill ${t.health_status==="risk"?"pill-err":t.health_status==="caution"?"pill-warn":"pill-ok"} ml-1">${t.health_status||"healthy"}</span></td>
               <td class="text-xs">${t.daily_post_count??0} / ${t.daily_post_limit??5}</td>
               <td class="text-xs text-ink-muted">${t.last_posted_at||"-"}</td>
               <td>${t.is_active?'<span class="pill pill-ok">有効</span>':'<span class="pill pill-soft">停止</span>'}</td>
@@ -1966,7 +1751,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         <div class="alert alert-info text-xs">X Developer Portal → User authentication settings → OAuth 1.0a → Keys and tokens</div>
         <div>
           <label class="field-label"><i class="fas fa-tag icon-blue"></i>アカウント表示名</label>
-          <input type="text" id="na-name" class="inp" placeholder="例: @accounts">
+          <input type="text" id="na-name" class="inp" placeholder="例: KATO メイン">
         </div>
         <div>
           <label class="field-label"><i class="fas fa-key icon-yellow"></i>Access Token</label>
@@ -2015,7 +1800,7 @@ async function delAcct(id) {
   location.reload();
 }
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-<\/script>`}function Sn(e){const t=[{key:"posts",label:"投稿キュー",desc:"全投稿データ（予約・投稿済・失敗含む）",icon:"fa-brands fa-x-twitter",color:"text-blue-600"},{key:"logs",label:"投稿ログ",desc:"投稿実行の全履歴（成功・失敗）",icon:"fa-clipboard-list",color:"text-emerald-600"},{key:"generations",label:"AI生成ログ",desc:"AI生成されたテキストの記録",icon:"fa-robot",color:"text-purple-600"},{key:"autopilot",label:"オートパイロット",desc:"予約ジョブの一覧",icon:"fa-plane-departure",color:"text-amber-600"},{key:"drafts",label:"下書き",desc:"保存済みの下書きデータ",icon:"fa-file-pen",color:"text-sky-600"},{key:"kpi",label:"KPI",desc:"日別投稿数・失敗数の統計",icon:"fa-chart-line",color:"text-rose-600"},{key:"accounts",label:"Xアカウント",desc:"アカウント情報（トークン除外）",icon:"fa-users-gear",color:"text-indigo-600"},{key:"targets",label:"ターゲット設定",desc:"ターゲットテンプレート",icon:"fa-bullseye",color:"text-orange-600"},{key:"voices",label:"ブランドボイス",desc:"ボイスプロファイル",icon:"fa-palette",color:"text-pink-600"}],a=[{key:"admin/users",label:"ユーザー一覧",desc:"全ユーザー（プラン・承認状態含む）",icon:"fa-users",color:"text-blue-600"},{key:"admin/licenses",label:"ライセンス",desc:"ライセンスキーの全データ",icon:"fa-key",color:"text-amber-600"},{key:"admin/subs",label:"サブスクリプション",desc:"全契約情報",icon:"fa-credit-card",color:"text-emerald-600"},{key:"admin/audit",label:"監査ログ",desc:"認証・操作ログ",icon:"fa-shield-halved",color:"text-red-600"}];return`
+<\/script>`}function fn(e){const t=[{key:"posts",label:"投稿キュー",desc:"全投稿データ（予約・投稿済・失敗含む）",icon:"fa-brands fa-x-twitter",color:"text-blue-600"},{key:"logs",label:"投稿ログ",desc:"投稿実行の全履歴（成功・失敗）",icon:"fa-clipboard-list",color:"text-emerald-600"},{key:"generations",label:"AI生成ログ",desc:"AI生成されたテキストの記録",icon:"fa-robot",color:"text-purple-600"},{key:"drafts",label:"下書き",desc:"保存済みの下書きデータ",icon:"fa-file-pen",color:"text-sky-600"},{key:"kpi",label:"KPI",desc:"日別投稿数・失敗数の統計",icon:"fa-chart-line",color:"text-rose-600"},{key:"accounts",label:"Xアカウント",desc:"アカウント情報（トークン除外）",icon:"fa-users-gear",color:"text-indigo-600"}],s=[{key:"admin/users",label:"ユーザー一覧",desc:"全ユーザー（プラン・承認状態含む）",icon:"fa-users",color:"text-blue-600"},{key:"admin/licenses",label:"ライセンス",desc:"ライセンスキーの全データ",icon:"fa-key",color:"text-amber-600"},{key:"admin/subs",label:"サブスクリプション",desc:"全契約情報",icon:"fa-credit-card",color:"text-emerald-600"},{key:"admin/audit",label:"監査ログ",desc:"認証・操作ログ",icon:"fa-shield-halved",color:"text-red-600"}];return`
 <div class="space-y-6">
   <div>
     <h1 class="section-title"><i class="fas fa-download"></i>一括ダウンロード</h1>
@@ -2039,17 +1824,17 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   <div class="card">
     <h3 class="font-bold text-ink mb-4"><i class="fas fa-file-csv text-accent"></i> 個別ダウンロード（CSV）</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-      ${t.map(s=>`
+      ${t.map(a=>`
         <div class="border border-line rounded-lg p-4 hover:border-accent hover:bg-accent-light/30 transition-all">
           <div class="flex items-start justify-between gap-2">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <i class="fas ${s.icon} ${s.color}"></i>
-                <span class="font-semibold text-sm text-ink">${s.label}</span>
+                <i class="fas ${a.icon} ${a.color}"></i>
+                <span class="font-semibold text-sm text-ink">${a.label}</span>
               </div>
-              <p class="text-xs text-ink-muted">${s.desc}</p>
+              <p class="text-xs text-ink-muted">${a.desc}</p>
             </div>
-            <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dlExport('${s.key}')" title="${s.label}をCSVでダウンロード">
+            <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dlExport('${a.key}')" title="${a.label}をCSVでダウンロード">
               <i class="fas fa-download"></i>
             </button>
           </div>
@@ -2069,17 +1854,17 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       </button>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      ${a.map(s=>`
+      ${s.map(a=>`
         <div class="border border-line rounded-lg p-4 hover:border-accent hover:bg-accent-light/30 transition-all">
           <div class="flex items-start justify-between gap-2">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <i class="fas ${s.icon} ${s.color}"></i>
-                <span class="font-semibold text-sm text-ink">${s.label}</span>
+                <i class="fas ${a.icon} ${a.color}"></i>
+                <span class="font-semibold text-sm text-ink">${a.label}</span>
               </div>
-              <p class="text-xs text-ink-muted">${s.desc}</p>
+              <p class="text-xs text-ink-muted">${a.desc}</p>
             </div>
-            <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dlExport('${s.key}')" title="${s.label}をCSVでダウンロード">
+            <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dlExport('${a.key}')" title="${a.label}をCSVでダウンロード">
               <i class="fas fa-download"></i>
             </button>
           </div>
@@ -2135,180 +1920,70 @@ function dlExport(key) {
     })
     .catch(e => toast(e.message, 'err'));
 }
-<\/script>`}function Tn(e){const t=e.settings||{};return`
+<\/script>`}function bn(e){const t=e.settings||{};return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-key"></i>API設定</h1>
-    <p class="section-desc">X API / OpenAI / Google Gemini / Telegram の設定を行います。</p>
+    <p class="section-desc">X API (Consumer Key/Secret)・OpenAI・Telegram の設定を行います。</p>
   </div>
-
-  <!-- X API -->
   <div class="card space-y-4">
-    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fa-brands fa-x-twitter"></i> X API設定（OAuth 1.0a User Context）</h3>
-    <div class="alert alert-warn">
-      <i class="fas fa-triangle-exclamation" style="margin-top:2px"></i>
-      <div style="font-size:.82rem">重要: App permissions を「Read」から「Read and Write」に変更した場合、必ず「Keys and tokens」タブで <strong>Access Token &amp; Secret を Regenerate（再発行）</strong> してください。再発行しないと権限が Read のままで 403 Forbidden や 401 Unauthorized になります。Bearer Token は /users/me の接続確認には使用しません。</div>
+    <h3 class="font-bold text-ink"><i class="fa-brands fa-x-twitter"></i> X API（アプリ共通）</h3>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle mt-0.5"></i>
+      <div>Consumer Key / Secret はアプリ共通です。ユーザー毎の Access Token は <a href="/dashboard/accounts" class="underline">アカウント管理</a> で登録してください。</div>
     </div>
     <div>
-      <label class="field-label"><i class="fas fa-key icon-yellow"></i>API Key (Consumer Key)</label>
-      <input type="text" id="api-xk" class="inp input-mono" placeholder="未設定" value="${I(t.api_key||"")}">
+      <label class="field-label"><i class="fas fa-key icon-yellow"></i>Consumer Key (API Key)</label>
+      <input type="text" id="api-xk" class="inp input-mono" value="${w(t.api_key||"")}">
     </div>
     <div>
-      <label class="field-label"><i class="fas fa-key icon-yellow"></i>API Secret (Consumer Secret)</label>
-      <input type="password" id="api-xs" class="inp input-mono" placeholder="未設定" value="${I(t.api_secret||"")}">
+      <label class="field-label"><i class="fas fa-key icon-yellow"></i>Consumer Secret (API Secret)</label>
+      <input type="password" id="api-xs" class="inp input-mono" value="${w(t.api_secret||"")}">
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="saveXApi()"><i class="fas fa-save"></i>保存</button>
-      <button class="btn btn-ghost" onclick="testApi('x')"><i class="fas fa-plug"></i>接続テスト</button>
-      <span id="xapi-status" style="font-size:.8rem;color:var(--ink-muted)">未接続確認（保存後に「接続テスト」を実行してください)</span>
+    <div class="flex gap-2">
+      <button class="btn btn-primary" onclick="saveApi()"><i class="fas fa-save"></i>保存</button>
     </div>
-  </div>
-
-  <!-- OpenAI -->
-  <div class="card space-y-4">
-    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fas fa-circle-nodes" style="color:#10A37F"></i> OpenAI API設定</h3>
-    <p style="font-size:.82rem;color:var(--ink-muted)">AI記事生成に使用するOpenAI APIキーを設定します。</p>
-    <div>
-      <label class="field-label"><i class="fas fa-key icon-green"></i>OpenAI API Key</label>
-      <input type="password" id="api-oai" class="inp input-mono" placeholder="${t.openai_api_key?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
-    </div>
-    <div>
-      <label class="field-label"><i class="fas fa-microchip icon-blue"></i>モデル</label>
-      <select id="api-model" class="inp" style="max-width:16rem">
-        <option value="gpt-4o-mini" ${(t.openai_model||"gpt-4o-mini")==="gpt-4o-mini"?"selected":""}>gpt-4o-mini（推奨・低コスト）</option>
-        <option value="gpt-4o" ${(t.openai_model||"")==="gpt-4o"?"selected":""}>gpt-4o（高性能）</option>
-        <option value="gpt-4-turbo" ${(t.openai_model||"")==="gpt-4-turbo"?"selected":""}>gpt-4-turbo</option>
-      </select>
-    </div>
-    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="saveOpenAI()"><i class="fas fa-save"></i>保存</button>
-      <button class="btn btn-ghost" onclick="testApi('openai')"><i class="fas fa-plug"></i>接続テスト</button>
-      <span id="oai-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
-    </div>
-  </div>
-
-  <!-- Google Gemini -->
-  <div class="card space-y-4">
-    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fas fa-gem" style="color:#4285F4"></i> Google Gemini API設定</h3>
-    <p style="font-size:.82rem;color:var(--ink-muted)">Google AI Studio で取得した API キーを入力してください。</p>
-    <div>
-      <label class="field-label"><i class="fas fa-key icon-blue"></i>Gemini API Key</label>
-      <input type="password" id="api-gem" class="inp input-mono" placeholder="${t.gemini_api_key?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
-    </div>
-    <div>
-      <label class="field-label"><i class="fas fa-microchip icon-blue"></i>モデル</label>
-      <select id="api-gem-model" class="inp" style="max-width:16rem">
-        <option value="gemini-1.5-flash" ${(t.gemini_model||"gemini-1.5-flash")==="gemini-1.5-flash"?"selected":""}>gemini-1.5-flash（推奨）</option>
-        <option value="gemini-1.5-pro" ${(t.gemini_model||"")==="gemini-1.5-pro"?"selected":""}>gemini-1.5-pro</option>
-        <option value="gemini-2.0-flash" ${(t.gemini_model||"")==="gemini-2.0-flash"?"selected":""}>gemini-2.0-flash</option>
-      </select>
-    </div>
-    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="saveGemini()"><i class="fas fa-save"></i>保存</button>
-      <button class="btn btn-ghost" onclick="testApi('gemini')"><i class="fas fa-plug"></i>接続テスト</button>
-      <span id="gem-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
-    </div>
-  </div>
-
-  <!-- Telegram -->
-  <div class="card space-y-4">
-    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fa-brands fa-telegram" style="color:#2AABEE"></i> Telegram 通知設定</h3>
-    <p style="font-size:.82rem;color:var(--ink-muted)">投稿成功・失敗をTelegramに通知します（任意）。</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div>
-        <label class="field-label"><i class="fas fa-robot icon-blue"></i>Bot Token</label>
-        <input type="password" id="api-tg-tok" class="inp input-mono" placeholder="${t.telegram_bot_token?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
-      </div>
-      <div>
-        <label class="field-label"><i class="fas fa-hash icon-blue"></i>Chat ID</label>
-        <input type="text" id="api-tg-chat" class="inp input-mono" placeholder="例: -1001234567890" value="${I(t.telegram_chat_id||"")}" pattern="-?[0-9]+">
-      </div>
-    </div>
-    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="saveTelegram()"><i class="fas fa-save"></i>保存</button>
-      <button class="btn btn-ghost" onclick="testApi('telegram')"><i class="fas fa-paper-plane"></i>テスト送信</button>
-      <span id="tg-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
-    </div>
+    <span id="api-msg" class="text-xs"></span>
   </div>
 </div>
 <script>
-function escHtml(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
-function setStatus(id,msg,ok){const el=document.getElementById(id);if(el){el.textContent=msg;el.style.color=ok?'#059669':'#DC2626';}}
-
-async function saveXApi(){
-  const r=await fetch('/api/admin/api-settings/x',{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({api_key:document.getElementById('api-xk').value,api_secret:document.getElementById('api-xs').value})});
-  const j=await r.json();
-  if(j.success){toast('X API設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
+async function saveApi() {
+  toast('X API設定保存:次フェーズで本実装','info');
 }
-async function saveOpenAI(){
-  const key=document.getElementById('api-oai').value.trim();
-  if(!key){toast('変更なし（保存済みのキーはそのまま使用されます）','info');return;}
-  const r=await fetch('/api/admin/api-settings/openai',{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({openai_key:key,openai_model:document.getElementById('api-model').value})});
-  const j=await r.json();
-  if(j.success){toast('OpenAI設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
-}
-async function saveGemini(){
-  const key=document.getElementById('api-gem').value.trim();
-  if(!key){toast('変更なし（保存済みのキーはそのまま使用されます）','info');return;}
-  const r=await fetch('/api/admin/api-settings/gemini',{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({gemini_key:key,gemini_model:document.getElementById('api-gem-model').value})});
-  const j=await r.json();
-  if(j.success){toast('Gemini設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
-}
-async function saveTelegram(){
-  const chatId = document.getElementById('api-tg-chat').value.trim();
-  if (chatId && !/^-?[0-9]+$/.test(chatId)) {
-    toast('Chat IDは数字のみ（例: -1001234567890）','err'); return;
-  }
-  const r=await fetch('/api/admin/api-settings/telegram',{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({telegram_token:document.getElementById('api-tg-tok').value,telegram_chat_id:document.getElementById('api-tg-chat').value})});
-  const j=await r.json();
-  if(j.success){toast('Telegram設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
-}
-async function testApi(kind){
-  const statusId = kind==='x'?'xapi-status':kind==='openai'?'oai-status':kind==='gemini'?'gem-status':'tg-status';
-  setStatus(statusId,'テスト中...', true);
-  try {
-    const r=await fetch('/api/admin/api-settings/'+kind+'/test',{method:'POST'});
-    const j=await r.json();
-    if(j.success||j.ok){setStatus(statusId,'✓ 接続OK: '+(j.message||j.username||''),true);}
-    else{setStatus(statusId,'✗ '+(j.error||'接続失敗'),false);}
-  } catch(e){setStatus(statusId,'✗ ネットワークエラー',false);}
-}
-<\/script>`}const q=new D;async function In(e,t){const{results:a}=await e.env.DB.prepare(`SELECT id, account_name, x_username, is_current
-       FROM x_accounts WHERE user_id = ? AND is_active = 1 ORDER BY id`).bind(t.id).all(),s=(a||[]).map(i=>({id:i.id,account_name:i.account_name,x_username:i.x_username})),n=(a||[]).find(i=>i.is_current===1)||(a||[])[0];return{accounts:s,currentAccountId:(n==null?void 0:n.id)??null}}q.get("/",e=>e.redirect("/login"));async function Y(e,t,a){const s=e.get("user"),{accounts:n,currentAccountId:i}=await In(e,s),r=n.length>0,o=await Promise.resolve(a({user:s,hasAccount:r,accounts:n,currentAccountId:i})),d=mn({active:t,user:s,accounts:n,currentAccountId:i,pageBody:o});return e.html($t("GE365x",d))}q.get("/dashboard",f,async e=>Y(e,"dashboard",async({user:t,hasAccount:a})=>{const s=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND DATE(created_at)=DATE('now','+9 hours') AND status='posted'").bind(t.id).first(),i=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE user_id=? AND status IN ('pending','approved')").bind(t.id).first(),r=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND status='failed' AND DATE(created_at)=DATE('now','+9 hours')").bind(t.id).first(),{results:o}=await e.env.DB.prepare(`SELECT pl.content, pl.status, pl.posted_at, xa.x_username
+function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+<\/script>`}const H=new A;async function gn(e,t){const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, is_current
+       FROM x_accounts WHERE user_id = ? AND is_active = 1 ORDER BY id`).bind(t.id).all(),a=(s||[]).map(i=>({id:i.id,account_name:i.account_name,x_username:i.x_username})),n=(s||[]).find(i=>i.is_current===1);return{accounts:a,currentAccountId:(n==null?void 0:n.id)??null}}H.get("/",e=>e.redirect("/login"));async function K(e,t,s){const a=e.get("user"),{accounts:n,currentAccountId:i}=await gn(e,a),r=n.length>0&&i!==null,o=await Promise.resolve(s({user:a,hasAccount:r,accounts:n,currentAccountId:i})),d=an({active:t,user:a,accounts:n,currentAccountId:i,pageBody:o});return e.html(It("GE365x",d))}H.get("/dashboard",m,async e=>K(e,"dashboard",async({user:t,hasAccount:s})=>{const a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND DATE(created_at)=DATE('now','+9 hours') AND status='posted'").bind(t.id).first(),i=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE user_id=? AND status IN ('pending','approved')").bind(t.id).first(),r=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND status='failed' AND DATE(created_at)=DATE('now','+9 hours')").bind(t.id).first(),{results:o}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status, is_active
+         FROM x_accounts WHERE user_id = ? ORDER BY id`).bind(t.id).all(),{results:d}=await e.env.DB.prepare(`SELECT pl.content, pl.status, pl.posted_at, xa.x_username
          FROM post_logs pl LEFT JOIN x_accounts xa ON xa.id = pl.account_id
          WHERE pl.user_id = ? AND pl.status = 'posted'
-         ORDER BY pl.id DESC LIMIT 5`).bind(t.id).all();return fn({stats:{accounts:(s==null?void 0:s.n)??0,today:(n==null?void 0:n.n)??0,pending:(i==null?void 0:i.n)??0,failed:(r==null?void 0:r.n)??0},recentLogs:o||[]})}));q.get("/dashboard/target",f,async e=>Y(e,"target",async({user:t,currentAccountId:a,hasAccount:s})=>{const n=String(a??"default"),i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,t.id).first();return hn({target:i,hasAccount:s,noAccountAlert:Ie})}));q.get("/dashboard/voice",f,async e=>Y(e,"voice",async({user:t,currentAccountId:a,hasAccount:s})=>{const n=String(a??"default"),i=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,t.id).first();return gn({voice:i,hasAccount:s,noAccountAlert:Ie})}));q.get("/dashboard/pattern",f,async e=>Y(e,"pattern",async({user:t,hasAccount:a,currentAccountId:s,accounts:n})=>{const i=String(s??"default");return await e.env.DB.prepare("SELECT age_range, gender FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(i,t.id).first(),await e.env.DB.prepare("SELECT tone FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(i,t.id).first(),n.find(r=>r.id===s),_n({hasAccount:a,noAccountAlert:Ie})}));q.get("/dashboard/generate",f,async e=>Y(e,"generate",({hasAccount:t})=>bn({hasAccount:t,noAccountAlert:Ie})));q.get("/dashboard/posts",f,async e=>Y(e,"posts",async({user:t,hasAccount:a})=>{const n=e.req.query("month")||new Date().toISOString().slice(0,7),[i,r]=n.split("-"),{results:o}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.post_mode, pq.status, pq.account_id, xa.x_username
+         ORDER BY pl.id DESC LIMIT 5`).bind(t.id).all();return nn({stats:{accounts:(a==null?void 0:a.n)??0,today:(n==null?void 0:n.n)??0,pending:(i==null?void 0:i.n)??0,failed:(r==null?void 0:r.n)??0},health:o||[],recentLogs:d||[]})}));H.get("/dashboard/target",m,async e=>K(e,"target",async({user:t,currentAccountId:s,hasAccount:a})=>{const n=String(s??"default"),i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,t.id).first();return rn({target:i,hasAccount:a,noAccountAlert:he})}));H.get("/dashboard/voice",m,async e=>K(e,"voice",async({user:t,currentAccountId:s,hasAccount:a})=>{const n=String(s??"default"),i=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,t.id).first();return on({voice:i,hasAccount:a,noAccountAlert:he})}));H.get("/dashboard/pattern",m,async e=>K(e,"pattern",async({user:t,hasAccount:s,currentAccountId:a,accounts:n})=>{const i=String(a??"default"),r=await e.env.DB.prepare("SELECT age_range, gender FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(i,t.id).first(),o=await e.env.DB.prepare("SELECT tone FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(i,t.id).first(),d=n.find(l=>l.id===a);return dn({hasAccount:s,noAccountAlert:he,target:r,voice:o,currentAcct:d})}));H.get("/dashboard/generate",m,async e=>K(e,"generate",({hasAccount:t})=>ln({hasAccount:t,noAccountAlert:he})));H.get("/dashboard/posts",m,async e=>K(e,"posts",async({user:t,hasAccount:s})=>{const n=e.req.query("month")||new Date().toISOString().slice(0,7),[i,r]=n.split("-"),{results:o}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.post_mode, pq.status, pq.account_id, xa.x_username
          FROM post_queue pq LEFT JOIN x_accounts xa ON xa.id = pq.account_id
         WHERE pq.user_id = ?
           AND strftime('%Y-%m', COALESCE(pq.posted_at, pq.scheduled_at, pq.created_at)) = ?
-        ORDER BY pq.id DESC LIMIT 200`).bind(t.id,n).all(),d=(o||[]).length,l=(o||[]).filter(m=>m.status==="pending"||m.status==="approved").length,c=(o||[]).filter(m=>m.status==="posted").length,p=(o||[]).filter(m=>m.status==="failed").length;return vn({hasAccount:a,noAccountAlert:Ie,month:n,y:i,m:parseInt(r,10),posts:o||[],stats:{total:d,pending:l,posted:c,failed:p}})}));q.get("/dashboard/thread",f,async e=>Y(e,"thread",async({user:t,hasAccount:a})=>{const{results:s}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.status, pq.posted_at, pq.created_at, pq.thread_parent_id
+        ORDER BY pq.id DESC LIMIT 200`).bind(t.id,n).all(),d=(o||[]).length,l=(o||[]).filter(_=>_.status==="pending"||_.status==="approved").length,c=(o||[]).filter(_=>_.status==="posted").length,p=(o||[]).filter(_=>_.status==="failed").length;return cn({hasAccount:s,noAccountAlert:he,month:n,y:i,m:parseInt(r,10),posts:o||[],stats:{total:d,pending:l,posted:c,failed:p}})}));H.get("/dashboard/thread",m,async e=>K(e,"thread",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.status, pq.posted_at, pq.created_at, pq.thread_parent_id
          FROM post_queue pq
         WHERE pq.user_id = ? AND pq.post_mode = 'thread' AND pq.thread_parent_id IS NOT NULL
-        ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return yn({hasAccount:a,noAccountAlert:Ie,history:s||[]})}));q.get("/dashboard/scheduled",f,async e=>Y(e,"scheduled",async({user:t})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.scheduled_at, pq.status, xa.x_username
+        ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return un({hasAccount:s,noAccountAlert:he,history:a||[]})}));H.get("/dashboard/scheduled",m,async e=>K(e,"scheduled",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.scheduled_at, pq.status, xa.x_username
          FROM post_queue pq LEFT JOIN x_accounts xa ON xa.id = pq.account_id
         WHERE pq.user_id = ? AND pq.scheduled_at IS NOT NULL
           AND pq.status NOT IN ('cancelled','rejected')
-        ORDER BY pq.scheduled_at ASC LIMIT 100`).bind(t.id).all();return En()}));q.get("/dashboard/autopilot",f,async e=>Y(e,"autopilot",async({user:t,hasAccount:a,accounts:s})=>{const{results:n}=await e.env.DB.prepare(`SELECT aj.*, xa.x_username FROM autopilot_jobs aj
+        ORDER BY pq.scheduled_at ASC LIMIT 100`).bind(t.id).all();return mn({hasAccount:s,noAccountAlert:he,scheduled:a||[]})}));H.get("/dashboard/autopilot",m,async e=>K(e,"autopilot",async({user:t,hasAccount:s,accounts:a})=>{const{results:n}=await e.env.DB.prepare(`SELECT aj.*, xa.x_username FROM autopilot_jobs aj
          LEFT JOIN x_accounts xa ON xa.id = aj.account_id
         WHERE aj.user_id = ?
-        ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return wn({hasAccount:a,noAccountAlert:Ie,accounts:s,jobs:n||[]})}));q.get("/dashboard/accounts",f,async e=>Y(e,"accounts",async({user:t})=>{const{results:a}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
+        ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
               daily_post_count, daily_post_limit, last_posted_at, is_active
-         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return kn({accounts:a||[]})}));q.get("/dashboard/api",f,async e=>Y(e,"api",async({user:t})=>{const{aesDecrypt:a}=await Promise.resolve().then(()=>lt),s=async g=>{const k=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key=?").bind(g).first();if(!(k!=null&&k.value))return"";try{return await a(k.value,e.env.ENCRYPTION_KEY)}catch{return""}},n=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? LIMIT 1").bind(t.id).first();let i="",r="";if(n!=null&&n.api_key)try{const g=await a(n.api_key,e.env.ENCRYPTION_KEY);i=g?g.slice(0,6)+"••••":""}catch{}if(n!=null&&n.api_secret)try{const g=await a(n.api_secret,e.env.ENCRYPTION_KEY);r=g?g.slice(0,4)+"••••":""}catch{}const o=await s("openai_api_key"),d=await s("openai_model"),l=await s("gemini_api_key"),c=await s("gemini_model"),p=await s("telegram_bot_token"),m=await s("telegram_chat_id");return Tn({settings:{api_key:i,api_secret:r,openai_api_key:!!o,openai_model:d||"gpt-4o-mini",gemini_api_key:!!l,gemini_model:c||"gemini-1.5-flash",telegram_bot_token:!!p,telegram_chat_id:m||""}})}));q.get("/dashboard/export",f,async e=>Y(e,"export",({user:t})=>Sn({isAdmin:t.is_admin})));const za=new D;za.get("/admin",f,Te,e=>{const t=`
+         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();return bn({settings:s})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;F.get("/admin",m,R,e=>{const t=`
 <div class="min-h-screen flex flex-col">
   <!-- ヘッダ -->
   <header class="border-b border-brand-800/40 bg-surface-raised/80 backdrop-blur">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
       <div class="flex items-center gap-3">
         <div class="brand-logo w-10 h-10 rounded-xl flex items-center justify-center">
-          <i class="fas ${H.icon} text-white"></i>
+          <i class="fas ${G.icon} text-white"></i>
         </div>
         <div>
-          <div class="text-white font-bold tracking-tight">${H.name} <span class="text-brand-400 text-xs font-normal">管理</span></div>
-          <div class="text-brand-400 text-xs">${H.longName}</div>
+          <div class="text-white font-bold tracking-tight">${G.name} <span class="text-brand-400 text-xs font-normal">管理</span></div>
+          <div class="text-brand-400 text-xs">${G.longName}</div>
         </div>
       </div>
       <div class="flex items-center gap-3 text-sm">
@@ -2325,6 +2000,8 @@ async function testApi(kind){
       <button onclick="showSection('users')"     id="nav-users"     class="tab-trigger active">ユーザー</button>
       <button onclick="showSection('licenses')"  id="nav-licenses"  class="tab-trigger">ライセンス</button>
       <button onclick="showSection('subs')"      id="nav-subs"      class="tab-trigger">サブスクリプション</button>
+      <button onclick="showSection('posts')"     id="nav-posts"     class="tab-trigger">投稿管理</button>
+      <button onclick="showSection('accounts')"  id="nav-accounts"  class="tab-trigger">Xアカウント</button>
       <button onclick="showSection('audit')"     id="nav-audit"     class="tab-trigger">監査ログ</button>
       <button onclick="showSection('settings')"  id="nav-settings"  class="tab-trigger">システム設定</button>
     </div>
@@ -2442,8 +2119,8 @@ async function testApi(kind){
       </div>
     </section>
 
-    <!-- === 投稿管理（削除済み） ===
-    <section id="section-posts" style="display:none!important">
+    <!-- === 投稿管理 === -->
+    <section id="section-posts" class="space-y-4 hidden-force">
       <h2 class="text-xl font-bold text-white">投稿キュー / ログ</h2>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="posts-stats"></div>
       <div class="card overflow-x-auto">
@@ -2457,8 +2134,8 @@ async function testApi(kind){
       </div>
     </section>
 
-    <!-- === Xアカウント（削除済み） ===
-    <section id="section-accounts" style="display:none!important">
+    <!-- === Xアカウント === -->
+    <section id="section-accounts" class="space-y-4 hidden-force">
       <h2 class="text-xl font-bold text-white">X アカウント</h2>
       <div class="card overflow-x-auto">
         <table class="data-table">
@@ -2499,7 +2176,7 @@ async function testApi(kind){
 </div>
 
 <script>
-const sections = ['users','licenses','subs','audit','settings'];
+const sections = ['users','licenses','subs','posts','accounts','audit','settings'];
 const loaders = {
   users: loadUsers, licenses: loadLicenses, subs: loadSubs,
   posts: loadPosts, accounts: loadAccounts, audit: loadAudit, settings: loadSettings
@@ -2721,93 +2398,84 @@ async function loadAudit() {
 
 // ---------- 設定 ----------
 async function loadSettings() {
-  var r = await fetch('/api/admin/settings');
-  var j = await r.json();
-  var td = j.trial_days || 7;
-  var form = document.getElementById('settings-form');
-  form.innerHTML =
-    '<div style="margin-bottom:1rem">' +
-      '<h3 style="color:#F9FAFB;font-size:1rem;font-weight:700;margin:0 0 .375rem">トライアル設定</h3>' +
-      '<p style="color:#9CA3AF;font-size:.82rem;margin:0">新規会員に付与するトライアル期間を設定します。保存後、新規登録から有効になります。</p>' +
-    '</div>' +
-    '<div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">' +
-      '<div>' +
-        '<div style="color:#F9FAFB;font-weight:600;margin-bottom:.375rem">トライアル日数</div>' +
-        '<div style="color:#9CA3AF;font-size:.78rem;margin-bottom:.5rem">現在: ' + td + '日（新規登録時のデフォルト）</div>' +
-        '<div style="display:flex;align-items:center;gap:.5rem">' +
-          '<input type="number" id="trial-days-input" class="input-field" value="' + td + '" min="1" max="365" style="width:6rem">' +
-          '<span style="color:#9CA3AF;font-size:.82rem">日</span>' +
-        '</div>' +
-      '</div>' +
-      '<button onclick="saveTrialDays()" class="btn-primary" style="display:inline-flex;align-items:center;gap:.375rem">' +
-        '<i class="fas fa-save"></i>保存' +
-      '</button>' +
-    '</div>' +
-    '<div id="trial-save-msg" style="font-size:.82rem;margin-top:.5rem"></div>';
+  const r = await fetch('/api/admin/settings');
+  const j = await r.json();
+  const form = document.getElementById('settings-form');
+  form.innerHTML = (j.settings || []).map(s => \`
+    <div class="flex items-center gap-3">
+      <div class="flex-1">
+        <div class="text-white font-medium">\${s.key}</div>
+        <div class="text-xs text-brand-400">\${s.description || ''}</div>
+      </div>
+      <input type="text" id="setting-\${s.key}" class="input-field w-64" value="\${s.value || ''}">
+      <button onclick="saveSetting('\${s.key}')" class="btn-primary"><i class="fas fa-save"></i></button>
+    </div>
+  \`).join('');
+}
+async function saveSetting(key) {
+  const value = document.getElementById('setting-' + key).value;
+  await fetch('/api/admin/settings', {
+    method: 'POST', headers: {'content-type':'application/json'},
+    body: JSON.stringify({ key, value }),
+  });
 }
 
-async function saveTrialDays() {
-  const val = parseInt(document.getElementById('trial-days-input').value, 10);
-  if (!val || val < 1 || val > 365) {
-    document.getElementById('trial-save-msg').innerHTML = '<span style="color:#EF4444">1〜365の数値を入力してください</span>';
-    return;
-  }
-  const r = await fetch('/api/admin/settings', {
-    method: 'POST',
-    headers: {'content-type': 'application/json'},
-    body: JSON.stringify({ key: 'trial_days', value: String(val) })
-  });
-  const j = await r.json();
-  if (j.ok) {
-    document.getElementById('trial-save-msg').innerHTML = '<span style="color:#6EE7B7">✓ 保存しました（新規登録から有効）</span>';
-    setTimeout(() => loadSettings(), 1000);
-  } else {
-    document.getElementById('trial-save-msg').innerHTML = '<span style="color:#EF4444">保存失敗</span>';
-  }
+// ---------- 一括ダウンロード ----------
+function dlAdminExport(key) {
+  const url = '/api/admin/export/' + key;
+  fetch(url).then(r => {
+    if (!r.ok) throw new Error('ダウンロード失敗 (' + r.status + ')');
+    const cd = r.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'ge365x_' + key.replace('/', '_') + '.' + (key.includes('all') ? 'json' : 'csv');
+    return r.blob().then(blob => ({ blob, filename }));
+  }).then(({ blob, filename }) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }).catch(e => alert(e.message));
 }
+
+// 起動時
+showSection('users');
 <\/script>
-`;return e.html($t("管理画面",`<style>
-:root{--brand:#2563EB;--brand-dark:#1E2A3B;--brand-400:#A7B6CE;--surface:#1E2A3B;--surface-raised:#243347;--line:#2A3B52}
-*{box-sizing:border-box}
-body{background:#111827;color:#F9FAFB;font-family:'Noto Sans JP',Inter,sans-serif;font-size:14px;margin:0}
-.brand-logo{background:linear-gradient(135deg,#2563EB,#7C3AED)}
-.btn-ghost{display:inline-flex;align-items:center;gap:.375rem;padding:.4rem .875rem;border-radius:.375rem;font-size:.82rem;font-weight:500;cursor:pointer;border:1px solid #2A3B52;background:transparent;color:#D1D5DB;font-family:inherit;text-decoration:none;transition:all .15s}
-.btn-ghost:hover{background:#1F2937;border-color:#4B5563;color:#fff}
-.btn-primary{display:inline-flex;align-items:center;gap:.375rem;padding:.4rem .875rem;border-radius:.375rem;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:#2563EB;color:#fff;font-family:inherit;transition:all .15s}
-.btn-primary:hover{background:#1D4ED8}
-.tab-trigger{display:inline-flex;align-items:center;gap:.375rem;padding:.5rem 1rem;font-size:.82rem;font-weight:500;cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;color:#9CA3AF;font-family:inherit;white-space:nowrap;transition:all .15s}
-.tab-trigger:hover{color:#F9FAFB}
-.tab-trigger.active{color:#60A5FA;border-bottom-color:#2563EB}
-.card{background:#1F2937;border:1px solid #2A3B52;border-radius:.75rem;padding:1.25rem}
-.data-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.data-table th{padding:.5rem .75rem;text-align:left;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#9CA3AF;background:#111827;border-bottom:1px solid #2A3B52}
-.data-table td{padding:.5rem .75rem;border-bottom:1px solid #1F2937;color:#D1D5DB;vertical-align:middle}
-.data-table tr:hover td{background:#1F2937}
-.input-field{display:block;width:100%;padding:.4rem .75rem;border-radius:.375rem;background:#111827;border:1px solid #374151;color:#F9FAFB;font-size:.82rem;font-family:inherit;outline:none}
-.input-field:focus{border-color:#2563EB;box-shadow:0 0 0 2px rgba(37,99,235,.2)}
-.pill{display:inline-flex;align-items:center;padding:.125rem .5rem;border-radius:9999px;font-size:.72rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
-.pill-active{background:#064E3B;color:#6EE7B7;border-color:#065F46}
-.pill-inactive{background:#1F2937;color:#9CA3AF;border-color:#374151}
-.pill-pending{background:#78350F;color:#FCD34D;border-color:#92400E}
-.hidden-force{display:none!important}
-.flex{display:flex}.flex-1{flex:1 1 0%}.items-center{align-items:center}.justify-between{justify-content:space-between}
-.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
-.space-y-4>*+*{margin-top:1rem}
-.text-white{color:#fff}.text-xl{font-size:1.2rem}.text-xs{font-size:.72rem}.text-sm{font-size:.82rem}
-.font-bold{font-weight:700}.font-medium{font-weight:500}
-.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-4{padding-top:1rem;padding-bottom:1rem}
-.mb-4{margin-bottom:1rem}.mt-4{margin-top:1rem}
-.w-10{width:2.5rem}.h-10{height:2.5rem}.rounded-xl{border-radius:.75rem}
-.overflow-x-auto{overflow-x:auto}.max-w-7xl{max-width:80rem}.mx-auto{margin-left:auto;margin-right:auto}
-.border-b{border-bottom:1px solid #2A3B52}.min-h-screen{min-height:100vh}
-select{cursor:pointer;background:#111827;border:1px solid #374151;color:#F9FAFB;border-radius:.375rem;padding:.3rem .5rem;font-family:inherit;font-size:.82rem}
-</style>`+t))});const Z=new D;Z.post("/api/auth/register",async e=>{const t=await e.req.json(),a=(t.email||"").trim().toLowerCase(),s=t.password||"";if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a)||s.length<8)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='invite_only'").first();if((n==null?void 0:n.value)==="1")return e.json({error:"invite_only"},403);if(await e.env.DB.prepare("SELECT 1 FROM users WHERE email = ?").bind(a).first())return e.json({error:"email_taken"},409);const r=await wt(s),o=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_days'").first(),d=parseInt((o==null?void 0:o.value)??"7",10),l=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_require_approval'").first(),c=(l==null?void 0:l.value)!=="0";x();const m=(await e.env.DB.prepare(`INSERT INTO users (email, password_hash, is_approved, is_admin, trial_start, trial_end)
+`;return e.html(It("管理画面",t))});F.get("/api/admin/users",m,R,async e=>{const t=e.req.query("filter")||"all",s=[];t==="pending"&&s.push("u.is_approved = 0"),t==="approved"&&s.push("u.is_approved = 1"),t==="admin"&&s.push("u.is_admin = 1");const a=`
+    SELECT u.id, u.email, u.is_approved, u.is_admin, u.trial_start, u.trial_end, u.created_at,
+           s.plan_code, s.status AS sub_status
+      FROM users u
+      LEFT JOIN user_subscriptions s ON s.user_id = u.id
+      ${s.length?"WHERE "+s.join(" AND "):""}
+      ORDER BY u.id DESC
+      LIMIT 200`,{results:n}=await e.env.DB.prepare(a).all();return e.json({users:n||[]})});F.post("/api/admin/users/:id/approve",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_approved:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_approved=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_approval",{userId:e.get("user").id,metadata:{target_user_id:t,is_approved:s}}),e.json({ok:!0})});F.post("/api/admin/users/:id/admin",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_admin:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_admin=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_admin",{userId:e.get("user").id,metadata:{target_user_id:t,is_admin:s}}),e.json({ok:!0})});F.get("/api/admin/licenses",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT l.*, u.email AS user_email
+       FROM licenses l
+       LEFT JOIN users u ON u.id = l.user_id
+       ORDER BY l.id DESC LIMIT 500`).all();return e.json({licenses:t||[]})});F.post("/api/admin/licenses/issue",m,R,async e=>{const t=e.get("user"),{plan_code:s,license_type:a,expires_at:n,count:i=1,note:r}=await e.req.json();if(i<1||i>100)return e.json({error:"invalid_count"},400);const o=[];for(let d=0;d<i;d++){let l=Zt("VPS-GE365X");for(let c=0;c<3&&await e.env.DB.prepare("SELECT 1 FROM licenses WHERE license_key=?").bind(l).first();c++)l=Zt("VPS-GE365X");await e.env.DB.prepare(`INSERT INTO licenses (license_key, license_type, plan_code, is_active, expires_at, issued_by, note)
+       VALUES (?, ?, ?, 1, ?, ?, ?)`).bind(l,a,s,n?n+" 23:59:59":null,t.id,r||null).run(),o.push(l)}return await Z(e,"admin_issue_license",{userId:t.id,metadata:{count:i,plan_code:s,license_type:a}}),e.json({ok:!0,keys:o})});F.post("/api/admin/licenses/:id/revoke",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=0, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),await e.env.DB.prepare(`INSERT INTO license_activations (license_id, user_id, event_type)
+     VALUES (?, ?, 'revoked')`).bind(t,e.get("user").id).run(),e.json({ok:!0})});F.post("/api/admin/licenses/:id/reactivate",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),e.json({ok:!0})});F.get("/api/admin/subscriptions",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT s.*, u.email AS user_email
+       FROM user_subscriptions s
+       LEFT JOIN users u ON u.id = s.user_id
+       ORDER BY s.updated_at DESC LIMIT 300`).all();return e.json({subscriptions:t||[]})});F.get("/api/admin/posts/summary",m,R,async e=>{const t=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue").first(),s=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE status='pending'").first(),a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE status='success'").first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE status='failed'").first(),{results:i}=await e.env.DB.prepare(`SELECT pl.created_at, pl.content, pl.status,
+            u.email, x.x_screen_name
+       FROM post_logs pl
+       LEFT JOIN users u  ON u.id = pl.user_id
+       LEFT JOIN x_accounts x ON x.id = pl.x_account_id
+       ORDER BY pl.created_at DESC LIMIT 100`).all();return e.json({stats:[{label:"全キュー",value:(t==null?void 0:t.n)??0},{label:"pending",value:(s==null?void 0:s.n)??0},{label:"成功",value:(a==null?void 0:a.n)??0},{label:"失敗",value:(n==null?void 0:n.n)??0}],recent:i||[]})});F.get("/api/admin/x-accounts",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT xa.id, xa.x_screen_name, xa.is_active, xa.last_used_at, xa.token_expires_at,
+            u.email AS user_email
+       FROM x_accounts xa
+       LEFT JOIN users u ON u.id = xa.user_id
+       ORDER BY xa.id DESC LIMIT 500`).all();return e.json({accounts:t||[]})});F.get("/api/admin/audit-logs",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT id, user_id, email, event_type, ip_address, user_agent, metadata, created_at
+       FROM auth_logs ORDER BY id DESC LIMIT 300`).all();return e.json({logs:t||[]})});F.get("/api/admin/settings",m,R,async e=>{const{results:t}=await e.env.DB.prepare("SELECT key, value, description FROM system_settings ORDER BY key").all();return e.json({settings:t||[]})});F.post("/api/admin/settings",m,R,async e=>{const{key:t,value:s}=await e.req.json();return await e.env.DB.prepare(`INSERT INTO system_settings (key, value, updated_at)
+     VALUES (?, ?, datetime('now','+9 hours'))
+     ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind(t,s).run(),e.json({ok:!0})});const fe=new A;fe.post("/api/auth/register",async e=>{const t=await e.req.json(),s=(t.email||"").trim().toLowerCase(),a=t.password||"";if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)||a.length<8)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='invite_only'").first();if((n==null?void 0:n.value)==="1")return e.json({error:"invite_only"},403);if(await e.env.DB.prepare("SELECT 1 FROM users WHERE email = ?").bind(s).first())return e.json({error:"email_taken"},409);const r=await Bt(a),o=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_days'").first(),d=parseInt((o==null?void 0:o.value)??"14",10),l=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_require_approval'").first(),c=(l==null?void 0:l.value)!=="0";g();const _=(await e.env.DB.prepare(`INSERT INTO users (email, password_hash, is_approved, is_admin, trial_start, trial_end)
      VALUES (?, ?, ?, 0, datetime('now','+9 hours'),
-             datetime('now','+9 hours', '+' || ? || ' days'))`).bind(a,r,c?0:1,d).run()).meta.last_row_id;return await e.env.DB.prepare(`INSERT INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end)
+             datetime('now','+9 hours', '+' || ? || ' days'))`).bind(s,r,c?0:1,d).run()).meta.last_row_id;return await e.env.DB.prepare(`INSERT INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end)
      VALUES (?, 'ge365x_free', 'trial', datetime('now','+9 hours'),
-             datetime('now','+9 hours', '+' || ? || ' days'))`).bind(m,d).run(),await e.env.DB.prepare(`INSERT INTO trial_history (email, user_id, trial_start, trial_end)
+             datetime('now','+9 hours', '+' || ? || ' days'))`).bind(_,d).run(),await e.env.DB.prepare(`INSERT INTO trial_history (email, user_id, trial_start, trial_end)
      VALUES (?, ?, datetime('now','+9 hours'),
-             datetime('now','+9 hours', '+' || ? || ' days'))`).bind(a,m,d).run(),await ie(e,"register",{userId:m,email:a}),e.json({ok:!0,user_id:m,approved:!c,message:c?"登録を受け付けました。管理者による承認後にログインできます。":"登録が完了しました。ログインしてください。"})});Z.post("/api/auth/login",async e=>{const t=await e.req.json(),a=(t.email||"").trim().toLowerCase(),s=t.password||"";if(!a||!s)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT id,email,password_hash,is_approved,is_admin FROM users WHERE email = ?").bind(a).first();if(!n)return await ie(e,"login_fail",{email:a,metadata:{reason:"no_user"}}),e.json({error:"invalid_credentials"},401);if(!await Pt(s,n.password_hash))return await ie(e,"login_fail",{userId:n.id,email:a,metadata:{reason:"bad_password"}}),e.json({error:"invalid_credentials"},401);if(n.is_approved===0)return await ie(e,"login_blocked",{userId:n.id,email:a,metadata:{reason:"not_approved"}}),e.json({error:"not_approved"},403);const r=n.trial_end;if(r&&!n.is_admin){const l=new Date,c=new Date(r.replace(" ","T")),p=await e.env.DB.prepare("SELECT status FROM user_subscriptions WHERE user_id = ?").bind(n.id).first();if((p==null?void 0:p.status)!=="active"&&l>c)return await ie(e,"trial_expired",{userId:n.id,email:a}),e.json({error:"trial_expired",message:"無料お試し期間が終了いたしました。"},403)}const o=await $a({uid:n.id,email:n.email,adm:n.is_admin===1},e.env.JWT_SECRET,3600*24*7),d=qt(Ht,o,{maxAge:3600*24*7});return await ie(e,"login_success",{userId:n.id,email:a}),new Response(JSON.stringify({ok:!0,user_id:n.id,email:n.email,is_admin:n.is_admin===1}),{headers:{"content-type":"application/json","set-cookie":d}})});Z.post("/api/auth/logout",async e=>{const t=e.get("user");t&&await ie(e,"logout",{userId:t.id,email:t.email});const a=qt(Ht,"",{maxAge:0});return new Response(JSON.stringify({ok:!0}),{headers:{"content-type":"application/json","set-cookie":a}})});Z.get("/api/auth/me",f,e=>e.json({ok:!0,user:e.get("user")}));Z.post("/api/auth/license/activate",f,async e=>{const t=e.get("user"),{license_key:a}=await e.req.json();if(!a||!Ha(a))return e.json({error:"invalid_license_format"},400);const s=a.trim().toUpperCase(),n=await e.env.DB.prepare("SELECT * FROM licenses WHERE license_key = ?").bind(s).first();if(!n)return e.json({error:"license_not_found"},404);if(n.is_active===0)return e.json({error:"license_inactive"},409);if(n.expires_at&&n.expires_at<x())return e.json({error:"license_expired"},409);if(n.user_id&&n.user_id!==t.id)return e.json({error:"license_already_used"},409);await e.env.DB.prepare(`UPDATE licenses
+             datetime('now','+9 hours', '+' || ? || ' days'))`).bind(s,_,d).run(),await Z(e,"register",{userId:_,email:s}),e.json({ok:!0,user_id:_,approved:!c,message:c?"登録を受け付けました。管理者による承認後にログインできます。":"登録が完了しました。ログインしてください。"})});fe.post("/api/auth/login",async e=>{const t=await e.req.json(),s=(t.email||"").trim().toLowerCase(),a=t.password||"";if(!s||!a)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT id,email,password_hash,is_approved,is_admin FROM users WHERE email = ?").bind(s).first();if(!n)return await Z(e,"login_fail",{email:s,metadata:{reason:"no_user"}}),e.json({error:"invalid_credentials"},401);if(!await Cs(a,n.password_hash))return await Z(e,"login_fail",{userId:n.id,email:s,metadata:{reason:"bad_password"}}),e.json({error:"invalid_credentials"},401);if(n.is_approved===0)return await Z(e,"login_blocked",{userId:n.id,email:s,metadata:{reason:"not_approved"}}),e.json({error:"not_approved"},403);const r=await za({uid:n.id,email:n.email,adm:n.is_admin===1},e.env.JWT_SECRET,3600*24*7),o=Ls(Nt,r,{maxAge:3600*24*7});return await Z(e,"login_success",{userId:n.id,email:s}),new Response(JSON.stringify({ok:!0,user_id:n.id,email:n.email,is_admin:n.is_admin===1}),{headers:{"content-type":"application/json","set-cookie":o}})});fe.post("/api/auth/logout",async e=>{const t=e.get("user");t&&await Z(e,"logout",{userId:t.id,email:t.email});const s=Ls(Nt,"",{maxAge:0});return new Response(JSON.stringify({ok:!0}),{headers:{"content-type":"application/json","set-cookie":s}})});fe.get("/api/auth/me",m,e=>e.json({ok:!0,user:e.get("user")}));fe.post("/api/auth/license/activate",m,async e=>{const t=e.get("user"),{license_key:s}=await e.req.json();if(!s||!Xa(s))return e.json({error:"invalid_license_format"},400);const a=s.trim().toUpperCase(),n=await e.env.DB.prepare("SELECT * FROM licenses WHERE license_key = ?").bind(a).first();if(!n)return e.json({error:"license_not_found"},404);if(n.is_active===0)return e.json({error:"license_inactive"},409);if(n.expires_at&&n.expires_at<g())return e.json({error:"license_expired"},409);if(n.user_id&&n.user_id!==t.id)return e.json({error:"license_already_used"},409);await e.env.DB.prepare(`UPDATE licenses
        SET user_id = ?, activated_at = COALESCE(activated_at, datetime('now','+9 hours')),
            updated_at = datetime('now','+9 hours')
      WHERE id = ?`).bind(t.id,n.id).run();const i=n.plan_code||"ge365x_standard",r=n.license_type==="trial"?"trial":"active",o=n.expires_at?n.expires_at:n.license_type==="lifetime"?"2099-12-31 23:59:59":null;return await e.env.DB.prepare(`INSERT INTO user_subscriptions
@@ -2820,65 +2488,13 @@ select{cursor:pointer;background:#111827;border:1px solid #374151;color:#F9FAFB;
        updated_at = datetime('now','+9 hours')`).bind(t.id,i,r,o).run(),await e.env.DB.prepare(`UPDATE users
        SET is_approved = 1, updated_at = datetime('now','+9 hours')
      WHERE id = ? AND is_approved = 0`).bind(t.id).run(),await e.env.DB.prepare(`INSERT INTO license_activations (license_id, user_id, event_type, ip_address, user_agent)
-     VALUES (?, ?, 'activated', ?, ?)`).bind(n.id,t.id,e.req.header("cf-connecting-ip")||"",e.req.header("user-agent")||"").run(),await ie(e,"license_activate",{userId:t.id,email:t.email,metadata:{license_id:n.id,plan_code:i}}),e.json({ok:!0,plan_code:i,status:r,license_type:n.license_type,expires_at:o})});Z.post("/api/auth/password/change",f,async e=>{const t=e.get("user"),{current_password:a,new_password:s}=await e.req.json();if(!a||!s||s.length<8)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT password_hash FROM users WHERE id = ?").bind(t.id).first();if(!n)return e.json({error:"user_not_found"},404);if(!await Pt(a,n.password_hash))return e.json({error:"invalid_credentials"},401);const r=await wt(s);return await e.env.DB.prepare("UPDATE users SET password_hash=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(r,t.id).run(),await ie(e,"password_change",{userId:t.id,email:t.email}),e.json({ok:!0})});Z.get("/license-request",async e=>{const t=e.req.query("msg")||"",a=e.req.query("ok")||"";return e.html(`<!DOCTYPE html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ライセンス申請 — ${H.name}</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-*{box-sizing:border-box}body{margin:0;background:#F7F8FB;font-family:'Noto Sans JP',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
-.card{background:#fff;border-radius:1rem;padding:2rem;max-width:28rem;width:100%;box-shadow:0 20px 40px rgba(0,0,0,.1);border:1px solid #E5E7EB}
-h1{font-size:1.25rem;font-weight:700;color:#1F2937;margin:0 0 .375rem}
-p{font-size:.85rem;color:#6B7280;margin:0 0 1.5rem}
-label{display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:.375rem}
-input{display:block;width:100%;padding:.5rem .75rem;border:1px solid #E5E7EB;border-radius:.5rem;font-size:.875rem;font-family:inherit;outline:none;transition:border .15s}
-input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.btn{display:block;width:100%;padding:.65rem;background:#2563EB;color:#fff;border:none;border-radius:.5rem;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:1.25rem;transition:background .15s}
-.btn:hover{background:#1D4ED8}
-.msg{padding:.625rem 1rem;border-radius:.375rem;font-size:.82rem;margin-bottom:1rem}
-.msg-ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
-.msg-err{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
-.mb-4{margin-bottom:1rem}
-a{color:#2563EB;font-size:.82rem}
-</style></head>
-<body>
-<div class="card">
-  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem">
-    <div style="width:2.5rem;height:2.5rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center">
-      <i class="fas fa-bolt" style="color:#fff;font-size:1.1rem"></i>
-    </div>
-    <div>
-      <h1>${H.name}</h1>
-      <p style="margin:0;font-size:.75rem;color:#6B7280">ライセンス申請フォーム</p>
-    </div>
-  </div>
-  ${a?'<div class="msg msg-ok"><i class="fas fa-check-circle"></i> '+a+"</div>":""}
-  ${t?'<div class="msg msg-err"><i class="fas fa-exclamation-circle"></i> '+t+"</div>":""}
-  <form method="POST" action="/api/auth/license/request">
-    <div class="mb-4">
-      <label>お名前</label>
-      <input type="text" name="name" placeholder="例: 山田 太郎" required>
-    </div>
-    <div class="mb-4">
-      <label>メールアドレス</label>
-      <input type="email" name="email" placeholder="example@email.com" required>
-    </div>
-
-    <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> 申請する</button>
-  </form>
-  <div style="text-align:center;margin-top:1rem">
-    <a href="/login">← ログイン画面へ戻る</a>
-  </div>
-</div>
-</body></html>`)});Z.post("/api/auth/license/request",async e=>{const t=await e.req.parseBody(),a=String(t.name||"").trim(),s=String(t.email||"").trim(),n="";if(!a||!s)return e.redirect("/license-request?msg=名前とメールアドレスは必須です");if(!/^[^@]+@[^@]+\.[^@]+$/.test(s))return e.redirect("/license-request?msg=有効なメールアドレスを入力してください");const i=e.env.DB,r=await i.prepare("SELECT id, is_approved FROM users WHERE email = ?").bind(s).first();if(r&&r.is_approved)return e.redirect("/license-request?msg=このメールアドレスは既に登録・承認済みです。ログインしてください。");let o=r==null?void 0:r.id;if(!o){const c=Math.random().toString(36).slice(2,10)+"Aa1!",{hashPassword:p}=await Promise.resolve().then(()=>lt),m=await p(c);o=(await i.prepare("INSERT INTO users (email, password_hash, is_approved, is_admin) VALUES (?, ?, 0, 0)").bind(s,m).run()).meta.last_row_id,await i.prepare("INSERT OR REPLACE INTO system_settings (key, value, description) VALUES (?,?,?)").bind("license_request_"+s,JSON.stringify({name:a,email:s,tmpPass:c,requested_at:new Date().toISOString(),license_key:n}),"ライセンス申請").run()}const d=await i.prepare("SELECT value FROM system_settings WHERE key='telegram_bot_token'").first(),l=await i.prepare("SELECT value FROM system_settings WHERE key='telegram_chat_id'").first();return d!=null&&d.value&&(l!=null&&l.value)&&fetch("https://api.telegram.org/bot"+d.value+"/sendMessage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:l.value,text:`📋 新規ライセンス申請
-名前: `+a+`
-メール: `+s+`
-キー: なし`})}).catch(()=>{}),e.redirect("/license-request?ok=申請を受け付けました。管理者が確認後、ログイン情報をお送りします。")});Z.get("/setup",async e=>{const t=e.req.query("token")||"",a=e.env.ADMIN_PASSWORD||"";if(!a||t!==a)return e.html(`<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+     VALUES (?, ?, 'activated', ?, ?)`).bind(n.id,t.id,e.req.header("cf-connecting-ip")||"",e.req.header("user-agent")||"").run(),await Z(e,"license_activate",{userId:t.id,email:t.email,metadata:{license_id:n.id,plan_code:i}}),e.json({ok:!0,plan_code:i,status:r,license_type:n.license_type,expires_at:o})});fe.post("/api/auth/password/change",m,async e=>{const t=e.get("user"),{current_password:s,new_password:a}=await e.req.json();if(!s||!a||a.length<8)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT password_hash FROM users WHERE id = ?").bind(t.id).first();if(!n)return e.json({error:"user_not_found"},404);if(!await Cs(s,n.password_hash))return e.json({error:"invalid_credentials"},401);const r=await Bt(a);return await e.env.DB.prepare("UPDATE users SET password_hash=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(r,t.id).run(),await Z(e,"password_change",{userId:t.id,email:t.email}),e.json({ok:!0})});fe.get("/setup",async e=>{const t=e.req.query("token")||"",s=e.env.ADMIN_PASSWORD||"";if(!s||t!==s)return e.html(`<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <title>Setup</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f7f8fb}
 .card{background:#fff;border-radius:12px;padding:2rem;max-width:420px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center}
 h2{color:#dc2626;margin:0 0 .5rem}p{color:#6b7280;font-size:.9rem}</style></head>
 <body><div class="card"><h2>❌ 認証失敗</h2>
-<p>URLに正しい token を付けてください。<br>例: /setup?token=（ADMIN_PASSWORDの値）</p></div></body></html>`,403);const s="admin@ge365x.local",i=await wt("Ge365x@Admin!"),r=await e.env.DB.prepare("SELECT id FROM users WHERE email = ?").bind(s).first();if(r)await e.env.DB.prepare("UPDATE users SET password_hash=?, is_admin=1, is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(i,r.id).run(),await e.env.DB.prepare("UPDATE user_subscriptions SET plan_code='ge365x_pro', status='active', current_period_end='2099-12-31 23:59:59' WHERE user_id=?").bind(r.id).run();else{const d=(await e.env.DB.prepare(`INSERT INTO users (email, password_hash, is_approved, is_admin, trial_start, trial_end)
-       VALUES (?, ?, 1, 1, datetime('now','+9 hours'), '2099-12-31 23:59:59')`).bind(s,i).run()).meta.last_row_id;await e.env.DB.prepare(`INSERT OR REPLACE INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end)
+<p>URLに正しい token を付けてください。<br>例: /setup?token=（ADMIN_PASSWORDの値）</p></div></body></html>`,403);const a="admin@ge365x.local",i=await Bt("Ge365x@Admin!"),r=await e.env.DB.prepare("SELECT id FROM users WHERE email = ?").bind(a).first();if(r)await e.env.DB.prepare("UPDATE users SET password_hash=?, is_admin=1, is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(i,r.id).run(),await e.env.DB.prepare("UPDATE user_subscriptions SET plan_code='ge365x_pro', status='active', current_period_end='2099-12-31 23:59:59' WHERE user_id=?").bind(r.id).run();else{const d=(await e.env.DB.prepare(`INSERT INTO users (email, password_hash, is_approved, is_admin, trial_start, trial_end)
+       VALUES (?, ?, 1, 1, datetime('now','+9 hours'), '2099-12-31 23:59:59')`).bind(a,i).run()).meta.last_row_id;await e.env.DB.prepare(`INSERT OR REPLACE INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end)
        VALUES (?, 'ge365x_pro', 'active', datetime('now','+9 hours'), '2099-12-31 23:59:59')`).bind(d).run()}return e.html(`<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <title>Setup 完了</title><style>
 body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f0fdf4}
@@ -2895,37 +2511,100 @@ td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8
 <h2>管理者アカウント設定完了</h2>
 <p style="color:#6b7280;font-size:.9rem">以下の情報でログインしてください</p>
 <table>
-<tr><td>メールアドレス</td><td>${s}</td></tr>
+<tr><td>メールアドレス</td><td>${a}</td></tr>
 <tr><td>パスワード</td><td>Ge365x@Admin!</td></tr>
 <tr><td>権限</td><td>Admin / Pro</td></tr>
 </table>
 <a class="btn" href="/login">→ ログイン画面へ</a>
 <div class="warn">⚠️ ログイン後すぐにパスワードを変更してください<br>このURLは設定後も有効なため、token を知らない人には教えないでください</div>
-</div></body></html>`)});const fe=new D;fe.get("/api/subscription/plans",async e=>{const{results:t}=await e.env.DB.prepare(`SELECT code, name, description, monthly_price_jpy, yearly_price_jpy,
+</div></body></html>`)});const be=new A;be.get("/api/subscription/plans",async e=>{const{results:t}=await e.env.DB.prepare(`SELECT code, name, description, monthly_price_jpy, yearly_price_jpy,
             daily_post_limit, x_account_limit, openai_token_monthly, features
        FROM subscription_plans
       WHERE is_active = 1
-      ORDER BY sort_order ASC`).all(),a=(t||[]).map(s=>({...s,features:s.features?JSON.parse(s.features):[]}));return e.json({plans:a})});fe.get("/api/subscription/me",f,async e=>{const t=e.get("user"),a=await e.env.DB.prepare(`SELECT s.plan_code, s.status, s.started_at, s.current_period_end, s.cancel_at_period_end,
+      ORDER BY sort_order ASC`).all(),s=(t||[]).map(a=>({...a,features:a.features?JSON.parse(a.features):[]}));return e.json({plans:s})});be.get("/api/subscription/me",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare(`SELECT s.plan_code, s.status, s.started_at, s.current_period_end, s.cancel_at_period_end,
             p.name AS plan_name, p.monthly_price_jpy, p.daily_post_limit, p.x_account_limit, p.features
        FROM user_subscriptions s
        LEFT JOIN subscription_plans p ON p.code = s.plan_code
-      WHERE s.user_id = ?`).bind(t.id).first();return a?e.json({subscription:{...a,features:a.features?JSON.parse(a.features):[]}}):e.json({subscription:null})});fe.post("/api/subscription/cancel",f,async e=>{const t=e.get("user");return await e.env.DB.prepare(`UPDATE user_subscriptions
+      WHERE s.user_id = ?`).bind(t.id).first();return s?e.json({subscription:{...s,features:s.features?JSON.parse(s.features):[]}}):e.json({subscription:null})});be.post("/api/subscription/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare(`UPDATE user_subscriptions
        SET cancel_at_period_end = 1, updated_at = datetime('now','+9 hours')
-     WHERE user_id = ?`).bind(t.id).run(),e.json({ok:!0})});fe.post("/api/subscription/reactivate",f,async e=>{const t=e.get("user");return await e.env.DB.prepare(`UPDATE user_subscriptions
+     WHERE user_id = ?`).bind(t.id).run(),e.json({ok:!0})});be.post("/api/subscription/reactivate",m,async e=>{const t=e.get("user");return await e.env.DB.prepare(`UPDATE user_subscriptions
        SET cancel_at_period_end = 0, status = 'active', updated_at = datetime('now','+9 hours')
-     WHERE user_id = ?`).bind(t.id).run(),e.json({ok:!0})});fe.get("/api/subscription/payments",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, amount_jpy, currency, provider, external_id, status, plan_code, paid_at, created_at
+     WHERE user_id = ?`).bind(t.id).run(),e.json({ok:!0})});be.get("/api/subscription/payments",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, amount_jpy, currency, provider, external_id, status, plan_code, paid_at, created_at
        FROM payment_history
       WHERE user_id = ?
       ORDER BY created_at DESC
-      LIMIT 50`).bind(t.id).all();return e.json({payments:a||[]})});fe.post("/api/subscription/stripe/checkout",f,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));fe.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const sa=new TextEncoder,Ya="https://api.x.com/2",Ka="https://upload.x.com/1.1";class C extends Error{constructor(a,s=0,n="api_error"){super(a);_(this,"statusCode");_(this,"errorType");this.name="XApiError",this.statusCode=s,this.errorType=n}}class kt extends C{constructor(a){super("Rate limited by X API (429)",429,"rate_limit");_(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=a}}function ee(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function An(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(a=>a.toString(16).padStart(2,"0")).join("")}function Dn(){return An(16)}async function jn(e,t){const a=await crypto.subtle.importKey("raw",sa.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),s=await crypto.subtle.sign("HMAC",a,sa.encode(t)),n=new Uint8Array(s);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function Ut(e,t,a,s){const n={oauth_consumer_key:a.consumerKey,oauth_nonce:Dn(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:a.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};if(i.searchParams.forEach((m,h)=>{r[h]=m}),s)for(const[m,h]of Object.entries(s))h!=null&&(r[m]=String(h));const o=Object.keys(r).sort().map(m=>`${ee(m)}=${ee(r[m])}`).join("&"),d=[e.toUpperCase(),ee(`${i.origin}${i.pathname}`),ee(o)].join("&"),l=`${ee(a.consumerSecret)}&${ee(a.accessTokenSecret)}`,c=await jn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(m=>`${ee(m)}="${ee(n[m])}"`).join(", ")}`}async function ct(e,t,a,s){const n=`${Ya}${t}`,i=await Ut(e,n,s),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};a!==void 0&&(r.body=JSON.stringify(a));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new kt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();throw new C(`X API ${e} ${t} failed: ${o.status} ${d.slice(0,500)}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Wt(e,t){var s,n;const a=await ct("POST","/tweets",{text:t},e);return{id:((s=a==null?void 0:a.data)==null?void 0:s.id)||"",text:((n=a==null?void 0:a.data)==null?void 0:n.text)||t}}async function zt(e,t,a,s){var r,o;const n={text:t};a&&a.length&&(n.media={media_ids:a.slice(0,4)}),s&&(n.reply={in_reply_to_tweet_id:s});const i=await ct("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function On(e,t){await ct("DELETE",`/tweets/${t}`,void 0,e)}async function Ja(e){var a,s,n,i;if(!e)throw new C("credentials未設定",0,"missing_credentials");if(!((a=e.consumerKey)!=null&&a.trim()))throw new C("API Key未設定",0,"missing_credentials");if(!((s=e.consumerSecret)!=null&&s.trim()))throw new C("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new C("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new C("Access Token Secret未設定",0,"missing_token");const t=await ct("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Rn(e,t,a=20){const s=await ct("GET",`/users/${t}/tweets?max_results=${a}&tweet.fields=created_at,text,in_reply_to_user_id&exclude=replies,retweets`,void 0,e);return(s==null?void 0:s.data)||[]}async function Ge(e,t,a,s,n,i){const r=new URL(`${Ka}${t}`);s&&Object.entries(s).forEach(([m,h])=>r.searchParams.set(m,h));const o=r.toString(),d={};if(n&&!i)for(const[m,h]of Object.entries(n))d[m]=String(h);const l=await Ut(e,o,a,d),c={method:e.toUpperCase(),headers:{authorization:l}};i?c.body=i:n&&(c.body=Object.entries(n).map(([m,h])=>`${encodeURIComponent(m)}=${encodeURIComponent(String(h))}`).join("&"),c.headers["content-type"]="application/x-www-form-urlencoded");const p=await fetch(o,c);if(!p.ok){const m=await p.text();throw new C(`X Upload ${e} ${t} failed: ${p.status} ${m.slice(0,300)}`,p.status,"media_upload_failed")}return p.status===204?{}:p.json()}async function Bn(e,t,a){const s=t instanceof Uint8Array?t:new Uint8Array(t),n=new FormData;n.append("media",new Blob([s],{type:a}));const i=await Ge("POST","/media/upload.json",e,null,null,n);return{media_id:i.media_id_string||String(i.media_id),size:i.size}}async function Cn(e,t,a){var c;const s=t instanceof Uint8Array?t:new Uint8Array(t),n=s.length,i=await Ge("POST","/media/upload.json",e,null,{command:"INIT",total_bytes:n,media_type:a,media_category:"tweet_video"},null),r=i.media_id_string||String(i.media_id),o=4*1024*1024;let d=0;for(let p=0;p<n;p+=o){const m=s.slice(p,Math.min(p+o,n)),h=new FormData;h.append("command","APPEND"),h.append("media_id",r),h.append("segment_index",String(d)),h.append("media",new Blob([m],{type:a})),await Ge("POST","/media/upload.json",e,null,null,h),d++}const l=await Ge("POST","/media/upload.json",e,null,{command:"FINALIZE",media_id:r},null);if(l.processing_info){let p=0;for(;p<30;){await new Promise(g=>setTimeout(g,(l.processing_info.check_after_secs||5)*1e3));const h=(await Ge("GET","/media/upload.json",e,{command:"STATUS",media_id:r},null,null)).processing_info;if(!h||h.state==="succeeded")break;if(h.state==="failed")throw new C("動画処理失敗: "+(((c=h.error)==null?void 0:c.message)||""),0,"video_process_failed");p++}}return{media_id:r,size:n}}async function St(e,t,a){var o,d;const s=((a==null?void 0:a.apiKey)??e.X_API_KEY??"").trim(),n=((a==null?void 0:a.apiSecret)??e.X_API_SECRET??"").trim();if(!s||!n)throw new C("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new C("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new C("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await tt(t.access_token,e.ENCRYPTION_KEY)}catch{throw new C("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await tt(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new C("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new C("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new C("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:s,consumerSecret:n,accessToken:i,accessTokenSecret:r}}const Va=Object.freeze(Object.defineProperty({__proto__:null,XApiError:C,XApiRateLimitError:kt,X_API_BASE:Ya,X_UPLOAD_BASE:Ka,buildCredentialsFromAccount:St,buildOAuth1Header:Ut,deleteTweet:On,getMe:Ja,getUserRecentTweets:Rn,percentEncode:ee,postToX:Wt,postToXWithMedia:zt,uploadImage:Bn,uploadVideo:Cn},Symbol.toStringTag,{value:"Module"}));async function na(e,t){if(!e)return"";try{return await tt(e,t)}catch{return""}}const he=new D;he.get("/api/admin/accounts",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
+      LIMIT 50`).bind(t.id).all();return e.json({payments:s||[]})});be.post("/api/subscription/stripe/checkout",m,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));be.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const Qt=new TextEncoder,vn="https://api.x.com/2";class $ extends Error{constructor(s,a=0,n="api_error"){super(s);h(this,"statusCode");h(this,"errorType");this.name="XApiError",this.statusCode=a,this.errorType=n}}class Mt extends ${constructor(s){super("Rate limited by X API (429)",429,"rate_limit");h(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=s}}function oe(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function yn(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(s=>s.toString(16).padStart(2,"0")).join("")}function En(){return yn(16)}async function xn(e,t){const s=await crypto.subtle.importKey("raw",Qt.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),a=await crypto.subtle.sign("HMAC",s,Qt.encode(t)),n=new Uint8Array(a);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function wn(e,t,s,a){const n={oauth_consumer_key:s.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:s.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};i.searchParams.forEach((_,b)=>{r[b]=_});const o=Object.keys(r).sort().map(_=>`${oe(_)}=${oe(r[_])}`).join("&"),d=[e.toUpperCase(),oe(`${i.origin}${i.pathname}`),oe(o)].join("&"),l=`${oe(s.consumerSecret)}&${oe(s.accessTokenSecret)}`,c=await xn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(_=>`${oe(_)}="${oe(n[_])}"`).join(", ")}`}async function $t(e,t,s,a){const n=`${vn}${t}`,i=await wn(e,n,a),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};s!==void 0&&(r.body=JSON.stringify(s));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new Mt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();throw new $(`X API ${e} ${t} failed: ${o.status} ${d.slice(0,500)}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Ms(e,t){var a,n;const s=await $t("POST","/tweets",{text:t},e);return{id:((a=s==null?void 0:s.data)==null?void 0:a.id)||"",text:((n=s==null?void 0:s.data)==null?void 0:n.text)||t}}async function $s(e,t,s,a){var r,o;const n={text:t};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function kn(e){var s,a,n,i;if(!e)throw new $("credentials未設定",0,"missing_credentials");if(!((s=e.consumerKey)!=null&&s.trim()))throw new $("API Key未設定",0,"missing_credentials");if(!((a=e.consumerSecret)!=null&&a.trim()))throw new $("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new $("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new $("Access Token Secret未設定",0,"missing_token");const t=await $t("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Ft(e,t,s){var o,d;const a=((s==null?void 0:s.apiKey)??e.X_API_KEY??"").trim(),n=((s==null?void 0:s.apiSecret)??e.X_API_SECRET??"").trim();if(!a||!n)throw new $("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new $("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new $("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await At(t.access_token,e.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await At(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new $("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:a,consumerSecret:n,accessToken:i,accessTokenSecret:r}}
+const xMU_URL="https://upload.twitter.com/1.1/media/upload.json";
+async function xMU_oauth(method,url,creds,bodyParams){
+  const oa={oauth_consumer_key:creds.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:creds.accessToken,oauth_version:"1.0"};
+  const u=new URL(url);const ap={...oa};
+  u.searchParams.forEach((v,k)=>{ap[k]=v});
+  if(bodyParams)for(const k of Object.keys(bodyParams))ap[k]=bodyParams[k];
+  const ps=Object.keys(ap).sort().map(k=>`${oe(k)}=${oe(ap[k])}`).join("&");
+  const bs=[method.toUpperCase(),oe(`${u.origin}${u.pathname}`),oe(ps)].join("&");
+  const sk=`${oe(creds.consumerSecret)}&${oe(creds.accessTokenSecret)}`;
+  oa.oauth_signature=await xn(sk,bs);
+  return `OAuth ${Object.keys(oa).sort().map(k=>`${oe(k)}="${oe(oa[k])}"`).join(", ")}`;
+}
+async function xMU_image(creds,bytes){
+  const u8=new Uint8Array(bytes);let bin="";const CH=8192;
+  for(let i=0;i<u8.length;i+=CH)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));
+  const b64=btoa(bin);
+  const auth=await xMU_oauth("POST",xMU_URL,creds,{media_data:b64});
+  const body="media_data="+encodeURIComponent(b64);
+  const r=await fetch(xMU_URL,{method:"POST",headers:{authorization:auth,"content-type":"application/x-www-form-urlencoded"},body,signal:AbortSignal.timeout(6e4)});
+  if(!r.ok){const t=await r.text();throw new $(`X media upload failed: ${r.status} ${t.slice(0,300)}`,r.status,"media_upload_failed")}
+  const j=await r.json();return j.media_id_string||String(j.media_id||"");
+}
+async function xMU_video_init(creds,size,mime){
+  const params={command:"INIT",total_bytes:String(size),media_type:mime,media_category:"tweet_video"};
+  const auth=await xMU_oauth("POST",xMU_URL,creds,params);
+  const body=Object.keys(params).map(k=>`${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&");
+  const r=await fetch(xMU_URL,{method:"POST",headers:{authorization:auth,"content-type":"application/x-www-form-urlencoded"},body,signal:AbortSignal.timeout(3e4)});
+  if(!r.ok){const t=await r.text();throw new $(`X media INIT failed: ${r.status} ${t.slice(0,300)}`,r.status,"media_init_failed")}
+  const j=await r.json();return j.media_id_string||String(j.media_id||"");
+}
+async function xMU_video_append(creds,mediaId,bytes,segIdx){
+  const u8=new Uint8Array(bytes);let bin="";const CH=8192;
+  for(let i=0;i<u8.length;i+=CH)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));
+  const b64=btoa(bin);
+  const params={command:"APPEND",media_id:mediaId,media_data:b64,segment_index:String(segIdx)};
+  const auth=await xMU_oauth("POST",xMU_URL,creds,params);
+  const body=Object.keys(params).map(k=>`${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&");
+  const r=await fetch(xMU_URL,{method:"POST",headers:{authorization:auth,"content-type":"application/x-www-form-urlencoded"},body,signal:AbortSignal.timeout(6e4)});
+  if(!r.ok){const t=await r.text();throw new $(`X media APPEND failed: ${r.status} ${t.slice(0,300)}`,r.status,"media_append_failed")}
+}
+async function xMU_video_finalize(creds,mediaId){
+  const params={command:"FINALIZE",media_id:mediaId};
+  const auth=await xMU_oauth("POST",xMU_URL,creds,params);
+  const body=Object.keys(params).map(k=>`${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&");
+  const r=await fetch(xMU_URL,{method:"POST",headers:{authorization:auth,"content-type":"application/x-www-form-urlencoded"},body,signal:AbortSignal.timeout(3e4)});
+  if(!r.ok){const t=await r.text();throw new $(`X media FINALIZE failed: ${r.status} ${t.slice(0,300)}`,r.status,"media_finalize_failed")}
+  const j=await r.json();return j;
+}
+async function xMU_video(creds,bytes,mime){
+  const id=await xMU_video_init(creds,bytes.byteLength,mime);
+  const CHUNK=1024*1024*4;const u8=new Uint8Array(bytes);let seg=0;
+  for(let off=0;off<u8.length;off+=CHUNK){
+    const slice=u8.slice(off,Math.min(off+CHUNK,u8.length));
+    await xMU_video_append(creds,id,slice.buffer,seg);seg++;
+  }
+  await xMU_video_finalize(creds,id);
+  return id;
+}
+async function xMU_upload(creds,bytes,mime){
+  if(mime&&mime.startsWith("video/"))return xMU_video(creds,bytes,mime);
+  return xMU_image(creds,bytes);
+}
+const ge=new A;ge.get("/api/admin/accounts",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
             daily_post_count, daily_post_limit, last_posted_at,
             account_health_score, health_status, is_active, is_current, created_at
-       FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return e.json({accounts:a||[]})});he.post("/api/admin/accounts",f,async e=>{var d,l;const t=e.get("user"),a=await e.req.json();if(!a.account_name)return e.json({error:"account_name required"},400);if(!((d=a.access_token)!=null&&d.trim())||!((l=a.access_token_secret)!=null&&l.trim()))return e.json({error:"access_token and access_token_secret required"},400);const s=await X(a.access_token.trim(),e.env.ENCRYPTION_KEY),n=await X(a.access_token_secret.trim(),e.env.ENCRYPTION_KEY),i=await e.env.DB.prepare("SELECT COUNT(*) AS cnt FROM x_accounts WHERE user_id=? AND is_active=1").bind(t.id).first(),r=((i==null?void 0:i.cnt)??0)===0?1:0;r&&await e.env.DB.prepare("UPDATE x_accounts SET is_current=0 WHERE user_id=?").bind(t.id).run();const o=await e.env.DB.prepare(`INSERT INTO x_accounts
-       (user_id, account_name, access_token, access_token_secret, daily_post_limit, is_active, is_current)
-     VALUES (?, ?, ?, ?, ?, 1, ?)`).bind(t.id,a.account_name,s,n,a.daily_post_limit??5,r).run();return e.json({success:!0,id:o.meta.last_row_id})});he.post("/api/admin/accounts/:id/test",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=?").bind(a,t.id).first();if(!s)return e.json({success:!1,error:"not_found"},404);try{const n=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id=? LIMIT 1").bind(t.id).first(),i=n!=null&&n.api_key?{apiKey:await na(n.api_key,e.env.ENCRYPTION_KEY),apiSecret:await na(n.api_secret||"",e.env.ENCRYPTION_KEY)}:void 0,r=await St(e.env,s,i),o=await Ja(r);return o!=null&&o.id&&await e.env.DB.prepare(`UPDATE x_accounts SET x_user_id=?, x_username=?, is_active=1,
+       FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return e.json({accounts:s||[]})});ge.post("/api/admin/accounts",m,async e=>{var r,o;const t=e.get("user"),s=await e.req.json();if(!s.account_name)return e.json({error:"account_name required"},400);if(!((r=s.access_token)!=null&&r.trim())||!((o=s.access_token_secret)!=null&&o.trim()))return e.json({error:"access_token and access_token_secret required"},400);const a=await _e(s.access_token.trim(),e.env.ENCRYPTION_KEY),n=await _e(s.access_token_secret.trim(),e.env.ENCRYPTION_KEY),i=await e.env.DB.prepare(`INSERT INTO x_accounts
+       (user_id, account_name, access_token, access_token_secret, daily_post_limit, is_active)
+     VALUES (?, ?, ?, ?, ?, 1)`).bind(t.id,s.account_name,a,n,s.daily_post_limit??5).run();return e.json({success:!0,id:i.meta.last_row_id})});ge.post("/api/admin/accounts/:id/test",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=?").bind(s,t.id).first();if(!a)return e.json({success:!1,error:"not_found"},404);try{const n=await Ft(e.env,a),i=await kn(n);return i!=null&&i.id&&await e.env.DB.prepare(`UPDATE x_accounts SET x_user_id=?, x_username=?, is_active=1,
            account_health_score = MAX(account_health_score, 80),
            health_status = CASE WHEN account_health_score >= 80 THEN 'healthy' ELSE health_status END,
-           updated_at=? WHERE id=?`).bind(o.id,o.username||null,x(),a).run(),e.json({success:!0,me:o})}catch(n){const i=n instanceof C?n.statusCode:0;return e.json({success:!1,error:n.message,status_code:i,error_type:n==null?void 0:n.errorType})}});he.post("/api/admin/accounts/:id/current",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10);return await e.env.DB.batch([e.env.DB.prepare("UPDATE x_accounts SET is_current=0 WHERE user_id=?").bind(t.id),e.env.DB.prepare("UPDATE x_accounts SET is_current=1, updated_at=? WHERE id=? AND user_id=?").bind(x(),a,t.id)]),e.json({success:!0})});he.post("/api/admin/accounts/:id/toggle",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE x_accounts SET is_active = 1 - is_active, updated_at = ? WHERE id=? AND user_id=?").bind(x(),a,t.id).run(),e.json({success:!0})});he.put("/api/admin/accounts/:id",f,async e=>{var r,o;const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.req.json(),n=[],i=[];if(s.account_name&&(n.push("account_name=?"),i.push(s.account_name)),s.daily_post_limit!==void 0&&(n.push("daily_post_limit=?"),i.push(s.daily_post_limit)),(r=s.access_token)!=null&&r.trim()){const d=await X(s.access_token.trim(),e.env.ENCRYPTION_KEY);n.push("access_token=?"),i.push(d)}if((o=s.access_token_secret)!=null&&o.trim()){const d=await X(s.access_token_secret.trim(),e.env.ENCRYPTION_KEY);n.push("access_token_secret=?"),i.push(d)}return n.length===0?e.json({success:!1,error:"no_fields"}):(n.push("updated_at=?"),i.push(x(),a,t.id),await e.env.DB.prepare(`UPDATE x_accounts SET ${n.join(", ")} WHERE id=? AND user_id=?`).bind(...i).run(),e.json({success:!0}))});he.delete("/api/admin/accounts/:id",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM x_accounts WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});const Nn=["20代","30代","40代","50代"],Ln=["男性","女性"],Mn=["美容","健康","副業","投資","AI活用","ダイエット","お金"],Fn={美容:"老化・肌荒れ・見た目の変化",健康:"疲れやすい・体力低下・不調",副業:"時間がない・何から始めるか不明",投資:"勝てない・資産が増えない",AI活用:"手作業が多い・効率が悪い",ダイエット:"リバウンド・続かない",お金:"貯まらない・将来不安"},$n={美容:"若々しくなりたい",健康:"元気に過ごしたい",副業:"収益化したい",投資:"安定して利益を出したい",AI活用:"業務を自動化したい",ダイエット:"理想の体型になりたい",お金:"経済的自由を得たい"},Ga=[];for(const e of Nn)for(const t of Ln)for(const a of Mn)Ga.push({key:`${e}_${t}_${a}`,label:`${e}${t}/${a}`,gender:t,age_range:e,genre:a,problem:Fn[a]||`${a}に悩んでいる`,goal:$n[a]||`${a}で成果を出したい`,knowledge:"一般"});const Pn=[{key:"authority",label:"権威型",instruction:"専門家として断定的に、簡潔に、根拠を示して書く。"},{key:"empathy",label:"共感型",instruction:"読者の悩みに寄り添い、共感を起点に語りかけるように書く。"},{key:"provocative",label:"煽り型",instruction:"問題を鋭く突き、危機感を持たせる書き方にする。"},{key:"story",label:"ストーリー型",instruction:"体験談や変化の流れを感じさせる構成で書く。"},{key:"problem_raise",label:"問題提起型",instruction:"最初に課題を提示し、その原因と解決策を示す。"}],Lt={problem:{name:"問題提起型",instruction:`【問題提起型】
+           updated_at=? WHERE id=?`).bind(i.id,i.username||null,g(),s).run(),e.json({success:!0,me:i})}catch(n){const i=n instanceof $?n.statusCode:0;return e.json({success:!1,error:n.message,status_code:i,error_type:n==null?void 0:n.errorType})}});ge.post("/api/admin/accounts/:id/current",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);return await e.env.DB.batch([e.env.DB.prepare("UPDATE x_accounts SET is_current=0 WHERE user_id=?").bind(t.id),e.env.DB.prepare("UPDATE x_accounts SET is_current=1, updated_at=? WHERE id=? AND user_id=?").bind(g(),s,t.id)]),e.json({success:!0})});ge.post("/api/admin/accounts/:id/toggle",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE x_accounts SET is_active = 1 - is_active, updated_at = ? WHERE id=? AND user_id=?").bind(g(),s,t.id).run(),e.json({success:!0})});ge.put("/api/admin/accounts/:id",m,async e=>{var r,o;const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=[],i=[];if(a.account_name&&(n.push("account_name=?"),i.push(a.account_name)),a.daily_post_limit!==void 0&&(n.push("daily_post_limit=?"),i.push(a.daily_post_limit)),(r=a.access_token)!=null&&r.trim()){const d=await _e(a.access_token.trim(),e.env.ENCRYPTION_KEY);n.push("access_token=?"),i.push(d)}if((o=a.access_token_secret)!=null&&o.trim()){const d=await _e(a.access_token_secret.trim(),e.env.ENCRYPTION_KEY);n.push("access_token_secret=?"),i.push(d)}return n.length===0?e.json({success:!1,error:"no_fields"}):(n.push("updated_at=?"),i.push(g(),s,t.id),await e.env.DB.prepare(`UPDATE x_accounts SET ${n.join(", ")} WHERE id=? AND user_id=?`).bind(...i).run(),e.json({success:!0}))});ge.delete("/api/admin/accounts/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM x_accounts WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});const Sn=["20代","30代","40代","50代"],Tn=["男性","女性"],Dn=["美容","健康","副業","投資","AI活用","ダイエット","お金"],An={美容:"老化・肌荒れ・見た目の変化",健康:"疲れやすい・体力低下・不調",副業:"時間がない・何から始めるか不明",投資:"勝てない・資産が増えない",AI活用:"手作業が多い・効率が悪い",ダイエット:"リバウンド・続かない",お金:"貯まらない・将来不安"},Rn={美容:"若々しくなりたい",健康:"元気に過ごしたい",副業:"収益化したい",投資:"安定して利益を出したい",AI活用:"業務を自動化したい",ダイエット:"理想の体型になりたい",お金:"経済的自由を得たい"},Fs=[];for(const e of Sn)for(const t of Tn)for(const s of Dn)Fs.push({key:`${e}_${t}_${s}`,label:`${e}${t}/${s}`,gender:t,age_range:e,genre:s,problem:An[s]||`${s}に悩んでいる`,goal:Rn[s]||`${s}で成果を出したい`,knowledge:"一般"});const On=[{key:"authority",label:"権威型",instruction:"専門家として断定的に、簡潔に、根拠を示して書く。"},{key:"empathy",label:"共感型",instruction:"読者の悩みに寄り添い、共感を起点に語りかけるように書く。"},{key:"provocative",label:"煽り型",instruction:"問題を鋭く突き、危機感を持たせる書き方にする。"},{key:"story",label:"ストーリー型",instruction:"体験談や変化の流れを感じさせる構成で書く。"},{key:"problem_raise",label:"問題提起型",instruction:"最初に課題を提示し、その原因と解決策を示す。"}],Rt={problem:{name:"問題提起型",instruction:`【問題提起型】
 1.冒頭で読者の痛みを突く質問
 2.具体的な3つの「あるある」
 3.「実はそれ○○が原因」と核心
@@ -2949,13 +2628,8 @@ td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8
 2.背景
 3.なぜその数字か
 4.読者が同じ結果を得る条件
-5.CTA`}};async function Xa(e,t){var r,o,d;const a=t.model||"gpt-4o-mini",s=t.maxTokens||4e3,n=t.temperature??.7,i=t.baseUrl||"https://api.openai.com/v1";for(let l=1;l<=3;l++)try{const c=await fetch(`${i}/chat/completions`,{method:"POST",headers:{authorization:`Bearer ${t.apiKey}`,"content-type":"application/json"},body:JSON.stringify({model:a,messages:e,max_tokens:s,temperature:n}),signal:AbortSignal.timeout(12e4)});if(!c.ok){const m=await c.text();if(c.status>=500&&l<3){await new Promise(h=>setTimeout(h,2e3*l));continue}throw new Error(`OpenAI API error: ${c.status} ${m.slice(0,500)}`)}const p=await c.json();return((d=(o=(r=p==null?void 0:p.choices)==null?void 0:r[0])==null?void 0:o.message)==null?void 0:d.content)||""}catch(c){if(((c==null?void 0:c.name)==="TimeoutError"||(c==null?void 0:c.name)==="AbortError")&&l<3){await new Promise(m=>setTimeout(m,2e3*l));continue}throw c}return""}function Za(e){let t=`以下のルールを厳守してX(Twitter)投稿文を生成してください。
-`;if(t+=`【改行ルール】スマートフォンでの読みやすさを最優先にしてください。
-`,t+=`・1つの文が終わったら必ず改行を入れること
-`,t+=`・20〜25文字を目安に改行すること（句読点の位置を優先）
-`,t+=`・箇条書きは各項目を必ず改行で区切ること
-`,t+=`・1行が長くなりすぎないよう注意すること
-`,e.brandVoice&&typeof e.brandVoice=="object"?(t+=`
+5.CTA`}};async function qs(e,t){var r,o,d;const s=t.model||"gpt-4o-mini",a=t.maxTokens||4e3,n=t.temperature??.7,i=t.baseUrl||"https://api.openai.com/v1";for(let l=1;l<=3;l++)try{const c=await fetch(`${i}/chat/completions`,{method:"POST",headers:{authorization:`Bearer ${t.apiKey}`,"content-type":"application/json"},body:JSON.stringify({model:s,messages:e,max_tokens:a,temperature:n}),signal:AbortSignal.timeout(12e4)});if(!c.ok){const _=await c.text();if(c.status>=500&&l<3){await new Promise(b=>setTimeout(b,2e3*l));continue}throw new Error(`OpenAI API error: ${c.status} ${_.slice(0,500)}`)}const p=await c.json();return((d=(o=(r=p==null?void 0:p.choices)==null?void 0:r[0])==null?void 0:o.message)==null?void 0:d.content)||""}catch(c){if(((c==null?void 0:c.name)==="TimeoutError"||(c==null?void 0:c.name)==="AbortError")&&l<3){await new Promise(_=>setTimeout(_,2e3*l));continue}throw c}return""}function Ps(e){let t=`以下のルールを厳守してX(Twitter)投稿文を生成してください。
+`;if(e.brandVoice&&typeof e.brandVoice=="object"?(t+=`
 【ブランドボイス】
 `,e.brandVoice.tone&&(t+=`口調: ${e.brandVoice.tone}
 `),e.brandVoice.worldview&&(t+=`世界観: ${e.brandVoice.worldview}
@@ -2972,60 +2646,57 @@ td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8
 `),r.desires&&(t+=`欲求: ${r.desires.replace(/\n/g," / ")}
 `),r.purchase_triggers&&(t+=`行動トリガー: ${r.purchase_triggers.replace(/\n/g," / ")}
 `),t+=`この読者が自然に反応する語彙・例えを使うこと。
-`}const a=`
-Markdown記号(#,##)禁止。見出しは「■」。番号リスト禁止。自然な文章で。箇条書きは「・」のみ。`;let s="";e.patternType&&Lt[e.patternType]&&(s=`
+`}const s=`
+Markdown記号(#,##)禁止。見出しは「■」。番号リスト禁止。自然な文章で。箇条書きは「・」のみ。`;let a="";e.patternType&&Rt[e.patternType]&&(a=`
 【投稿パターン（構造のみ）】
-${Lt[e.patternType].instruction}`);let n=`テーマ: ${e.theme||""}${e.keywords?`
+${Rt[e.patternType].instruction}`);let n=`テーマ: ${e.theme||""}${e.keywords?`
 キーワード: ${e.keywords}`:""}`;e.postMode==="140"?n+=`
 140文字以内のX投稿を作成。簡潔かつインパクト重視。ハッシュタグは含めない。`:n+=`
 X投稿用のフル文章を作成。読みやすく改行を入れる。ハッシュタグは含めない。`,e.cta&&(n+=`
 CTA: ${e.cta}`),e.userInput&&(n+=`
-追加指示: ${e.userInput}`);const i=t+s+a;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}function qn(e){if(!e)return e;let t=e;return t=t.replace(/([\u3002\uff01\uff1f!?])/g,`$1
-`),t=t.replace(/\n{3,}/g,`
+追加指示: ${e.userInput}`);const i=t+a+s;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}async function Hs(e,t,s,a,n,i="body"){const{messages:r}=Ps({theme:t,keywords:s,brandVoice:n,targetDna:a,postMode:i||"body"}),o=await qs(r,{apiKey:e,temperature:.8});return bt(o,i)}async function Us(e,t,s,a,n,i,r="body"){if(!Rt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Ps({theme:s,keywords:a,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await qs(o,{apiKey:e,temperature:.8});return bt(d,r)}function bt(e,t){if(!e)return"";let s=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"・").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
 
-`),t.trim()}async function Qa(e,t,a,s,n,i="body"){const{messages:r}=Za({theme:t,keywords:a,brandVoice:n,targetDna:s,postMode:i||"body"}),o=await Xa(r,{apiKey:e,temperature:.8});return Tt(o,i)}async function es(e,t,a,s,n,i,r="body"){if(!Lt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Za({theme:a,keywords:s,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await Xa(o,{apiKey:e,temperature:.8});return Tt(d,r)}function Tt(e,t){if(!e)return"";let a=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"・").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
-
-`).trim();return a=Hn(a),t==="140"&&a.length>140&&(a=a.slice(0,137)+"..."),a}function Hn(e){if(!e)return"";const t=e.split(`
-`).length,a=e.replace(/\n/g,"").length;if(t>3||a<40)return e;const s=e.split(new RegExp("(?<=[。！？!?\\n])","g")).filter(r=>r.trim());if(s.length<=1)return e;let n="",i=0;for(let r=0;r<s.length;r++){const o=s[r].trim();if(o){if(/^https?:\/\//.test(o)||/^#/.test(o)||/^@/.test(o)){n&&!n.endsWith(`
+`).trim();return s=jn(s),t==="140"&&s.length>140&&(s=s.slice(0,137)+"..."),s}function jn(e){if(!e)return"";const t=e.split(`
+`).length,s=e.replace(/\n/g,"").length;if(t>3||s<40)return e;const a=e.split(new RegExp("(?<=[。！？!?\\n])","g")).filter(r=>r.trim());if(a.length<=1)return e;let n="",i=0;for(let r=0;r<a.length;r++){const o=a[r].trim();if(o){if(/^https?:\/\//.test(o)||/^#/.test(o)||/^@/.test(o)){n&&!n.endsWith(`
 `)&&(n+=`
-`),n+=o,i=0;continue}n+=o,i++,i>=2&&r<s.length-1?(n+=`
+`),n+=o,i=0;continue}n+=o,i++,i>=2&&r<a.length-1?(n+=`
 
-`,i=0):r<s.length-1&&!o.endsWith(`
+`,i=0):r<a.length-1&&!o.endsWith(`
 `)&&(n+=`
 `)}}return n.replace(/\n{3,}/g,`
 
-`).trim()}const Un=new TextEncoder;async function Se(e){const t=await crypto.subtle.digest("SHA-256",Un.encode(e||""));return[...new Uint8Array(t)].slice(0,8).map(s=>s.toString(16).padStart(2,"0")).join("")}function Mt(e){const t=(e||"").replace(/\s+/g,"").slice(0,2e3),a=new Set;for(let s=0;s<t.length-1;s++)a.add(t.slice(s,s+2));return a}function ts(e,t){const a=Mt(e),s=Mt(t);if(a.size===0&&s.size===0)return 0;let n=0;for(const r of a)s.has(r)&&n++;const i=a.size+s.size-n;return i===0?0:n/i}const Wn=120*1e3;async function as(e,t){const a=new Date().toISOString(),s=new Date(Date.now()-Wn).toISOString(),n=await e.DB.prepare("SELECT account_id, locked_at FROM post_locks WHERE account_id = ?").bind(t).first();return n&&n.locked_at>s?!1:(await e.DB.prepare(`INSERT INTO post_locks (account_id, locked_at) VALUES (?, ?)
-     ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,a).run(),!0)}async function ss(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function ns(e,t,a,s,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),d>=(r.daily_post_limit||5)&&i.errors.push({code:"daily_limit_reached",message:`日次投稿上限 (${r.daily_post_limit}) に達しています`}),r.last_posted_at){const c=Date.parse(r.last_posted_at.replace(" ","T")+"+09:00");if(!Number.isNaN(c)){const p=(Date.now()-c)/6e4;p<15&&i.errors.push({code:"too_frequent",message:`前回投稿から ${Math.floor(p)} 分しか経過していません（最低 15 分）`,overridable:!0})}}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
+`).trim()}const In=new TextEncoder;async function Ae(e){const t=await crypto.subtle.digest("SHA-256",In.encode(e||""));return[...new Uint8Array(t)].slice(0,8).map(a=>a.toString(16).padStart(2,"0")).join("")}function Ot(e){const t=(e||"").replace(/\s+/g,"").slice(0,2e3),s=new Set;for(let a=0;a<t.length-1;a++)s.add(t.slice(a,a+2));return s}function Ws(e,t){const s=Ot(e),a=Ot(t);if(s.size===0&&a.size===0)return 0;let n=0;for(const r of s)a.has(r)&&n++;const i=s.size+a.size-n;return i===0?0:n/i}const Cn=120*1e3;async function Ys(e,t){const s=new Date().toISOString(),a=new Date(Date.now()-Cn).toISOString(),n=await e.DB.prepare("SELECT account_id, locked_at FROM post_locks WHERE account_id = ?").bind(t).first();return n&&n.locked_at>a?!1:(await e.DB.prepare(`INSERT INTO post_locks (account_id, locked_at) VALUES (?, ?)
+     ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,s).run(),!0)}async function Js(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function Ks(e,t,s,a,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),d>=(r.daily_post_limit||5)&&i.errors.push({code:"daily_limit_reached",message:`日次投稿上限 (${r.daily_post_limit}) に達しています`}),r.last_posted_at){const c=Date.parse(r.last_posted_at.replace(" ","T")+"+09:00");if(!Number.isNaN(c)){const p=(Date.now()-c)/6e4;p<15&&i.errors.push({code:"too_frequent",message:`前回投稿から ${Math.floor(p)} 分しか経過していません（最低 15 分）`,overridable:!0})}}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
        WHERE account_id = ? AND status IN ('posted','approved','publishing')
        ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC
-       LIMIT 5`).bind(t).all();for(const c of l||[]){const p=ts(a,c.body||"");if(p>=.7){i.errors.push({code:"too_similar",message:`過去投稿 (ID: ${c.id}) と類似度 ${p.toFixed(2)} で重複`});break}}if(s){const c=await e.DB.prepare(`SELECT COUNT(*) AS n FROM post_queue
+       LIMIT 5`).bind(t).all();for(const c of l||[]){const p=Ws(s,c.body||"");if(p>=.7){i.errors.push({code:"too_similar",message:`過去投稿 (ID: ${c.id}) と類似度 ${p.toFixed(2)} で重複`});break}}if(a){const c=await e.DB.prepare(`SELECT COUNT(*) AS n FROM post_queue
         WHERE account_id = ? AND link_url = ? AND status IN ('posted','approved','publishing')
-          AND DATE(COALESCE(posted_at, scheduled_at, created_at)) >= DATE('now','+9 hours','-7 days')`).bind(t,s).first();((c==null?void 0:c.n)??0)>=3&&i.errors.push({code:"link_spam",message:`同一リンクを過去7日で${c==null?void 0:c.n}回使用しています`})}if(n){const c=ia(n);if(c.size>0){const{results:p}=await e.DB.prepare(`SELECT hashtags FROM post_queue
+          AND DATE(COALESCE(posted_at, scheduled_at, created_at)) >= DATE('now','+9 hours','-7 days')`).bind(t,a).first();((c==null?void 0:c.n)??0)>=3&&i.errors.push({code:"link_spam",message:`同一リンクを過去7日で${c==null?void 0:c.n}回使用しています`})}if(n){const c=es(n);if(c.size>0){const{results:p}=await e.DB.prepare(`SELECT hashtags FROM post_queue
            WHERE account_id = ? AND status IN ('posted','approved','publishing') AND hashtags IS NOT NULL AND hashtags != ''
-           ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC LIMIT 3`).bind(t).all();(p||[]).length>=3&&(p||[]).every(h=>{const k=[...ia(h.hashtags||"")].filter(w=>c.has(w)).length;return(c.size===0?0:k/c.size)>=.8})&&i.errors.push({code:"hashtag_spam",message:"同一ハッシュタグセットが 3 回連続で 80%以上一致しています"})}}return r.health_status==="risk"&&i.errors.push({code:"health_risk",message:"アカウント健全性スコアが危険域です。投稿を控えてください。"}),i.ok=i.errors.length===0,i}function ia(e){return new Set((e||"").split(/[\s,]+/).map(t=>t.trim().replace(/^#/,"").toLowerCase()).filter(Boolean))}async function yt(e,t,a,s,n){const i=await e.DB.prepare("SELECT account_health_score FROM x_accounts WHERE id = ?").bind(t).first();if(!i)return{score_after:100,status_after:"healthy"};let r=Math.max(0,Math.min(100,(i.account_health_score??100)+s));const o=r>=80?"healthy":r>=60?"caution":"risk";return await e.DB.prepare("UPDATE x_accounts SET account_health_score = ?, health_status = ?, updated_at = datetime('now','+9 hours') WHERE id = ?").bind(r,o,t).run(),await e.DB.prepare(`INSERT INTO account_health_events (account_id, event_type, delta, score_after, status_after, metadata)
-     VALUES (?, ?, ?, ?, ?, ?)`).bind(t,a,s,r,o,n?JSON.stringify(n):null).run(),{score_after:r,status_after:o}}function ra(e){if(!e)return Date.now();const t=e.replace(" ","T")+"+09:00",a=Date.parse(t);return Number.isNaN(a)?Date.now():a}function oa(e){return new Date(e+324e5).toISOString().replace("T"," ").slice(0,19)}async function zn(e,t,a){const s=a.jitter_enabled!==!1,n=a.jitter_minutes??5,i=a.collision_avoidance_enabled!==!1,r=a.min_spacing_seconds??90;let o=ra(t),d=0,l=0;if(s&&n>0){const m=Math.floor((Math.random()*2-1)*n*60);d=m,o+=m*1e3}if(i&&a.account_id){const m=oa(o),h=[a.account_id,m,m];let g=`
+           ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC LIMIT 3`).bind(t).all();(p||[]).length>=3&&(p||[]).every(b=>{const T=[...es(b.hashtags||"")].filter(D=>c.has(D)).length;return(c.size===0?0:T/c.size)>=.8})&&i.errors.push({code:"hashtag_spam",message:"同一ハッシュタグセットが 3 回連続で 80%以上一致しています"})}}return r.health_status==="risk"&&i.errors.push({code:"health_risk",message:"アカウント健全性スコアが危険域です。投稿を控えてください。"}),i.ok=i.errors.length===0,i}function es(e){return new Set((e||"").split(/[\s,]+/).map(t=>t.trim().replace(/^#/,"").toLowerCase()).filter(Boolean))}async function mt(e,t,s,a,n){const i=await e.DB.prepare("SELECT account_health_score FROM x_accounts WHERE id = ?").bind(t).first();if(!i)return{score_after:100,status_after:"healthy"};let r=Math.max(0,Math.min(100,(i.account_health_score??100)+a));const o=r>=80?"healthy":r>=60?"caution":"risk";return await e.DB.prepare("UPDATE x_accounts SET account_health_score = ?, health_status = ?, updated_at = datetime('now','+9 hours') WHERE id = ?").bind(r,o,t).run(),await e.DB.prepare(`INSERT INTO account_health_events (account_id, event_type, delta, score_after, status_after, metadata)
+     VALUES (?, ?, ?, ?, ?, ?)`).bind(t,s,a,r,o,n?JSON.stringify(n):null).run(),{score_after:r,status_after:o}}function ts(e){if(!e)return Date.now();const t=e.replace(" ","T")+"+09:00",s=Date.parse(t);return Number.isNaN(s)?Date.now():s}function ss(e){return new Date(e+324e5).toISOString().replace("T"," ").slice(0,19)}async function Bn(e,t,s){const a=s.jitter_enabled!==!1,n=s.jitter_minutes??5,i=s.collision_avoidance_enabled!==!1,r=s.min_spacing_seconds??90;let o=ts(t),d=0,l=0;if(a&&n>0){const _=Math.floor((Math.random()*2-1)*n*60);d=_,o+=_*1e3}if(i&&s.account_id){const _=ss(o),b=[s.account_id,_,_];let v=`
       SELECT COALESCE(effective_scheduled_at, scheduled_at) AS sat
         FROM post_queue
        WHERE account_id = ?
          AND status NOT IN ('cancelled','rejected','failed')
          AND COALESCE(effective_scheduled_at, scheduled_at) IS NOT NULL
          AND datetime(COALESCE(effective_scheduled_at, scheduled_at)) >= datetime(?, '-1 hours')
-         AND datetime(COALESCE(effective_scheduled_at, scheduled_at)) <= datetime(?, '+1 hours')`;a.exclude_id&&(g+=" AND id != ?",h.push(a.exclude_id)),g+=" ORDER BY sat ASC";const{results:k}=await e.DB.prepare(g).bind(...h).all();let y=!0,w=0;for(;y&&w<30;){y=!1;for(const v of k||[]){const j=ra(v.sat),O=Math.abs(o-j)/1e3;if(O<r){const A=(r-O+1)*1e3*(o>=j?1:-1);o+=A,l+=Math.floor(A/1e3),y=!0}}w++}}const c=oa(o);return{effective_at:c,audit:{base_at:t,effective_at:c,jitter_applied_seconds:d,collision_adjusted_seconds:l,ruleset:{jitter_enabled:s,jitter_minutes:n,collision_avoidance_enabled:i,min_spacing_seconds:r}}}}async function Yn(e,t,a,s){await e.DB.prepare("INSERT INTO schedule_audits (post_id, account_id, audit_json) VALUES (?, ?, ?)").bind(t,a??null,JSON.stringify(s)).run()}const Kn=.7;async function Jn(e){const t=[...Mt(e)].slice(0,200),a=await Se(e);return JSON.stringify({bigrams:t,content_hash:a})}async function Vn(e,t,a,s){await e.DB.prepare("INSERT INTO post_fingerprints (post_id, account_id, fingerprint) VALUES (?, ?, ?)").bind(t,a??null,s).run()}async function Gn(e,t,a,s={}){const n={pass:!0,blocked_reason:null,scores:[]};if(!t||!a)return n;const i=[a];let r=`SELECT id, body FROM post_queue
+         AND datetime(COALESCE(effective_scheduled_at, scheduled_at)) <= datetime(?, '+1 hours')`;s.exclude_id&&(v+=" AND id != ?",b.push(s.exclude_id)),v+=" ORDER BY sat ASC";const{results:T}=await e.DB.prepare(v).bind(...b).all();let E=!0,D=0;for(;E&&D<30;){E=!1;for(const k of T||[]){const N=ts(k.sat),P=Math.abs(o-N)/1e3;if(P<r){const L=(r-P+1)*1e3*(o>=N?1:-1);o+=L,l+=Math.floor(L/1e3),E=!0}}D++}}const c=ss(o);return{effective_at:c,audit:{base_at:t,effective_at:c,jitter_applied_seconds:d,collision_adjusted_seconds:l,ruleset:{jitter_enabled:a,jitter_minutes:n,collision_avoidance_enabled:i,min_spacing_seconds:r}}}}async function Nn(e,t,s,a){await e.DB.prepare("INSERT INTO schedule_audits (post_id, account_id, audit_json) VALUES (?, ?, ?)").bind(t,s??null,JSON.stringify(a)).run()}const Ln=.7;async function Mn(e){const t=[...Ot(e)].slice(0,200),s=await Ae(e);return JSON.stringify({bigrams:t,content_hash:s})}async function $n(e,t,s,a){await e.DB.prepare("INSERT INTO post_fingerprints (post_id, account_id, fingerprint) VALUES (?, ?, ?)").bind(t,s??null,a).run()}async function Fn(e,t,s,a={}){const n={pass:!0,blocked_reason:null,scores:[]};if(!t||!s)return n;const i=[s];let r=`SELECT id, body FROM post_queue
               WHERE account_id = ? AND body IS NOT NULL AND body != ''
-                AND status IN ('posted','approved','publishing')`;s.post_id&&(r+=" AND id != ?",i.push(s.post_id)),r+=" ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC LIMIT 5";const{results:o}=await e.DB.prepare(r).bind(...i).all();for(const d of o||[]){const l=ts(t,d.body||"");if(n.scores.push({post_id:d.id,similarity:l}),l>=Kn){n.pass=!1,n.blocked_reason=`過去投稿(ID:${d.id})と類似度 ${l.toFixed(2)} で重複`;break}}return n}const M=new D;async function Xn(e,t,a){const s=String(a??"default");let n=await e.DB.prepare("SELECT * FROM target_templates WHERE account_id = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1").bind(s,t).first();n||(n=await e.DB.prepare("SELECT * FROM target_templates WHERE user_id = ? OR user_id IS NULL ORDER BY is_default DESC, id ASC LIMIT 1").bind(t).first());let i=await e.DB.prepare("SELECT * FROM brand_voice WHERE account_id = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1").bind(s,t).first();return i||(i=await e.DB.prepare("SELECT * FROM brand_voice WHERE user_id = ? OR user_id IS NULL ORDER BY is_default DESC, id ASC LIMIT 1").bind(t).first()),{target:n,voice:i}}async function Zn(e,t){if(!(!e.TELEGRAM_BOT_TOKEN||!e.TELEGRAM_CHAT_ID))try{await fetch(`https://api.telegram.org/bot${e.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:e.TELEGRAM_CHAT_ID,text:t,parse_mode:"HTML"})})}catch{}}async function da(e,t){try{await e.DB.prepare(`INSERT INTO post_logs
+                AND status IN ('posted','approved','publishing')`;a.post_id&&(r+=" AND id != ?",i.push(a.post_id)),r+=" ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC LIMIT 5";const{results:o}=await e.DB.prepare(r).bind(...i).all();for(const d of o||[]){const l=Ws(t,d.body||"");if(n.scores.push({post_id:d.id,similarity:l}),l>=Ln){n.pass=!1,n.blocked_reason=`過去投稿(ID:${d.id})と類似度 ${l.toFixed(2)} で重複`;break}}return n}const U=new A;async function qn(e,t,s){const a=String(s??"default");let n=await e.DB.prepare("SELECT * FROM target_templates WHERE account_id = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1").bind(a,t).first();n||(n=await e.DB.prepare("SELECT * FROM target_templates WHERE user_id = ? OR user_id IS NULL ORDER BY is_default DESC, id ASC LIMIT 1").bind(t).first());let i=await e.DB.prepare("SELECT * FROM brand_voice WHERE account_id = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1").bind(a,t).first();return i||(i=await e.DB.prepare("SELECT * FROM brand_voice WHERE user_id = ? OR user_id IS NULL ORDER BY is_default DESC, id ASC LIMIT 1").bind(t).first()),{target:n,voice:i}}async function as(e,t){if(!(!e.TELEGRAM_BOT_TOKEN||!e.TELEGRAM_CHAT_ID))try{await fetch(`https://api.telegram.org/bot${e.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:e.TELEGRAM_CHAT_ID,text:t,parse_mode:"HTML"})})}catch{}}async function ns(e,t){try{await e.DB.prepare(`INSERT INTO post_logs
          (record_id, account_id, user_id, account_name, platform,
           source_type, generation_type, post_mode, content, content_hash, link_url,
           media_type, media_upload_status, media_id,
           thread_parent_id, thread_order, thread_total_count,
           recycle_source_post_id, recycle_rule,
           scheduled_at, executed_at, posted_at, status, error_message, api_response_summary)
-       VALUES (?, ?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(t.record_id??null,t.account_id??null,t.user_id??null,t.account_name??"",t.source_type??"",t.generation_type??null,t.post_mode??"body",t.content??"",t.content_hash??"",t.link_url??"",t.media_type??null,t.media_upload_status??null,t.media_id??null,t.thread_parent_id??null,t.thread_order??null,t.thread_total_count??null,t.recycle_source_post_id??null,t.recycle_rule??null,t.scheduled_at??null,t.executed_at??x(),t.posted_at??null,t.status??"posted",t.error_message??null,t.api_response_summary??null).run()}catch(a){console.error("[PostLog]",a.message)}}M.get("/api/admin/posts",f,async e=>{const t=e.get("user"),a=e.req.query("status"),s=e.req.query("account_id"),n=e.req.query("post_mode"),i=parseInt(e.req.query("page")||"1",10),r=50,o=(i-1)*r;let d="WHERE pq.platform='x' AND pq.user_id = ?";const l=[t.id];a&&a!=="all"&&(d+=" AND pq.status = ?",l.push(a)),s&&(d+=" AND pq.account_id = ?",l.push(Number(s))),n&&n!=="all"&&(d+=" AND pq.post_mode = ?",l.push(n));const{results:c}=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
+       VALUES (?, ?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(t.record_id??null,t.account_id??null,t.user_id??null,t.account_name??"",t.source_type??"",t.generation_type??null,t.post_mode??"body",t.content??"",t.content_hash??"",t.link_url??"",t.media_type??null,t.media_upload_status??null,t.media_id??null,t.thread_parent_id??null,t.thread_order??null,t.thread_total_count??null,t.recycle_source_post_id??null,t.recycle_rule??null,t.scheduled_at??null,t.executed_at??g(),t.posted_at??null,t.status??"posted",t.error_message??null,t.api_response_summary??null).run()}catch(s){console.error("[PostLog]",s.message)}}U.get("/api/admin/posts",m,async e=>{const t=e.get("user"),s=e.req.query("status"),a=e.req.query("account_id"),n=e.req.query("post_mode"),i=parseInt(e.req.query("page")||"1",10),r=50,o=(i-1)*r;let d="WHERE pq.platform='x' AND pq.user_id = ?";const l=[t.id];s&&s!=="all"&&(d+=" AND pq.status = ?",l.push(s)),a&&(d+=" AND pq.account_id = ?",l.push(Number(a))),n&&n!=="all"&&(d+=" AND pq.post_mode = ?",l.push(n));const{results:c}=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
        FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id = xa.id
-       ${d} ORDER BY pq.created_at DESC LIMIT ? OFFSET ?`).bind(...l,r,o).all(),p=await e.env.DB.prepare(`SELECT COUNT(*) AS total FROM post_queue pq ${d}`).bind(...l).first();return e.json({posts:c||[],total:(p==null?void 0:p.total)??0,page:i})});M.get("/api/admin/posts/:id",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
+       ${d} ORDER BY pq.created_at DESC LIMIT ? OFFSET ?`).bind(...l,r,o).all(),p=await e.env.DB.prepare(`SELECT COUNT(*) AS total FROM post_queue pq ${d}`).bind(...l).first();return e.json({posts:c||[],total:(p==null?void 0:p.total)??0,page:i})});U.get("/api/admin/posts/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
        FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id = xa.id
-       WHERE pq.id = ? AND pq.user_id = ?`).bind(a,t.id).first();return s?e.json({post:s}):e.json({error:"Not found"},404)});M.post("/api/admin/posts",f,async e=>{const t=e.get("user"),a=await e.req.json();if(!a.body)return e.json({error:"body is required"},400);const s=x(),n=await Se(a.body);if(a.scheduled_at&&a.post_mode==="scheduled_once"){const r=await e.env.DB.prepare(`SELECT id FROM post_queue WHERE platform='x' AND user_id=? AND account_id IS ?
+       WHERE pq.id = ? AND pq.user_id = ?`).bind(s,t.id).first();return a?e.json({post:a}):e.json({error:"Not found"},404)});U.post("/api/admin/posts",m,async e=>{const t=e.get("user"),s=await e.req.json();if(!s.body)return e.json({error:"body is required"},400);const a=g(),n=await Ae(s.body);if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepare(`SELECT id FROM post_queue WHERE platform='x' AND user_id=? AND account_id IS ?
          AND body=? AND COALESCE(link_url,'')=COALESCE(?,'') AND scheduled_at=? AND post_mode='scheduled_once'
-         AND status NOT IN ('cancelled','failed')`).bind(t.id,a.account_id||null,a.body,a.link_url||"",a.scheduled_at).first();if(r)return e.json({success:!1,error:`Same content/time already exists (ID:${r.id})`})}const i=await e.env.DB.prepare(`INSERT INTO post_queue
+         AND status NOT IN ('cancelled','failed')`).bind(t.id,s.account_id||null,s.body,s.link_url||"",s.scheduled_at).first();if(r)return e.json({success:!1,error:`Same content/time already exists (ID:${r.id})`})}const i=await e.env.DB.prepare(`INSERT INTO post_queue
        (platform, user_id, account_id, body, link_url, hashtags,
         post_mode, status, scheduled_at, content_hash, generation_type, source_type,
         recurrence_type, recurrence_rule, recurrence_end_at, next_run_at,
@@ -3036,21 +2707,21 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
              ?, ?, ?, ?,
              ?, ?, ?, ?,
              ?, ?, ?, ?, ?,
-             ?, ?)`).bind(t.id,a.account_id??null,a.body,a.link_url??null,a.hashtags??null,a.post_mode??"body",a.status??"pending",a.scheduled_at??null,n,a.generation_type??null,a.source_type??"manual_post",a.recurrence_type??null,a.recurrence_rule??null,a.recurrence_end_at??null,a.next_run_at??null,a.recycle_rule??null,a.source_post_id??null,a.min_engagement_score??0,a.rewrite_mode??null,a.thread_parent_id??null,a.thread_order??0,a.thread_count??0,a.media_type??null,a.media_file_path??null,s,s).run();return e.json({success:!0,id:i.meta.last_row_id})});M.post("/api/admin/posts/generate",f,async e=>{const t=e.get("user"),{theme:a,keywords:s,count:n,pattern_type:i,post_mode:r,link_url:o,hashtags:d,footer_text:l,account_id:c,generation_type:p}=await e.req.json();if(!a)return e.json({error:"theme required"},400);let m=e.env.OPENAI_API_KEY||"";try{const v=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='openai_api_key' LIMIT 1").first();if(v!=null&&v.value){const{aesDecrypt:j}=await Promise.resolve().then(()=>lt),O=await j(v.value,e.env.ENCRYPTION_KEY);O&&(m=O)}}catch{}if(!m)return e.json({error:"OpenAI APIキーが設定されていません。API設定画面から設定してください。"},400);let h=c??null;if(!h){const v=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();h=(v==null?void 0:v.id)??null}const{target:g,voice:k}=await Xn(e.env,t.id,h),y=x(),w=[];try{const v=Math.min(n||1,10);for(let j=0;j<v;j++){const O=r||"body";let A;i?A=await es(m,i,a,s||"",g,k,O):A=await Qa(m,a,s||"",g,k,O),A=qn(A),l&&(A=A.trimEnd()+`
+             ?, ?)`).bind(t.id,s.account_id??null,s.body,s.link_url??null,s.hashtags??null,s.post_mode??"body",s.status??"pending",s.scheduled_at??null,n,s.generation_type??null,s.source_type??"manual_post",s.recurrence_type??null,s.recurrence_rule??null,s.recurrence_end_at??null,s.next_run_at??null,s.recycle_rule??null,s.source_post_id??null,s.min_engagement_score??0,s.rewrite_mode??null,s.thread_parent_id??null,s.thread_order??0,s.thread_count??0,s.media_type??null,s.media_file_path??null,a,a).run();return e.json({success:!0,id:i.meta.last_row_id})});U.post("/api/admin/posts/generate",m,async e=>{const t=e.get("user"),s=e.env.OPENAI_API_KEY,{theme:a,keywords:n,count:i,pattern_type:r,post_mode:o,link_url:d,hashtags:l,footer_text:c,account_id:p,generation_type:_}=await e.req.json();if(!a)return e.json({error:"theme required"},400);if(!s)return e.json({error:"OPENAI_API_KEY not set"},500);let b=p??null;if(!b){const k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();b=(k==null?void 0:k.id)??null}const{target:v,voice:T}=await qn(e.env,t.id,b),E=g(),D=[];try{const k=Math.min(i||1,10);for(let N=0;N<k;N++){const P=o||"body";let L;r?L=await Us(s,r,a,n||"",v,T,P):L=await Hs(s,a,n||"",v,T,P),c&&(L=L.trimEnd()+`
 
-`+l.trim());const De=await Se(A),G=await e.env.DB.prepare(`INSERT INTO post_queue
+`+c.trim());const nt=await Ae(L),Q=await e.env.DB.prepare(`INSERT INTO post_queue
            (platform, user_id, account_id, theme, keywords, body, link_url, hashtags, post_mode, pattern_type,
             content_hash, generation_type, source_type, status, created_at, updated_at)
-         VALUES ('x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`).bind(t.id,h,a,s||"",A,o||null,d||null,O,i||null,De,p||i||"general",i?"pattern_generated_post":"ai_generated_post",y,y).run();w.push({id:G.meta.last_row_id,body:A,link_url:o||"",post_mode:O});try{await e.env.DB.prepare(`INSERT INTO generation_logs
+         VALUES ('x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`).bind(t.id,b,a,n||"",L,d||null,l||null,P,r||null,nt,_||r||"general",r?"pattern_generated_post":"ai_generated_post",E,E).run();D.push({id:Q.meta.last_row_id,body:L,link_url:d||"",post_mode:P});try{await e.env.DB.prepare(`INSERT INTO generation_logs
              (user_id, account_id, brand_voice_id, target_setting_id, post_mode, generation_type, output_text)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(t.id,h,(k==null?void 0:k.id)??null,(g==null?void 0:g.id)??null,O,i||"general",A.slice(0,500)).run()}catch{}}return e.json({success:!0,generated:w,count:w.length})}catch(v){return e.json({error:"AI error: "+v.message},500)}});M.post("/api/admin/posts/:id/approve",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='approved', updated_at=? WHERE id=? AND user_id=?").bind(x(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});M.post("/api/admin/posts/:id/reject",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='rejected', updated_at=? WHERE id=? AND user_id=?").bind(x(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});M.post("/api/admin/posts/:id/schedule",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10),{scheduled_at:s,jitter_enabled:n=!0,jitter_minutes:i=5,collision_avoidance_enabled:r=!0,min_spacing_seconds:o=90}=await e.req.json();if(!s)return e.json({error:"scheduled_at required"},400);const d=await e.env.DB.prepare("SELECT * FROM post_queue WHERE id=? AND user_id=?").bind(a,t.id).first();if(!d)return e.json({success:!1,error:"Not found"},404);const l=await Gn(e.env,d.body||"",d.account_id??null,{post_id:d.id});if(!l.pass)return e.json({success:!1,error:"類似: "+l.blocked_reason,similarity_blocked:!0,scores:l.scores});const{effective_at:c,audit:p}=await zn(e.env,s,{jitter_enabled:n,jitter_minutes:i,collision_avoidance_enabled:r,min_spacing_seconds:o,account_id:d.account_id,exclude_id:d.id}),m=await Jn(d.body||"");return await Vn(e.env,d.id,d.account_id,m),await e.env.DB.prepare(`UPDATE post_queue SET
+           VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(t.id,b,(T==null?void 0:T.id)??null,(v==null?void 0:v.id)??null,P,r||"general",L.slice(0,500)).run()}catch{}}return e.json({success:!0,generated:D,count:D.length})}catch(k){return e.json({error:"AI error: "+k.message},500)}});U.post("/api/admin/posts/:id/approve",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='approved', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});U.post("/api/admin/posts/:id/reject",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='rejected', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});U.post("/api/admin/posts/:id/schedule",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),{scheduled_at:a,jitter_enabled:n=!0,jitter_minutes:i=5,collision_avoidance_enabled:r=!0,min_spacing_seconds:o=90}=await e.req.json();if(!a)return e.json({error:"scheduled_at required"},400);const d=await e.env.DB.prepare("SELECT * FROM post_queue WHERE id=? AND user_id=?").bind(s,t.id).first();if(!d)return e.json({success:!1,error:"Not found"},404);const l=await Fn(e.env,d.body||"",d.account_id??null,{post_id:d.id});if(!l.pass)return e.json({success:!1,error:"類似: "+l.blocked_reason,similarity_blocked:!0,scores:l.scores});const{effective_at:c,audit:p}=await Bn(e.env,a,{jitter_enabled:n,jitter_minutes:i,collision_avoidance_enabled:r,min_spacing_seconds:o,account_id:d.account_id,exclude_id:d.id}),_=await Mn(d.body||"");return await $n(e.env,d.id,d.account_id,_),await e.env.DB.prepare(`UPDATE post_queue SET
        status='approved', base_scheduled_at=?, effective_scheduled_at=?, scheduled_at=?,
        jitter_enabled=?, jitter_minutes=?, collision_avoidance_enabled=?, min_spacing_seconds=?,
        schedule_resolution_log=?, updated_at=?
-     WHERE id=?`).bind(s,c,c,n?1:0,i,r?1:0,o,JSON.stringify(p),x(),a).run(),await Yn(e.env,d.id,d.account_id,p),e.json({success:!0,base_scheduled_at:s,effective_scheduled_at:c,scheduled_at:c,audit:p})});M.post("/api/admin/posts/:id/post-now",f,async e=>{var d;const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=(await e.req.json().catch(()=>({}))).force_override===!0,n=await e.env.DB.prepare("SELECT * FROM post_queue WHERE id=? AND user_id=?").bind(a,t.id).first();if(!n)return e.json({success:!1,error:"Not found"},404);let i=null;if(n.account_id&&(i=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=?").bind(n.account_id,t.id).first()),i||(i=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first(),i&&await e.env.DB.prepare("UPDATE post_queue SET account_id=? WHERE id=?").bind(i.id,a).run()),!i)return e.json({success:!1,error:"No active X account"});const r=await ns(e.env,i.id,n.body||"",n.link_url,n.hashtags),o=r.errors.filter(l=>!(s&&l.overridable));if(o.length>0){const l=r.errors.find(c=>c.overridable);return l&&!s?e.json({success:!1,error:l.message,overridable:!0,cooldown_override:!0}):e.json({success:!1,error:"Safety: "+o.map(c=>c.message).join("; ")})}if(!await as(e.env,i.id))return e.json({success:!1,error:"Account busy"});try{await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=?").bind(x(),a).run();let l;try{const y=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id=? LIMIT 1").bind(t.id).first();if(y!=null&&y.api_key){const{aesDecrypt:w}=await Promise.resolve().then(()=>lt);l={apiKey:await w(y.api_key,e.env.ENCRYPTION_KEY),apiSecret:y.api_secret?await w(y.api_secret,e.env.ENCRYPTION_KEY):""}}}catch{}const c=await St(e.env,i,l);let p=Tt(n.body||"",n.post_mode);n.link_url&&(p+=`
-`+n.link_url),n.hashtags&&(p+=`
-`+n.hashtags);const m=[],h=await e.req.json().catch(()=>({})),g=n.options_json?(()=>{try{return JSON.parse(String(n.options_json))}catch{return{}}})():{};if((d=h.media_images)!=null&&d.length&&(g.media_images=h.media_images),h.media_video&&(g.media_video=h.media_video),g.media_images&&Array.isArray(g.media_images)&&g.media_images.length>0){const{uploadImage:y}=await Promise.resolve().then(()=>Va);for(const w of g.media_images.slice(0,4))try{if(w.data&&typeof w.data=="string"){const v=w.data.includes(",")?w.data.split(",")[1]:w.data,j=w.type||"image/jpeg",O=Uint8Array.from(atob(v),De=>De.charCodeAt(0)),A=await y(c,O,j);A!=null&&A.media_id_string&&m.push(A.media_id_string)}}catch(v){console.error("Media upload failed:",v.message)}}if(g.media_json)try{const y=JSON.parse(g.media_json);for(const w of(y||[]).slice(0,4)){const v=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(w,t.id).first();v!=null&&v.x_media_id&&m.push(v.x_media_id)}}catch{}const k=m.length>0?await zt(c,p,m,null):await Wt(c,p);return await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(k.id||"",x(),x(),a).run(),await e.env.DB.prepare(`UPDATE x_accounts SET last_posted_at=?, daily_post_count=daily_post_count+1,
-         last_daily_reset_date = DATE('now','+9 hours'), updated_at=? WHERE id=?`).bind(x(),x(),i.id).run(),await da(e.env,{record_id:a,account_id:i.id,user_id:t.id,account_name:i.account_name,source_type:n.source_type||"manual_post",generation_type:n.generation_type,post_mode:n.post_mode,content:n.body||"",content_hash:n.content_hash||"",link_url:n.link_url,posted_at:x(),status:"posted",api_response_summary:JSON.stringify({tweet_id:k.id})}),e.json({success:!0,tweet_id:k.id})}catch(l){return await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(l.message,x(),a).run(),await da(e.env,{record_id:a,account_id:i.id,user_id:t.id,account_name:i.account_name,source_type:n.source_type,post_mode:n.post_mode,content:n.body||"",content_hash:n.content_hash||"",status:"failed",error_message:l.message}),l instanceof kt?await yt(e.env,i.id,"rate_limit",-15):await yt(e.env,i.id,"error",-5,{message:l.message}),await Zn(e.env,`X post FAILED #${a} ${l.message}`),e.json({success:!1,error:l.message})}finally{await ss(e.env,i.id)}});M.put("/api/admin/posts/:id",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.req.json(),n=x(),i=s.body?await Se(s.body):null;return s.media_json!==void 0&&s.body===void 0?(await e.env.DB.prepare("UPDATE post_queue SET media_json=?, updated_at=? WHERE id=? AND user_id=?").bind(s.media_json,n,a,t.id).run(),e.json({success:!0})):s.account_id!==void 0&&s.body===void 0?(await e.env.DB.prepare("UPDATE post_queue SET account_id=?, updated_at=? WHERE id=? AND user_id=?").bind(s.account_id,n,a,t.id).run(),e.json({success:!0})):(await e.env.DB.prepare(`UPDATE post_queue SET
+     WHERE id=?`).bind(a,c,c,n?1:0,i,r?1:0,o,JSON.stringify(p),g(),s).run(),await Nn(e.env,d.id,d.account_id,p),e.json({success:!0,base_scheduled_at:a,effective_scheduled_at:c,scheduled_at:c,audit:p})});U.post("/api/admin/posts/:id/post-now",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=(await e.req.json().catch(()=>({}))).force_override===!0,n=await e.env.DB.prepare("SELECT * FROM post_queue WHERE id=? AND user_id=?").bind(s,t.id).first();if(!n)return e.json({success:!1,error:"Not found"},404);let i=null;if(n.account_id&&(i=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=?").bind(n.account_id,t.id).first()),i||(i=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first(),i&&await e.env.DB.prepare("UPDATE post_queue SET account_id=? WHERE id=?").bind(i.id,s).run()),!i)return e.json({success:!1,error:"No active X account"});const r=await Ks(e.env,i.id,n.body||"",n.link_url,n.hashtags),o=r.errors.filter(d=>!(a&&d.overridable));if(o.length>0){const d=r.errors.find(l=>l.overridable);return d&&!a?e.json({success:!1,error:d.message,overridable:!0,cooldown_override:!0}):e.json({success:!1,error:"Safety: "+o.map(l=>l.message).join("; ")})}if(!await Ys(e.env,i.id))return e.json({success:!1,error:"Account busy"});try{await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=?").bind(g(),s).run();const d=await Ft(e.env,i);let l=bt(n.body||"",n.post_mode);n.link_url&&(l+=`
+`+n.link_url),n.hashtags&&(l+=`
+`+n.hashtags);const c=[];if(n.media_json)try{const _=JSON.parse(n.media_json);for(const b of(_||[]).slice(0,4)){const v=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(b,t.id).first();if(v){if(!v.x_media_id){try{let bytes,mime;if(v.storage_path&&v.storage_path.startsWith("/media/")&&e.env.MEDIA_BUCKET){const obj=await e.env.MEDIA_BUCKET.get(v.storage_path.slice(7));if(obj){bytes=await obj.arrayBuffer();mime=v.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"}}else if(v.storage_path&&/^https?:/i.test(v.storage_path)){const rr=await fetch(v.storage_path,{signal:AbortSignal.timeout(3e4)});if(rr.ok){bytes=await rr.arrayBuffer();mime=v.mime_type||rr.headers.get("content-type")||"image/jpeg"}}if(bytes){const xid=await xMU_upload(d,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),v.id).run();c.push(xid)}}catch(uErr){console.error("[mediaUp]",uErr&&uErr.message)}}else c.push(v.x_media_id)}}}catch{}const p=c.length>0?await $s(d,l,c,null):await Ms(d,l);return await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(p.id||"",g(),g(),s).run(),await e.env.DB.prepare(`UPDATE x_accounts SET last_posted_at=?, daily_post_count=daily_post_count+1,
+         last_daily_reset_date = DATE('now','+9 hours'), updated_at=? WHERE id=?`).bind(g(),g(),i.id).run(),await ns(e.env,{record_id:s,account_id:i.id,user_id:t.id,account_name:i.account_name,source_type:n.source_type||"manual_post",generation_type:n.generation_type,post_mode:n.post_mode,content:n.body||"",content_hash:n.content_hash||"",link_url:n.link_url,posted_at:g(),status:"posted",api_response_summary:JSON.stringify({tweet_id:p.id})}),await as(e.env,`X posted @${i.x_username||i.account_name} ID:${p.id}`),e.json({success:!0,tweet_id:p.id})}catch(d){return await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(d.message,g(),s).run(),await ns(e.env,{record_id:s,account_id:i.id,user_id:t.id,account_name:i.account_name,source_type:n.source_type,post_mode:n.post_mode,content:n.body||"",content_hash:n.content_hash||"",status:"failed",error_message:d.message}),d instanceof Mt?await mt(e.env,i.id,"rate_limit",-15):await mt(e.env,i.id,"error",-5,{message:d.message}),await as(e.env,`X post FAILED #${s} ${d.message}`),e.json({success:!1,error:d.message})}finally{await Js(e.env,i.id)}});U.put("/api/admin/posts/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g(),i=a.body?await Ae(a.body):null;return a.media_json!==void 0&&a.body===void 0?(await e.env.DB.prepare("UPDATE post_queue SET media_json=?, updated_at=? WHERE id=? AND user_id=?").bind(a.media_json,n,s,t.id).run(),e.json({success:!0})):a.account_id!==void 0&&a.body===void 0?(await e.env.DB.prepare("UPDATE post_queue SET account_id=?, updated_at=? WHERE id=? AND user_id=?").bind(a.account_id,n,s,t.id).run(),e.json({success:!0})):(await e.env.DB.prepare(`UPDATE post_queue SET
        body=?, link_url=?, hashtags=?, scheduled_at=?, post_mode=?,
        media_json=COALESCE(?, media_json), content_hash=COALESCE(?, content_hash),
        recurrence_type=COALESCE(?, recurrence_type),
@@ -3058,21 +2729,19 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
        next_run_at=COALESCE(?, next_run_at),
        recurrence_end_at=COALESCE(?, recurrence_end_at),
        updated_at=?
-     WHERE id=? AND user_id=?`).bind(s.body,s.link_url??null,s.hashtags??null,s.scheduled_at??null,s.post_mode??"body",s.media_json??null,i,s.recurrence_type??null,s.recurrence_rule??null,s.next_run_at??null,s.recurrence_end_at??null,n,a,t.id).run(),e.json({success:!0}))});M.delete("/api/admin/posts/:id",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM post_queue WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});M.post("/api/admin/posts/:id/cancel",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(x(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});M.get("/api/admin/posts-scheduled",f,async e=>{const t=e.get("user"),a=e.req.query("account_id"),s=[t.id];let n="WHERE pq.platform='x' AND pq.user_id=? AND (pq.scheduled_at IS NOT NULL OR pq.status='pending') AND pq.status NOT IN ('cancelled','rejected','posted')";a&&(n+=" AND pq.account_id=?",s.push(Number(a)));const{results:i}=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
+     WHERE id=? AND user_id=?`).bind(a.body,a.link_url??null,a.hashtags??null,a.scheduled_at??null,a.post_mode??"body",a.media_json??null,i,a.recurrence_type??null,a.recurrence_rule??null,a.next_run_at??null,a.recurrence_end_at??null,n,s,t.id).run(),e.json({success:!0}))});U.delete("/api/admin/posts/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM post_queue WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});U.post("/api/admin/posts/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});U.get("/api/admin/posts-scheduled",m,async e=>{const t=e.get("user"),s=e.req.query("account_id"),a=[t.id];let n="WHERE pq.platform='x' AND pq.user_id=? AND pq.scheduled_at IS NOT NULL AND pq.status NOT IN ('cancelled','rejected')";s&&(n+=" AND pq.account_id=?",a.push(Number(s)));const{results:i}=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
        FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id=xa.id
-       ${n} ORDER BY pq.scheduled_at ASC`).bind(...s).all(),r=[t.id];let o="WHERE aj.user_id=? AND aj.status NOT IN ('cancelled','error') AND aj.publish_at IS NOT NULL";a&&(o+=" AND aj.account_id=?",r.push(Number(a)));const{results:d}=await e.env.DB.prepare(`SELECT aj.id, aj.account_id, aj.theme AS body, aj.publish_at AS scheduled_at, aj.status,
+       ${n} ORDER BY pq.scheduled_at ASC`).bind(...a).all(),r=[t.id];let o="WHERE aj.user_id=? AND aj.status NOT IN ('cancelled','error') AND aj.publish_at IS NOT NULL";s&&(o+=" AND aj.account_id=?",r.push(Number(s)));const{results:d}=await e.env.DB.prepare(`SELECT aj.id, aj.account_id, aj.theme AS body, aj.publish_at AS scheduled_at, aj.status,
             aj.content_mode AS post_type, 'autopilot' AS source_type, xa.account_name,
             aj.options_json AS media_json
        FROM autopilot_jobs aj LEFT JOIN x_accounts xa ON aj.account_id=xa.id
-       ${o} ORDER BY aj.publish_at ASC`).bind(...r).all(),l=(d||[]).map(p=>({...p,post_mode:"body",id:"ap-"+p.id})),c=[...i||[],...l].sort((p,m)=>(p.scheduled_at||"").localeCompare(m.scheduled_at||""));return e.json({posts:c})});M.post("/api/admin/posts/schedule",f,async e=>{var r;const t=e.get("user"),a=await e.req.json();if(!a.body&&!a.theme)return e.json({success:!1,error:"本文が必要です"},400);if(!a.scheduled_at)return e.json({success:!1,error:"予約日時が必要です"},400);const s=a.account_id||null,n=s?await e.env.DB.prepare("SELECT id FROM x_accounts WHERE id=? AND user_id=? AND is_active=1").bind(s,t.id).first():await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 LIMIT 1").bind(t.id).first(),{results:i}=await e.env.DB.prepare(`INSERT INTO post_queue (user_id, account_id, platform, body, link_url, hashtags, scheduled_at, status, post_mode, source_type, created_at, updated_at)
-     VALUES (?, ?, 'x', ?, ?, ?, ?, 'pending', 'body', 'manual_schedule', datetime('now','+9 hours'), datetime('now','+9 hours'))
-     RETURNING id`).bind(t.id,(n==null?void 0:n.id)||null,a.body||a.theme||"",a.link_url||null,a.hashtags||null,a.scheduled_at).all();return e.json({success:!0,post_id:(r=i==null?void 0:i[0])==null?void 0:r.id})});M.post("/api/admin/posts/:id/schedule-update",f,async e=>{var o;const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.req.json();if(!s.scheduled_at)return e.json({success:!1,error:"scheduled_at required"},400);const n=await e.env.DB.prepare("SELECT id, options_json FROM post_queue WHERE id=? AND user_id=?").bind(a,t.id).first();if(!n)return e.json({success:!1,error:"Not found"},404);const r={...n.options_json?(()=>{try{return JSON.parse(String(n.options_json))}catch{return{}}})():{},...(o=s.media_images)!=null&&o.length?{media_images:s.media_images}:{},...s.media_video?{media_video:s.media_video}:{}};return await e.env.DB.prepare("UPDATE post_queue SET status='pending', scheduled_at=?, options_json=?, updated_at=datetime('now','+9 hours') WHERE id=? AND user_id=?").bind(s.scheduled_at,JSON.stringify(r),a,t.id).run(),e.json({success:!0})});M.post("/api/admin/posts/thread",f,async e=>{const t=e.get("user"),{tweets:a,link_url:s,account_id:n}=await e.req.json();if(!a||!Array.isArray(a)||a.length<2)return e.json({error:"Thread requires 2+ tweets"},400);const i=x(),r=await Se(a[0].body),d=(await e.env.DB.prepare(`INSERT INTO post_queue
+       ${o} ORDER BY aj.publish_at ASC`).bind(...r).all(),l=(d||[]).map(p=>({...p,post_mode:"body",id:"ap-"+p.id})),c=[...i||[],...l].sort((p,_)=>(p.scheduled_at||"").localeCompare(_.scheduled_at||""));return e.json({posts:c})});U.post("/api/admin/posts/thread",m,async e=>{const t=e.get("user"),{tweets:s,link_url:a,account_id:n}=await e.req.json();if(!s||!Array.isArray(s)||s.length<2)return e.json({error:"Thread requires 2+ tweets"},400);const i=g(),r=await Ae(s[0].body),d=(await e.env.DB.prepare(`INSERT INTO post_queue
        (platform, user_id, account_id, body, link_url, post_mode, thread_count,
         content_hash, source_type, status, created_at, updated_at)
-     VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,a[0].body,a[0].link_url??s??null,a.length,r,i,i).run()).meta.last_row_id,l=[d];for(let c=1;c<a.length;c++){const p=await Se(a[c].body),m=await e.env.DB.prepare(`INSERT INTO post_queue
+     VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[0].body,s[0].link_url??a??null,s.length,r,i,i).run()).meta.last_row_id,l=[d];for(let c=1;c<s.length;c++){const p=await Ae(s[c].body),_=await e.env.DB.prepare(`INSERT INTO post_queue
          (platform, user_id, account_id, body, link_url, post_mode,
           thread_parent_id, thread_order, content_hash, source_type, status, created_at, updated_at)
-       VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,a[c].body,a[c].link_url??null,d,c,p,i,i).run();l.push(m.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const is=new D,Qn=5;is.post("/cron/tick",async e=>{const t=x(),{results:a}=await e.env.DB.prepare(`SELECT * FROM post_queue
+       VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[c].body,s[c].link_url??null,d,c,p,i,i).run();l.push(_.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const zs=new A,Pn=5;zs.post("/cron/tick",async e=>{const t=g(),{results:s}=await e.env.DB.prepare(`SELECT * FROM post_queue
       WHERE platform='x'
         AND status IN ('pending','approved')
         AND (
@@ -3080,9 +2749,9 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
            OR COALESCE(effective_scheduled_at, scheduled_at) <= datetime('now','+9 hours')
         )
       ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC
-      LIMIT ?`).bind(Qn).all();let s=0,n=0,i=0;for(const r of a||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){s++;try{if(!r.account_id)throw new Error("account_id is null");const d=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=?").bind(r.account_id).first();if(!d)throw new Error("account_not_found");const l=await ns(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await as(e.env,d.id))throw new Error("account_busy");try{const c=await St(e.env,d);let p=Tt(r.body||"",r.post_mode);r.link_url&&(p+=`
+      LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{if(!r.account_id)throw new Error("account_id is null");const d=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=?").bind(r.account_id).first();if(!d)throw new Error("account_not_found");const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id))throw new Error("account_busy");try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
-`+r.hashtags);const m=[];if(r.media_json)try{const g=JSON.parse(r.media_json);for(const k of(g||[]).slice(0,4)){const y=await e.env.DB.prepare("SELECT x_media_id FROM media_assets WHERE id=?").bind(k).first();y!=null&&y.x_media_id&&m.push(y.x_media_id)}}catch{}const h=m.length>0?await zt(c,p,m,null):await Wt(c,p);await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(h.id||"",x(),x(),r.id).run(),await e.env.DB.prepare(`UPDATE x_accounts SET
+`+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{let bytes,mime;if(E.storage_path&&E.storage_path.startsWith("/media/")&&e.env.MEDIA_BUCKET){const obj=await e.env.MEDIA_BUCKET.get(E.storage_path.slice(7));if(obj){bytes=await obj.arrayBuffer();mime=E.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"}}else if(E.storage_path&&/^https?:/i.test(E.storage_path)){const rr=await fetch(E.storage_path,{signal:AbortSignal.timeout(3e4)});if(rr.ok){bytes=await rr.arrayBuffer();mime=E.mime_type||rr.headers.get("content-type")||"image/jpeg"}}if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}const b=_.length>0?await $s(c,p,_,null):await Ms(c,p);await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),await e.env.DB.prepare(`UPDATE x_accounts SET
              last_posted_at = ?,
              daily_post_count = CASE
                WHEN last_daily_reset_date != DATE('now','+9 hours') THEN 1
@@ -3090,45 +2759,45 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
              END,
              last_daily_reset_date = DATE('now','+9 hours'),
              updated_at = ?
-           WHERE id = ?`).bind(x(),x(),d.id).run(),await e.env.DB.prepare(`INSERT INTO post_logs
+           WHERE id = ?`).bind(g(),g(),d.id).run(),await e.env.DB.prepare(`INSERT INTO post_logs
              (record_id, account_id, user_id, account_name, platform, source_type, generation_type,
               post_mode, content, content_hash, link_url, posted_at, executed_at, status, api_response_summary)
-           VALUES (?, ?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, 'posted', ?)`).bind(r.id,d.id,r.user_id,d.account_name,r.source_type,r.generation_type,r.post_mode,r.body||"",r.content_hash||"",r.link_url||"",x(),x(),JSON.stringify({tweet_id:h.id})).run(),await e.env.DB.prepare(`INSERT INTO kpi_metrics (account_id, user_id, metric_date, posts_sent)
+           VALUES (?, ?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, 'posted', ?)`).bind(r.id,d.id,r.user_id,d.account_name,r.source_type,r.generation_type,r.post_mode,r.body||"",r.content_hash||"",r.link_url||"",g(),g(),JSON.stringify({tweet_id:b.id})).run(),await e.env.DB.prepare(`INSERT INTO kpi_metrics (account_id, user_id, metric_date, posts_sent)
            VALUES (?, ?, date('now','+9 hours'), 1)
            ON CONFLICT(account_id, metric_date) DO UPDATE SET
              posts_sent = posts_sent + 1,
-             updated_at = datetime('now','+9 hours')`).bind(d.id,r.user_id).run(),n++}finally{await ss(e.env,d.id)}}catch(d){const l=(d==null?void 0:d.message)||"unknown_error";await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(l,x(),r.id).run(),await e.env.DB.prepare(`INSERT INTO post_logs
+             updated_at = datetime('now','+9 hours')`).bind(d.id,r.user_id).run(),n++}finally{await Js(e.env,d.id)}}catch(d){const l=(d==null?void 0:d.message)||"unknown_error";await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(l,g(),r.id).run(),await e.env.DB.prepare(`INSERT INTO post_logs
            (record_id, account_id, user_id, platform, source_type, post_mode, content, content_hash,
             status, error_message, executed_at)
-         VALUES (?, ?, ?, 'x', ?, ?, ?, ?, 'failed', ?, ?)`).bind(r.id,r.account_id,r.user_id,r.source_type,r.post_mode,r.body||"",r.content_hash||"",l,x()).run(),r.account_id&&(d instanceof kt?await yt(e.env,r.account_id,"rate_limit",-15):await yt(e.env,r.account_id,"error",-5,{message:l})),r.account_id&&await e.env.DB.prepare(`INSERT INTO kpi_metrics (account_id, user_id, metric_date, posts_failed)
+         VALUES (?, ?, ?, 'x', ?, ?, ?, ?, 'failed', ?, ?)`).bind(r.id,r.account_id,r.user_id,r.source_type,r.post_mode,r.body||"",r.content_hash||"",l,g()).run(),r.account_id&&(d instanceof Mt?await mt(e.env,r.account_id,"rate_limit",-15):await mt(e.env,r.account_id,"error",-5,{message:l})),r.account_id&&await e.env.DB.prepare(`INSERT INTO kpi_metrics (account_id, user_id, metric_date, posts_failed)
            VALUES (?, ?, date('now','+9 hours'), 1)
            ON CONFLICT(account_id, metric_date) DO UPDATE SET
              posts_failed = posts_failed + 1,
-             updated_at = datetime('now','+9 hours')`).bind(r.account_id,r.user_id).run(),i++}}}return e.json({ok:!0,processed:s,success:n,failed:i,now:t})});const ge=new D;ge.get("/api/admin/autopilot/jobs",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT aj.*, xa.account_name
+             updated_at = datetime('now','+9 hours')`).bind(r.account_id,r.user_id).run(),i++}}}return e.json({ok:!0,processed:a,success:n,failed:i,now:t})});const ve=new A;ve.get("/api/admin/autopilot/jobs",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT aj.*, xa.account_name
        FROM autopilot_jobs aj LEFT JOIN x_accounts xa ON aj.account_id = xa.id
       WHERE aj.user_id = ?
-      ORDER BY COALESCE(aj.generate_at, aj.publish_at, aj.created_at) DESC LIMIT 100`).bind(t.id).all(),{results:s}=await e.env.DB.prepare("SELECT id, account_name FROM x_accounts WHERE user_id = ? AND is_active = 1").bind(t.id).all();return e.json({jobs:a||[],accounts:s||[]})});ge.get("/api/admin/autopilot/jobs/:id",f,async e=>{const t=e.get("user"),a=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).first();return a?e.json(a):e.json({error:"not found"})});ge.post("/api/admin/autopilot/jobs",f,async e=>{var p;const t=e.get("user"),a=await e.req.json(),s=x(),n=(a.publish_at||a.generate_at||s).slice(0,10),i=await e.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM autopilot_jobs
+      ORDER BY COALESCE(aj.generate_at, aj.publish_at, aj.created_at) DESC LIMIT 100`).bind(t.id).all(),{results:a}=await e.env.DB.prepare("SELECT id, account_name FROM x_accounts WHERE user_id = ? AND is_active = 1").bind(t.id).all();return e.json({jobs:s||[],accounts:a||[]})});ve.get("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).first();return s?e.json(s):e.json({error:"not found"})});ve.post("/api/admin/autopilot/jobs",m,async e=>{const t=e.get("user"),s=await e.req.json(),a=g(),n=(s.publish_at||s.generate_at||a).slice(0,10),i=await e.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM autopilot_jobs
        WHERE user_id=? AND account_id=?
          AND SUBSTR(COALESCE(publish_at, generate_at, created_at), 1, 10)=?
-         AND status NOT IN ('cancelled')`).bind(t.id,a.account_id||0,n).first();if(((i==null?void 0:i.cnt)??0)>=10)return e.json({success:!1,error:"この日は既に10件の予約があります"});const r=await e.env.DB.prepare("SELECT MAX(CAST(reservation_no AS INTEGER)) AS mx FROM autopilot_jobs").first(),o=String(((r==null?void 0:r.mx)??0)+1).padStart(4,"0");let d=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const m=new Date(a.publish_at.replace(" ","T"));m.setMinutes(m.getMinutes()-2),d=m.toISOString().replace("T"," ").slice(0,19)}catch{}const l=d||a.publish_at?"configured":"draft",c=await e.env.DB.prepare(`INSERT INTO autopilot_jobs
+         AND status NOT IN ('cancelled')`).bind(t.id,s.account_id||0,n).first();if(((i==null?void 0:i.cnt)??0)>=10)return e.json({success:!1,error:"この日は既に10件の予約があります"});const r=await e.env.DB.prepare("SELECT MAX(CAST(reservation_no AS INTEGER)) AS mx FROM autopilot_jobs").first(),o=String(((r==null?void 0:r.mx)??0)+1).padStart(4,"0");let d=s.generate_at??null;if(s.publish_at&&!s.generate_at)try{const p=new Date(s.publish_at.replace(" ","T"));p.setMinutes(p.getMinutes()-2),d=p.toISOString().replace("T"," ").slice(0,19)}catch{}const l=d||s.publish_at?"configured":"draft",c=await e.env.DB.prepare(`INSERT INTO autopilot_jobs
        (reservation_no, user_id, account_id, channel_type, content_mode, theme, keywords,
         prompt_text, options_json, title_memo, link_url, generate_at, publish_at, status, created_at, updated_at)
-     VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,a.account_id??null,a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",JSON.stringify({...a.options_json?typeof a.options_json=="string"?JSON.parse(a.options_json):a.options_json:{},...a.footer_text?{footer_text:a.footer_text}:{},...(p=a.media_images)!=null&&p.length?{media_images:a.media_images}:{},...a.media_video?{media_video:a.media_video,media_video_name:a.media_video_name,media_video_type:a.media_video_type}:{}}),a.title_memo||"",a.link_url||"",d,a.publish_at||null,l,s,s).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ge.put("/api/admin/autopilot/jobs/:id",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.req.json(),n=x();let i=s.generate_at??null;if(s.publish_at&&!s.generate_at)try{const o=new Date(s.publish_at.replace(" ","T"));o.setMinutes(o.getMinutes()-2),i=o.toISOString().replace("T"," ").slice(0,19)}catch{}const r=i||s.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
+     VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",s.options_json||"{}",s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T"));o.setMinutes(o.getMinutes()-2),i=o.toISOString().replace("T"," ").slice(0,19)}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
        content_mode=?, theme=?, keywords=?, prompt_text=?, options_json=?, title_memo=?,
        link_url=?, generate_at=?, publish_at=?, status=?, updated_at=?
-     WHERE id=? AND user_id=?`).bind(s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",s.options_json||"{}",s.title_memo||"",s.link_url||"",i,s.publish_at||null,r,n,a,t.id).run(),e.json({success:!0})});ge.delete("/api/admin/autopilot/jobs/:id",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ge.post("/api/admin/autopilot/jobs/:id/cancel",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(x(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ge.post("/cron/autopilot-tick",async e=>{if(!e.env.OPENAI_API_KEY)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
+     WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/cron/autopilot-tick",async e=>{if(!e.env.OPENAI_API_KEY)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
        WHERE status = 'configured'
          AND generate_at IS NOT NULL
          AND generate_at <= datetime('now','+9 hours')
-       ORDER BY generate_at ASC LIMIT 5`).all();let a=0;for(const s of t||[])try{const n=String(s.account_id??"default");let i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,s.user_id).first();i||(i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(s.user_id).first());let r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,s.user_id).first();r||(r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(s.user_id).first());let o;s.content_mode&&s.content_mode!=="freetext"?o=await es(e.env.OPENAI_API_KEY,s.content_mode,s.theme||"",s.keywords||"",i,r,"body"):o=await Qa(e.env.OPENAI_API_KEY,s.theme||"",s.keywords||"",i,r,"body");const d=await Se(o),l=x(),c=await e.env.DB.prepare(`INSERT INTO post_queue
+       ORDER BY generate_at ASC LIMIT 5`).all();let s=0;for(const a of t||[])try{const n=String(a.account_id??"default");let i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();i||(i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();r||(r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let o;a.content_mode&&a.content_mode!=="freetext"?o=await Us(e.env.OPENAI_API_KEY,a.content_mode,a.theme||"",a.keywords||"",i,r,"body"):o=await Hs(e.env.OPENAI_API_KEY,a.theme||"",a.keywords||"",i,r,"body");const d=await Ae(o),l=g(),c=await e.env.DB.prepare(`INSERT INTO post_queue
            (platform, user_id, account_id, body, link_url, post_mode,
             scheduled_at, effective_scheduled_at, base_scheduled_at,
             content_hash, generation_type, source_type, status, created_at, updated_at)
-         VALUES ('x', ?, ?, ?, ?, 'body', ?, ?, ?, ?, ?, 'autopilot', 'approved', ?, ?)`).bind(s.user_id,s.account_id,o,s.link_url,s.publish_at,s.publish_at,s.publish_at,d,s.content_mode,l,l).run();await e.env.DB.prepare("UPDATE autopilot_jobs SET status='generated', generated_post_id=?, updated_at=? WHERE id=?").bind(c.meta.last_row_id,l,s.id).run(),a++}catch(n){await e.env.DB.prepare("UPDATE autopilot_jobs SET status='error', error_message=?, updated_at=? WHERE id=?").bind((n==null?void 0:n.message)||"unknown_error",x(),s.id).run()}return e.json({ok:!0,generated:a,total:(t||[]).length})});const la={topics:[{title:"投稿の基本",keywords:["投稿","ポスト","ツイート","post","tweet"],answer:"[新規投稿] タブから本文を入力し「投稿キューへ」で予約できます。即時投稿は [今すぐ投稿] ボタンから。"},{title:"オートパイロット",keywords:["オートパイロット","autopilot","自動投稿","自動"],answer:"[オートパイロット] タブでジョブを作成すると、指定時刻に OpenAI が投稿案を生成しキューに入ります。"},{title:"アカウント連携",keywords:["連携","アカウント","追加","OAuth","トークン"],answer:"X Developer Portal で Consumer Key/Secret と Access Token/Secret を取得し、[アカウント管理] から追加してください。OAuth 1.0a User Context を使用します。"},{title:"ライセンス",keywords:["ライセンス","認証","license","VPS-GE365X"],answer:"ログイン画面の [ライセンス] タブから VPS-GE365X-XXXXXXXX 形式のキーを入力するとプランが有効化されます。"},{title:"類似度制御",keywords:["類似","重複","ブロック","similarity"],answer:"同一アカウントの直近5件と Jaccard係数 0.7 以上の類似があると投稿がブロックされます。"},{title:"投稿間隔",keywords:["間隔","時間","cooldown","spacing"],answer:"最低投稿間隔は15分、推奨は30〜120分のランダム。jitter で ±5分の微分散も付与されます。"}],default_response:"該当するトピックが見つかりませんでした。[アカウント管理][投稿][オートパイロット][ライセンス] 等のキーワードで試してください。"},ze=new D;async function Yt(e){const t=await e.DB.prepare("SELECT json_data FROM chatbot_kb WHERE id = 1").first();if(t!=null&&t.json_data)try{return JSON.parse(t.json_data)}catch{}return await e.DB.prepare("INSERT OR IGNORE INTO chatbot_kb (id, json_data) VALUES (1, ?)").bind(JSON.stringify(la)).run(),la}ze.get("/api/admin/chatbot/topics",f,async e=>{const t=await Yt(e.env);return e.json({topics:(t.topics||[]).map((a,s)=>({id:s,title:a.title,keywords:a.keywords}))})});ze.post("/api/admin/chatbot/ask",f,async e=>{const t=await Yt(e.env),s=((await e.req.json().catch(()=>({}))).question||"").toLowerCase().trim();if(!s)return e.json({answer:t.default_response});let n=null,i=0;for(const r of t.topics||[]){let o=0;for(const d of r.keywords||[])s.includes(d.toLowerCase())&&(o+=d.length);o>i&&(i=o,n=r)}return n?e.json({answer:n.answer,title:n.title,matched:!0}):e.json({answer:t.default_response,matched:!1})});ze.get("/api/admin/chatbot/topic/:id",f,async e=>{const a=((await Yt(e.env)).topics||[])[parseInt(e.req.param("id"),10)];return a?e.json({topic:a}):e.json({error:"トピック未登録"},404)});ze.put("/api/admin/chatbot/kb",f,Te,async e=>{const t=await e.req.json();return!t||!Array.isArray(t.topics)?e.json({error:"invalid_kb"},400):(await e.env.DB.prepare(`INSERT INTO chatbot_kb (id, json_data, updated_at)
+         VALUES ('x', ?, ?, ?, ?, 'body', ?, ?, ?, ?, ?, 'autopilot', 'approved', ?, ?)`).bind(a.user_id,a.account_id,o,a.link_url,a.publish_at,a.publish_at,a.publish_at,d,a.content_mode,l,l).run();await e.env.DB.prepare("UPDATE autopilot_jobs SET status='generated', generated_post_id=?, updated_at=? WHERE id=?").bind(c.meta.last_row_id,l,a.id).run(),s++}catch(n){await e.env.DB.prepare("UPDATE autopilot_jobs SET status='error', error_message=?, updated_at=? WHERE id=?").bind((n==null?void 0:n.message)||"unknown_error",g(),a.id).run()}return e.json({ok:!0,generated:s,total:(t||[]).length})});const is={topics:[{title:"投稿の基本",keywords:["投稿","ポスト","ツイート","post","tweet"],answer:"[新規投稿] タブから本文を入力し「投稿キューへ」で予約できます。即時投稿は [今すぐ投稿] ボタンから。"},{title:"オートパイロット",keywords:["オートパイロット","autopilot","自動投稿","自動"],answer:"[オートパイロット] タブでジョブを作成すると、指定時刻に OpenAI が投稿案を生成しキューに入ります。"},{title:"アカウント連携",keywords:["連携","アカウント","追加","OAuth","トークン"],answer:"X Developer Portal で Consumer Key/Secret と Access Token/Secret を取得し、[アカウント管理] から追加してください。OAuth 1.0a User Context を使用します。"},{title:"ライセンス",keywords:["ライセンス","認証","license","VPS-GE365X"],answer:"ログイン画面の [ライセンス] タブから VPS-GE365X-XXXXXXXX 形式のキーを入力するとプランが有効化されます。"},{title:"類似度制御",keywords:["類似","重複","ブロック","similarity"],answer:"同一アカウントの直近5件と Jaccard係数 0.7 以上の類似があると投稿がブロックされます。"},{title:"投稿間隔",keywords:["間隔","時間","cooldown","spacing"],answer:"最低投稿間隔は15分、推奨は30〜120分のランダム。jitter で ±5分の微分散も付与されます。"}],default_response:"該当するトピックが見つかりませんでした。[アカウント管理][投稿][オートパイロット][ライセンス] 等のキーワードで試してください。"},tt=new A;async function qt(e){const t=await e.DB.prepare("SELECT json_data FROM chatbot_kb WHERE id = 1").first();if(t!=null&&t.json_data)try{return JSON.parse(t.json_data)}catch{}return await e.DB.prepare("INSERT OR IGNORE INTO chatbot_kb (id, json_data) VALUES (1, ?)").bind(JSON.stringify(is)).run(),is}tt.get("/api/admin/chatbot/topics",m,async e=>{const t=await qt(e.env);return e.json({topics:(t.topics||[]).map((s,a)=>({id:a,title:s.title,keywords:s.keywords}))})});tt.post("/api/admin/chatbot/ask",m,async e=>{const t=await qt(e.env),a=((await e.req.json().catch(()=>({}))).question||"").toLowerCase().trim();if(!a)return e.json({answer:t.default_response});let n=null,i=0;for(const r of t.topics||[]){let o=0;for(const d of r.keywords||[])a.includes(d.toLowerCase())&&(o+=d.length);o>i&&(i=o,n=r)}return n?e.json({answer:n.answer,title:n.title,matched:!0}):e.json({answer:t.default_response,matched:!1})});tt.get("/api/admin/chatbot/topic/:id",m,async e=>{const s=((await qt(e.env)).topics||[])[parseInt(e.req.param("id"),10)];return s?e.json({topic:s}):e.json({error:"トピック未登録"},404)});tt.put("/api/admin/chatbot/kb",m,R,async e=>{const t=await e.req.json();return!t||!Array.isArray(t.topics)?e.json({error:"invalid_kb"},400):(await e.env.DB.prepare(`INSERT INTO chatbot_kb (id, json_data, updated_at)
      VALUES (1, ?, datetime('now','+9 hours'))
-     ON CONFLICT(id) DO UPDATE SET json_data=excluded.json_data, updated_at=excluded.updated_at`).bind(JSON.stringify(t)).run(),e.json({success:!0,topic_count:t.topics.length}))});ze.post("/api/admin/chatbot",f,async e=>{var r,o,d;const t=e.get("user"),{message:a}=await e.req.json();if(!a)return e.json({reply:"メッセージが空です"},400);const s=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key=?").bind("openai_api_key_"+t.id).first();if(!(s!=null&&s.value))return e.json({reply:"OpenAI APIキーが設定されていません。API設定ページから設定してください。"});const{decryptValue:n}=await Promise.resolve().then(()=>lt),i=await n(s.value,e.env.ENCRYPTION_KEY);try{const p=((d=(o=(r=(await(await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+i},body:JSON.stringify({model:e.env.OPENAI_MODEL||"gpt-4o-mini",messages:[{role:"system",content:"あなたはGrowth-engine365XのAIアシスタントです。X(Twitter)の投稿戦略、AI生成、オートパイロット設定について日本語で簡潔にアドバイスしてください。"},{role:"user",content:a}],max_tokens:500})})).json()).choices)==null?void 0:r[0])==null?void 0:o.message)==null?void 0:d.content)||"応答を取得できませんでした";return e.json({reply:p})}catch(l){return e.json({reply:"AI応答エラー: "+l.message})}});const pt=new D;pt.get("/api/admin/drafts",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, account_id, title, body, link_url, hashtags, post_mode, created_at, updated_at
-       FROM drafts WHERE user_id = ? ORDER BY updated_at DESC LIMIT 200`).bind(t.id).all();return e.json({drafts:a||[]})});pt.post("/api/admin/drafts",f,async e=>{const t=e.get("user"),a=await e.req.json();if(!a.body)return e.json({error:"body required"},400);const s=await e.env.DB.prepare(`INSERT INTO drafts (user_id, account_id, title, body, link_url, hashtags, post_mode)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(t.id,a.account_id??null,a.title??null,a.body,a.link_url??null,a.hashtags??null,a.post_mode??"body").run();return e.json({success:!0,id:s.meta.last_row_id})});pt.put("/api/admin/drafts/:id",f,async e=>{const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.req.json();return await e.env.DB.prepare(`UPDATE drafts SET
+     ON CONFLICT(id) DO UPDATE SET json_data=excluded.json_data, updated_at=excluded.updated_at`).bind(JSON.stringify(t)).run(),e.json({success:!0,topic_count:t.topics.length}))});const st=new A;st.get("/api/admin/drafts",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_id, title, body, link_url, hashtags, post_mode, created_at, updated_at
+       FROM drafts WHERE user_id = ? ORDER BY updated_at DESC LIMIT 200`).bind(t.id).all();return e.json({drafts:s||[]})});st.post("/api/admin/drafts",m,async e=>{const t=e.get("user"),s=await e.req.json();if(!s.body)return e.json({error:"body required"},400);const a=await e.env.DB.prepare(`INSERT INTO drafts (user_id, account_id, title, body, link_url, hashtags, post_mode)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(t.id,s.account_id??null,s.title??null,s.body,s.link_url??null,s.hashtags??null,s.post_mode??"body").run();return e.json({success:!0,id:a.meta.last_row_id})});st.put("/api/admin/drafts/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json();return await e.env.DB.prepare(`UPDATE drafts SET
        title = COALESCE(?, title),
        body = COALESCE(?, body),
        link_url = COALESCE(?, link_url),
@@ -3136,40 +2805,99 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
        post_mode = COALESCE(?, post_mode),
        account_id = COALESCE(?, account_id),
        updated_at = ?
-     WHERE id = ? AND user_id = ?`).bind(s.title??null,s.body??null,s.link_url??null,s.hashtags??null,s.post_mode??null,s.account_id??null,x(),a,t.id).run(),e.json({success:!0})});pt.delete("/api/admin/drafts/:id",f,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM drafts WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});const ut=new D;ut.get("/api/admin/media",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, file_type, mime_type, file_name, byte_size, storage_path, x_media_id,
+     WHERE id = ? AND user_id = ?`).bind(a.title??null,a.body??null,a.link_url??null,a.hashtags??null,a.post_mode??null,a.account_id??null,g(),s,t.id).run(),e.json({success:!0})});st.delete("/api/admin/drafts/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM drafts WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});const at=new A;at.get("/api/admin/media",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, file_type, mime_type, file_name, byte_size, storage_path, x_media_id,
             upload_status, last_error, created_at
-       FROM media_assets WHERE user_id = ? ORDER BY id DESC LIMIT 200`).bind(t.id).all();return e.json({assets:a||[]})});ut.post("/api/admin/media",f,async e=>{const t=e.get("user");if(!e.env.MEDIA_BUCKET)return e.json({error:"R2 bucket (MEDIA_BUCKET) not configured"},501);const s=(await e.req.parseBody()).file;if(!s)return e.json({error:"file required"},400);const n=s.type.startsWith("video/")?"video":"image",i=`u${t.id}/${Date.now()}-${s.name}`;await e.env.MEDIA_BUCKET.put(i,await s.arrayBuffer(),{httpMetadata:{contentType:s.type}});const r=await e.env.DB.prepare(`INSERT INTO media_assets (user_id, file_type, mime_type, file_name, byte_size, storage_path, upload_status)
-     VALUES (?, ?, ?, ?, ?, ?, 'ready')`).bind(t.id,n,s.type,s.name,s.size,`/media/${i}`).run();return e.json({success:!0,id:r.meta.last_row_id,storage_path:`/media/${i}`})});ut.delete("/api/admin/media/:id",f,async e=>{var n;const t=e.get("user"),a=parseInt(e.req.param("id"),10),s=await e.env.DB.prepare("SELECT storage_path FROM media_assets WHERE id=? AND user_id=?").bind(a,t.id).first();if((n=s==null?void 0:s.storage_path)!=null&&n.startsWith("/media/")&&e.env.MEDIA_BUCKET){const i=s.storage_path.slice(7);await e.env.MEDIA_BUCKET.delete(i).catch(()=>{})}return await e.env.DB.prepare("DELETE FROM media_assets WHERE id=? AND user_id=?").bind(a,t.id).run(),e.json({success:!0})});ut.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e.req.path.replace(/^\/media\//,""),a=await e.env.MEDIA_BUCKET.get(t);if(!a)return e.notFound();const s=new Headers;return a.writeHttpMetadata(s),s.set("etag",a.httpEtag),new Response(a.body,{headers:s})});const Kt=new D;Kt.get("/api/admin/kpi",f,async e=>{const t=e.get("user"),a=e.req.query("account_id"),s=parseInt(e.req.query("days")||"30",10),n=[t.id,s];let i="WHERE km.user_id = ? AND km.metric_date >= date('now','+9 hours','-' || ? || ' days')";a&&(i+=" AND km.account_id = ?",n.push(Number(a)));const{results:r}=await e.env.DB.prepare(`SELECT km.*, xa.account_name
+       FROM media_assets WHERE user_id = ? ORDER BY id DESC LIMIT 200`).bind(t.id).all();return e.json({assets:s||[]})});at.post("/api/admin/media",m,async e=>{const t=e.get("user");if(!e.env.MEDIA_BUCKET)return e.json({error:"R2 bucket (MEDIA_BUCKET) not configured"},501);const a=(await e.req.parseBody()).file;if(!a)return e.json({error:"file required"},400);const n=a.type.startsWith("video/")?"video":"image",i=`u${t.id}/${Date.now()}-${a.name}`;await e.env.MEDIA_BUCKET.put(i,await a.arrayBuffer(),{httpMetadata:{contentType:a.type}});const r=await e.env.DB.prepare(`INSERT INTO media_assets (user_id, file_type, mime_type, file_name, byte_size, storage_path, upload_status)
+     VALUES (?, ?, ?, ?, ?, ?, 'ready')`).bind(t.id,n,a.type,a.name,a.size,`/media/${i}`).run();return e.json({success:!0,id:r.meta.last_row_id,storage_path:`/media/${i}`})});at.delete("/api/admin/media/:id",m,async e=>{var n;const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.env.DB.prepare("SELECT storage_path FROM media_assets WHERE id=? AND user_id=?").bind(s,t.id).first();if((n=a==null?void 0:a.storage_path)!=null&&n.startsWith("/media/")&&e.env.MEDIA_BUCKET){const i=a.storage_path.slice(7);await e.env.MEDIA_BUCKET.delete(i).catch(()=>{})}return await e.env.DB.prepare("DELETE FROM media_assets WHERE id=? AND user_id=?").bind(s,t.id).run(),e.json({success:!0})});
+at.post("/api/admin/media/url",m,async e=>{
+  const t=e.get("user");const{url:u,file_type:ft}=await e.req.json().catch(()=>({}));
+  if(!u||typeof u!=="string"||!/^https?:\/\//i.test(u))return e.json({error:"valid url required"},400);
+  const tt=g();
+  const ft2=ft||(/\.(mp4|mov|m4v|webm)(\?|$)/i.test(u)?"video":"image");
+  const r=await e.env.DB.prepare(`INSERT INTO media_assets (user_id, file_type, mime_type, file_name, byte_size, storage_path, upload_status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'ready', ?, ?)`).bind(t.id,ft2,ft2==="video"?"video/mp4":"image/jpeg",u.split("/").pop()||"remote",0,u,tt,tt).run();
+  return e.json({success:!0,id:r.meta.last_row_id,storage_path:u});
+});
+at.post("/api/admin/media/:id/x-upload",m,async e=>{
+  const t=e.get("user");const sid=parseInt(e.req.param("id"),10);
+  const{account_id:aid}=await e.req.json().catch(()=>({}));
+  const asset=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(sid,t.id).first();
+  if(!asset)return e.json({error:"asset not found"},404);
+  if(asset.x_media_id)return e.json({success:!0,x_media_id:asset.x_media_id,cached:!0});
+  let acct=null;
+  if(aid)acct=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=?").bind(aid,t.id).first();
+  if(!acct)acct=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_current=1 LIMIT 1").bind(t.id).first();
+  if(!acct)acct=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();
+  if(!acct)return e.json({error:"No active X account"},400);
+  let bytes,mime;
+  try{
+    if(asset.storage_path&&asset.storage_path.startsWith("/media/")){
+      if(!e.env.MEDIA_BUCKET)return e.json({error:"R2 not configured"},501);
+      const key=asset.storage_path.slice(7);
+      const obj=await e.env.MEDIA_BUCKET.get(key);
+      if(!obj)return e.json({error:"object not found in R2"},404);
+      bytes=await obj.arrayBuffer();mime=asset.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg";
+    }else if(asset.storage_path&&/^https?:/i.test(asset.storage_path)){
+      const r=await fetch(asset.storage_path,{signal:AbortSignal.timeout(3e4)});
+      if(!r.ok)return e.json({error:"failed to fetch remote media: "+r.status},400);
+      bytes=await r.arrayBuffer();mime=asset.mime_type||r.headers.get("content-type")||"image/jpeg";
+    }else return e.json({error:"unsupported storage_path"},400);
+  }catch(err){return e.json({error:"media fetch error: "+err.message},500)}
+  try{
+    const creds=await Ft(e.env,acct);
+    const xMid=await xMU_upload(creds,bytes,mime);
+    await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=? AND user_id=?").bind(xMid,g(),sid,t.id).run();
+    return e.json({success:!0,x_media_id:xMid});
+  }catch(err){
+    await e.env.DB.prepare("UPDATE media_assets SET upload_status='failed', last_error=?, updated_at=? WHERE id=? AND user_id=?").bind((err&&err.message)||"unknown",g(),sid,t.id).run();
+    return e.json({success:!1,error:(err&&err.message)||"upload error"},500);
+  }
+});
+at.post("/api/admin/posts/:id/attach-media",m,async e=>{
+  const t=e.get("user");const pid=parseInt(e.req.param("id"),10);
+  const{media_ids:mids}=await e.req.json().catch(()=>({media_ids:[]}));
+  if(!Array.isArray(mids))return e.json({error:"media_ids must be array"},400);
+  const post=await e.env.DB.prepare("SELECT id, media_json FROM post_queue WHERE id=? AND user_id=?").bind(pid,t.id).first();
+  if(!post)return e.json({error:"post not found"},404);
+  let mediaType=null;
+  if(mids.length>0){
+    const f=await e.env.DB.prepare("SELECT file_type FROM media_assets WHERE id=? AND user_id=?").bind(mids[0],t.id).first();
+    mediaType=(f==null?void 0:f.file_type)||null;
+  }
+  await e.env.DB.prepare("UPDATE post_queue SET media_json=?, media_type=?, updated_at=? WHERE id=? AND user_id=?").bind(JSON.stringify(mids.slice(0,4)),mediaType,g(),pid,t.id).run();
+  return e.json({success:!0});
+});
+at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e.req.path.replace(/^\/media\//,""),s=await e.env.MEDIA_BUCKET.get(t);if(!s)return e.notFound();const a=new Headers;return s.writeHttpMetadata(a),a.set("etag",s.httpEtag),new Response(s.body,{headers:a})});const Pt=new A;Pt.get("/api/admin/kpi",m,async e=>{const t=e.get("user"),s=e.req.query("account_id"),a=parseInt(e.req.query("days")||"30",10),n=[t.id,a];let i="WHERE km.user_id = ? AND km.metric_date >= date('now','+9 hours','-' || ? || ' days')";s&&(i+=" AND km.account_id = ?",n.push(Number(s)));const{results:r}=await e.env.DB.prepare(`SELECT km.*, xa.account_name
        FROM kpi_metrics km LEFT JOIN x_accounts xa ON xa.id = km.account_id
-       ${i} ORDER BY km.metric_date DESC, km.account_id ASC`).bind(...n).all();return e.json({metrics:r||[]})});Kt.get("/api/admin/kpi/summary",f,async e=>{const t=e.get("user"),a=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
-       FROM kpi_metrics WHERE user_id = ? AND metric_date = date('now','+9 hours')`).bind(t.id).first(),s=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
-       FROM kpi_metrics WHERE user_id = ? AND metric_date >= date('now','+9 hours','-7 days')`).bind(t.id).first();return e.json({today:{sent:(a==null?void 0:a.sent)??0,failed:(a==null?void 0:a.failed)??0},week:{sent:(s==null?void 0:s.sent)??0,failed:(s==null?void 0:s.failed)??0}})});const It=new D;It.get("/api/admin/logs/posts",f,async e=>{const t=e.get("user"),a=e.req.query("status"),s=e.req.query("account_id"),n=[t.id];let i="WHERE pl.user_id = ?";a&&a!=="all"&&(i+=" AND pl.status = ?",n.push(a)),s&&(i+=" AND pl.account_id = ?",n.push(Number(s)));const{results:r}=await e.env.DB.prepare(`SELECT pl.*, xa.account_name AS joined_account_name
+       ${i} ORDER BY km.metric_date DESC, km.account_id ASC`).bind(...n).all();return e.json({metrics:r||[]})});Pt.get("/api/admin/kpi/summary",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
+       FROM kpi_metrics WHERE user_id = ? AND metric_date = date('now','+9 hours')`).bind(t.id).first(),a=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
+       FROM kpi_metrics WHERE user_id = ? AND metric_date >= date('now','+9 hours','-7 days')`).bind(t.id).first();return e.json({today:{sent:(s==null?void 0:s.sent)??0,failed:(s==null?void 0:s.failed)??0},week:{sent:(a==null?void 0:a.sent)??0,failed:(a==null?void 0:a.failed)??0}})});const gt=new A;gt.get("/api/admin/logs/posts",m,async e=>{const t=e.get("user"),s=e.req.query("status"),a=e.req.query("account_id"),n=[t.id];let i="WHERE pl.user_id = ?";s&&s!=="all"&&(i+=" AND pl.status = ?",n.push(s)),a&&(i+=" AND pl.account_id = ?",n.push(Number(a)));const{results:r}=await e.env.DB.prepare(`SELECT pl.*, xa.account_name AS joined_account_name
        FROM post_logs pl LEFT JOIN x_accounts xa ON pl.account_id = xa.id
-       ${i} ORDER BY pl.id DESC LIMIT 300`).bind(...n).all();return e.json({logs:r||[]})});It.get("/api/admin/logs/generations",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT gl.*, xa.account_name
+       ${i} ORDER BY pl.id DESC LIMIT 300`).bind(...n).all();return e.json({logs:r||[]})});gt.get("/api/admin/logs/generations",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT gl.*, xa.account_name
        FROM generation_logs gl LEFT JOIN x_accounts xa ON gl.account_id = xa.id
        WHERE gl.user_id = ?
-       ORDER BY gl.id DESC LIMIT 200`).bind(t.id).all();return e.json({logs:a||[]})});It.get("/api/admin/logs/health",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT he.*, xa.account_name
+       ORDER BY gl.id DESC LIMIT 200`).bind(t.id).all();return e.json({logs:s||[]})});gt.get("/api/admin/logs/health",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT he.*, xa.account_name
        FROM account_health_events he LEFT JOIN x_accounts xa ON he.account_id = xa.id
        WHERE xa.user_id = ?
-       ORDER BY he.id DESC LIMIT 200`).bind(t.id).all();return e.json({logs:a||[]})});const At=new D;At.get("/api/admin/target/presets",f,e=>e.json({templates:Ga}));At.get("/api/admin/target",f,async e=>{const t=e.get("user"),a=e.req.query("account_id")||"default",s=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(a,t.id).first();return e.json({target:s})});At.post("/api/admin/target",f,async e=>{const t=e.get("user"),a=await e.req.json(),s=String(a.account_id??"default"),n=x(),i=await e.env.DB.prepare("SELECT id FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(s,t.id).first();if(i)return await e.env.DB.prepare(`UPDATE target_templates SET
+       ORDER BY he.id DESC LIMIT 200`).bind(t.id).all();return e.json({logs:s||[]})});const vt=new A;vt.get("/api/admin/target/presets",m,e=>e.json({templates:Fs}));vt.get("/api/admin/target",m,async e=>{const t=e.get("user"),s=e.req.query("account_id")||"default",a=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(s,t.id).first();return e.json({target:a})});vt.post("/api/admin/target",m,async e=>{const t=e.get("user"),s=await e.req.json(),a=String(s.account_id??"default"),n=g(),i=await e.env.DB.prepare("SELECT id FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(a,t.id).first();if(i)return await e.env.DB.prepare(`UPDATE target_templates SET
          template_key=?, label=?, age_range=?, gender=?, genre=?, occupation=?,
          pains=?, desires=?, purchase_triggers=?, problem=?, goal=?, knowledge=?,
          is_default=?, updated_at=?
-       WHERE id=?`).bind(a.template_key??null,a.label??null,a.age_range??null,a.gender??null,a.genre??null,a.occupation??null,a.pains??null,a.desires??null,a.purchase_triggers??null,a.problem??null,a.goal??null,a.knowledge??null,a.is_default?1:0,n,i.id).run(),e.json({success:!0,id:i.id});{const r=await e.env.DB.prepare(`INSERT INTO target_templates
+       WHERE id=?`).bind(s.template_key??null,s.label??null,s.age_range??null,s.gender??null,s.genre??null,s.occupation??null,s.pains??null,s.desires??null,s.purchase_triggers??null,s.problem??null,s.goal??null,s.knowledge??null,s.is_default?1:0,n,i.id).run(),e.json({success:!0,id:i.id});{const r=await e.env.DB.prepare(`INSERT INTO target_templates
          (account_id, user_id, template_key, label, age_range, gender, genre, occupation,
           pains, desires, purchase_triggers, problem, goal, knowledge, is_default)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(s,t.id,a.template_key??null,a.label??null,a.age_range??null,a.gender??null,a.genre??null,a.occupation??null,a.pains??null,a.desires??null,a.purchase_triggers??null,a.problem??null,a.goal??null,a.knowledge??null,a.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const Dt=new D;Dt.get("/api/admin/voice/presets",f,e=>e.json({templates:Pn}));Dt.get("/api/admin/voice",f,async e=>{const t=e.get("user"),a=e.req.query("account_id")||"default",s=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(a,t.id).first();return e.json({voice:s})});Dt.post("/api/admin/voice",f,async e=>{const t=e.get("user"),a=await e.req.json(),s=String(a.account_id??"default"),n=x(),i=await e.env.DB.prepare("SELECT id FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(s,t.id).first();if(i)return await e.env.DB.prepare(`UPDATE brand_voice SET
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(a,t.id,s.template_key??null,s.label??null,s.age_range??null,s.gender??null,s.genre??null,s.occupation??null,s.pains??null,s.desires??null,s.purchase_triggers??null,s.problem??null,s.goal??null,s.knowledge??null,s.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const yt=new A;yt.get("/api/admin/voice/presets",m,e=>e.json({templates:On}));yt.get("/api/admin/voice",m,async e=>{const t=e.get("user"),s=e.req.query("account_id")||"default",a=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(s,t.id).first();return e.json({voice:a})});yt.post("/api/admin/voice",m,async e=>{const t=e.get("user"),s=await e.req.json(),a=String(s.account_id??"default"),n=g(),i=await e.env.DB.prepare("SELECT id FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(a,t.id).first();if(i)return await e.env.DB.prepare(`UPDATE brand_voice SET
          voice_key=?, label=?, tone=?, worldview=?, personal_story=?,
          prohibited_words=?, sample_posts=?, is_default=?, updated_at=?
-       WHERE id=?`).bind(a.voice_key??null,a.label??null,a.tone??null,a.worldview??null,a.personal_story??null,a.prohibited_words??null,a.sample_posts??null,a.is_default?1:0,n,i.id).run(),e.json({success:!0,id:i.id});{const r=await e.env.DB.prepare(`INSERT INTO brand_voice
+       WHERE id=?`).bind(s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0,n,i.id).run(),e.json({success:!0,id:i.id});{const r=await e.env.DB.prepare(`INSERT INTO brand_voice
          (account_id, user_id, voice_key, label, tone, worldview, personal_story,
           prohibited_words, sample_posts, is_default)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(s,t.id,a.voice_key??null,a.label??null,a.tone??null,a.worldview??null,a.personal_story??null,a.prohibited_words??null,a.sample_posts??null,a.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const Ae=new D;Ae.get("/api/admin/api-settings",f,async e=>{const t=e.get("user"),a=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first(),s=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','telegram_bot_token','telegram_chat_id')").all(),n={};for(const l of s.results||[])n[l.key]=l.value;const i=a!=null&&a.api_key?await Le(a.api_key,e.env.ENCRYPTION_KEY):"",r=a!=null&&a.api_secret?"••••••••":"",o=n.openai_api_key?"••••••••":"",d=n.telegram_bot_token?"••••••••":"";return e.json({api_key:i,api_secret:r,openai_key:o,openai_model:n.openai_model||"gpt-4o-mini",telegram_token:d,telegram_chat_id:n.telegram_chat_id||""})});Ae.post("/api/admin/api-settings/x",f,async e=>{const t=e.get("user"),{api_key:a,api_secret:s}=await e.req.json();if(!a||a.includes("•"))return e.json({success:!1,error:"api_key required"},400);const n=await X(a.trim(),e.env.ENCRYPTION_KEY),i=s&&!s.includes("•")?await X(s.trim(),e.env.ENCRYPTION_KEY):null;return await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first()?i?await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,i,t.id).run():await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,t.id).run():await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,n,i||"").run(),e.json({success:!0})});Ae.post("/api/admin/api-settings/openai",f,async e=>{const{openai_key:t,openai_model:a}=await e.req.json();if(t&&!t.includes("•")){const s=await X(t.trim(),e.env.ENCRYPTION_KEY);await We(e,"openai_api_key",s,"OpenAI API Key (AES暗号化)")}return a&&await We(e,"openai_model",a,"OpenAI モデル名"),e.json({success:!0})});Ae.post("/api/admin/api-settings/telegram",f,async e=>{const{telegram_token:t,telegram_chat_id:a}=await e.req.json();if(t&&!t.includes("•")){const s=await X(t.trim(),e.env.ENCRYPTION_KEY);await We(e,"telegram_bot_token",s,"Telegram Bot Token (AES暗号化)")}return a&&await We(e,"telegram_chat_id",a,"Telegram Chat ID"),e.json({success:!0})});Ae.post("/api/admin/api-settings/:kind/test",f,async e=>{var s;const t=e.req.param("kind"),a=e.get("user");try{if(t==="x"){const n=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(a.id).first();if(!(n!=null&&n.api_key))return e.json({success:!1,error:"X API Key が未設定です。先にAPIキーを保存してください。"});const i=await Le(n.api_key,e.env.ENCRYPTION_KEY),r=n.api_secret?await Le(n.api_secret,e.env.ENCRYPTION_KEY):"";if(!i)return e.json({success:!1,error:"Consumer Key の復号に失敗しました"});const o=await e.env.DB.prepare("SELECT access_token, access_token_secret, x_username FROM x_accounts WHERE user_id=? AND is_active=1 LIMIT 1").bind(a.id).first();if(!(o!=null&&o.access_token))return e.json({success:!0,message:"Consumer Key を復号できました（アカウント登録後に実投稿テストできます）"});try{const{buildCredentialsFromAccount:d,getMe:l}=await Promise.resolve().then(()=>Va),c=await d(e.env,o,{apiKey:i,apiSecret:r}),p=await l(c);return e.json({success:!0,message:"接続OK: @"+(p.username||((s=p.data)==null?void 0:s.username)||"unknown")})}catch(d){return e.json({success:!1,error:"接続失敗: "+(d.message||String(d))})}}if(t==="openai"){const n=await ft(e,"openai_api_key");if(!n)return e.json({success:!1,error:"OpenAI Key 未設定"});const i=await Le(n,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const r=await fetch("https://api.openai.com/v1/models",{headers:{Authorization:`Bearer ${i}`}});return r.ok?e.json({success:!0,message:"OpenAI 接続OK"}):e.json({success:!1,error:`OpenAI API ${r.status}`})}if(t==="gemini"){const n=await ft(e,"gemini_api_key");if(!n)return e.json({success:!1,error:"Gemini Key 未設定"});const i=await Le(n,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${i}`);return r.ok?e.json({success:!0,message:"Gemini 接続OK"}):e.json({success:!1,error:`Gemini API ${r.status}`})}if(t==="telegram"){const n=await ft(e,"telegram_bot_token"),i=await ft(e,"telegram_chat_id");if(!n||!i)return e.json({success:!1,error:"Telegram 未設定"});const r=await Le(n,e.env.ENCRYPTION_KEY);if(!r)return e.json({success:!1,error:"復号失敗"});const d=await(await fetch(`https://api.telegram.org/bot${r}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:i,text:"✅ GE365x-web: Telegram 接続テスト成功"})})).json();return d!=null&&d.ok?e.json({success:!0,message:"Telegram 送信成功"}):e.json({success:!1,error:(d==null?void 0:d.description)||"Telegram 送信失敗"})}return e.json({success:!1,error:"unknown kind"},400)}catch(n){return e.json({success:!1,error:(n==null?void 0:n.message)||String(n)})}});async function We(e,t,a,s){await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(a,t.id,s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const He=new A;He.get("/api/admin/api-settings",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first(),a=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','telegram_bot_token','telegram_chat_id')").all(),n={};for(const l of a.results||[])n[l.key]=l.value;const i=s!=null&&s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):"",r=s!=null&&s.api_secret?"••••••••":"",o=n.openai_api_key?"••••••••":"",d=n.telegram_bot_token?"••••••••":"";return e.json({api_key:i,api_secret:r,openai_key:o,openai_model:n.openai_model||"gpt-4o-mini",telegram_token:d,telegram_chat_id:n.telegram_chat_id||""})});He.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a}=await e.req.json();if(!s||s.includes("•"))return e.json({success:!1,error:"api_key required"},400);const n=await _e(s.trim(),e.env.ENCRYPTION_KEY),i=a&&!a.includes("•")?await _e(a.trim(),e.env.ENCRYPTION_KEY):null;return await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first()?i?await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,i,t.id).run():await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,t.id).run():await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,n,i||"").run(),e.json({success:!0})});He.post("/api/admin/api-settings/openai",m,async e=>{const{openai_key:t,openai_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"openai_api_key",a,"OpenAI API Key (AES暗号化)")}return s&&await _t(e,"openai_model",s,"OpenAI モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/telegram",m,async e=>{const{telegram_token:t,telegram_chat_id:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"telegram_bot_token",a,"Telegram Bot Token (AES暗号化)")}return s&&await _t(e,"telegram_chat_id",s,"Telegram Chat ID"),e.json({success:!0})});He.post("/api/admin/api-settings/:kind/test",m,async e=>{const t=e.req.param("kind"),s=e.get("user");try{if(t==="x"){const a=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(s.id).first();if(!(a!=null&&a.api_key))return e.json({success:!1,error:"X API Key 未設定"});const n=await lt(a.api_key,e.env.ENCRYPTION_KEY);return e.json({success:!!n,message:n?"Consumer Key 正常に復号できました":"復号失敗"})}if(t==="openai"){const a=await Tt(e,"openai_api_key");if(!a)return e.json({success:!1,error:"OpenAI Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch("https://api.openai.com/v1/models",{headers:{Authorization:`Bearer ${n}`}});return i.ok?e.json({success:!0,message:"OpenAI 接続OK"}):e.json({success:!1,error:`OpenAI API ${i.status}`})}if(t==="telegram"){const a=await Tt(e,"telegram_bot_token"),n=await Tt(e,"telegram_chat_id");if(!a||!n)return e.json({success:!1,error:"Telegram 未設定"});const i=await lt(a,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const o=await(await fetch(`https://api.telegram.org/bot${i}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:n,text:"✅ GE365x-web: Telegram 接続テスト成功"})})).json();return o!=null&&o.ok?e.json({success:!0,message:"Telegram 送信成功"}):e.json({success:!1,error:(o==null?void 0:o.description)||"Telegram 送信失敗"})}return e.json({success:!1,error:"unknown kind"},400)}catch(a){return e.json({success:!1,error:(a==null?void 0:a.message)||String(a)})}});async function _t(e,t,s,a){await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
      VALUES (?, ?, ?, datetime('now','+9 hours'))
-     ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind(t,a,s).run()}async function ft(e,t){const a=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key = ?").bind(t).first();return(a==null?void 0:a.value)||null}async function Le(e,t){try{return await tt(e,t)}catch{return""}}Ae.post("/api/admin/api-settings/gemini",f,async e=>{e.get("user");const t=await e.req.json(),a=t.gemini_key,s=t.gemini_model;if(!a||a.includes("•"))return e.json({success:!1,error:"api_key required"},400);const n=await X(a.trim(),e.env.ENCRYPTION_KEY);return await We(e,"gemini_api_key",n,"Gemini API Key (AES暗号化)"),s&&await We(e,"gemini_model",s,"Gemini モデル名"),e.json({success:!0})});const F=new D;function ca(e){if(e==null)return"";const t=String(e);return t.includes(",")||t.includes('"')||t.includes(`
-`)||t.includes("\r")?'"'+t.replace(/"/g,'""')+'"':t}function U(e,t){const s=e.map(ca).join(","),n=t.map(i=>e.map(r=>ca(i[r])).join(","));return"\uFEFF"+s+`
+     ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind(t,s,a).run()}async function Tt(e,t){const s=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key = ?").bind(t).first();return(s==null?void 0:s.value)||null}async function lt(e,t){try{return await At(e,t)}catch{return""}}const B=new A;function rs(e){if(e==null)return"";const t=String(e);return t.includes(",")||t.includes('"')||t.includes(`
+`)||t.includes("\r")?'"'+t.replace(/"/g,'""')+'"':t}function W(e,t){const a=e.map(rs).join(","),n=t.map(i=>e.map(r=>rs(i[r])).join(","));return"\uFEFF"+a+`
 `+n.join(`
-`)}function W(e,t){return new Response(e,{headers:{"content-type":"text/csv; charset=utf-8","content-disposition":`attachment; filename="${t}"`,"cache-control":"no-store"}})}function rs(e,t){return new Response(JSON.stringify(e,null,2),{headers:{"content-type":"application/json; charset=utf-8","content-disposition":`attachment; filename="${t}"`,"cache-control":"no-store"}})}function P(){const e=new Date,t=a=>String(a).padStart(2,"0");return`${e.getFullYear()}${t(e.getMonth()+1)}${t(e.getDate())}_${t(e.getHours())}${t(e.getMinutes())}`}F.get("/api/admin/export/posts",f,async e=>{const t=e.get("user"),a=e.req.query("status"),s=e.req.query("month");let n="WHERE pq.platform='x' AND pq.user_id = ?";const i=[t.id];a&&a!=="all"&&(n+=" AND pq.status = ?",i.push(a)),s&&(n+=" AND strftime('%Y-%m', COALESCE(pq.posted_at, pq.scheduled_at, pq.created_at)) = ?",i.push(s));const{results:r}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.link_url, pq.hashtags, pq.post_mode, pq.status,
+`)}function Y(e,t){return new Response(e,{headers:{"content-type":"text/csv; charset=utf-8","content-disposition":`attachment; filename="${t}"`,"cache-control":"no-store"}})}function Vs(e,t){return new Response(JSON.stringify(e,null,2),{headers:{"content-type":"application/json; charset=utf-8","content-disposition":`attachment; filename="${t}"`,"cache-control":"no-store"}})}function q(){const e=new Date,t=s=>String(s).padStart(2,"0");return`${e.getFullYear()}${t(e.getMonth()+1)}${t(e.getDate())}_${t(e.getHours())}${t(e.getMinutes())}`}B.get("/api/admin/export/posts",m,async e=>{const t=e.get("user"),s=e.req.query("status"),a=e.req.query("month");let n="WHERE pq.platform='x' AND pq.user_id = ?";const i=[t.id];s&&s!=="all"&&(n+=" AND pq.status = ?",i.push(s)),a&&(n+=" AND strftime('%Y-%m', COALESCE(pq.posted_at, pq.scheduled_at, pq.created_at)) = ?",i.push(a));const{results:r}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.link_url, pq.hashtags, pq.post_mode, pq.status,
             pq.generation_type, pq.source_type, pq.pattern_type,
             pq.scheduled_at, pq.effective_scheduled_at, pq.posted_at,
             pq.external_post_id, pq.error_message,
@@ -3179,7 +2907,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
             pq.created_at, pq.updated_at,
             xa.account_name, xa.x_username
        FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id = xa.id
-       ${n} ORDER BY pq.id DESC LIMIT 10000`).bind(...i).all(),d=U(["id","body","link_url","hashtags","post_mode","status","account_name","x_username","generation_type","source_type","pattern_type","scheduled_at","effective_scheduled_at","posted_at","external_post_id","error_message","recurrence_type","recurrence_rule","thread_parent_id","thread_order","thread_count","media_type","jitter_enabled","jitter_minutes","created_at","updated_at"],r||[]);return W(d,`ge365x_posts_${P()}.csv`)});F.get("/api/admin/export/logs",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT pl.id, pl.record_id, pl.account_name, pl.platform,
+       ${n} ORDER BY pq.id DESC LIMIT 10000`).bind(...i).all(),d=W(["id","body","link_url","hashtags","post_mode","status","account_name","x_username","generation_type","source_type","pattern_type","scheduled_at","effective_scheduled_at","posted_at","external_post_id","error_message","recurrence_type","recurrence_rule","thread_parent_id","thread_order","thread_count","media_type","jitter_enabled","jitter_minutes","created_at","updated_at"],r||[]);return Y(d,`ge365x_posts_${q()}.csv`)});B.get("/api/admin/export/logs",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT pl.id, pl.record_id, pl.account_name, pl.platform,
             pl.source_type, pl.generation_type, pl.post_mode,
             pl.content, pl.content_hash, pl.link_url,
             pl.media_type, pl.media_upload_status, pl.media_id,
@@ -3189,14 +2917,14 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
             pl.created_at
        FROM post_logs pl
        WHERE pl.user_id = ?
-       ORDER BY pl.id DESC LIMIT 10000`).bind(t.id).all(),n=U(["id","record_id","account_name","platform","source_type","generation_type","post_mode","content","content_hash","link_url","media_type","media_upload_status","media_id","thread_parent_id","thread_order","thread_total_count","scheduled_at","executed_at","posted_at","status","error_message","api_response_summary","created_at"],a||[]);return W(n,`ge365x_post_logs_${P()}.csv`)});F.get("/api/admin/export/generations",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT gl.id, gl.account_id, xa.account_name, xa.x_username,
+       ORDER BY pl.id DESC LIMIT 10000`).bind(t.id).all(),n=W(["id","record_id","account_name","platform","source_type","generation_type","post_mode","content","content_hash","link_url","media_type","media_upload_status","media_id","thread_parent_id","thread_order","thread_total_count","scheduled_at","executed_at","posted_at","status","error_message","api_response_summary","created_at"],s||[]);return Y(n,`ge365x_post_logs_${q()}.csv`)});B.get("/api/admin/export/generations",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT gl.id, gl.account_id, xa.account_name, xa.x_username,
             gl.brand_voice_id, gl.target_setting_id,
             gl.post_mode, gl.generation_type, gl.output_text,
             gl.created_at
        FROM generation_logs gl
        LEFT JOIN x_accounts xa ON gl.account_id = xa.id
        WHERE gl.user_id = ?
-       ORDER BY gl.id DESC LIMIT 10000`).bind(t.id).all(),n=U(["id","account_id","account_name","x_username","brand_voice_id","target_setting_id","post_mode","generation_type","output_text","created_at"],a||[]);return W(n,`ge365x_generation_logs_${P()}.csv`)});F.get("/api/admin/export/autopilot",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT aj.id, aj.reservation_no, aj.account_id, xa.account_name, xa.x_username,
+       ORDER BY gl.id DESC LIMIT 10000`).bind(t.id).all(),n=W(["id","account_id","account_name","x_username","brand_voice_id","target_setting_id","post_mode","generation_type","output_text","created_at"],s||[]);return Y(n,`ge365x_generation_logs_${q()}.csv`)});B.get("/api/admin/export/autopilot",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT aj.id, aj.reservation_no, aj.account_id, xa.account_name, xa.x_username,
             aj.channel_type, aj.content_mode, aj.theme, aj.keywords, aj.prompt_text,
             aj.title_memo, aj.link_url,
             aj.generate_at, aj.publish_at, aj.status,
@@ -3205,46 +2933,46 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
        FROM autopilot_jobs aj
        LEFT JOIN x_accounts xa ON aj.account_id = xa.id
        WHERE aj.user_id = ?
-       ORDER BY aj.id DESC LIMIT 10000`).bind(t.id).all(),n=U(["id","reservation_no","account_id","account_name","x_username","channel_type","content_mode","theme","keywords","prompt_text","title_memo","link_url","generate_at","publish_at","status","generated_post_id","external_post_id","error_message","created_at","updated_at"],a||[]);return W(n,`ge365x_autopilot_${P()}.csv`)});F.get("/api/admin/export/drafts",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, account_id, title, body, link_url, hashtags, post_mode, created_at, updated_at
-       FROM drafts WHERE user_id = ? ORDER BY id DESC LIMIT 5000`).bind(t.id).all(),n=U(["id","account_id","title","body","link_url","hashtags","post_mode","created_at","updated_at"],a||[]);return W(n,`ge365x_drafts_${P()}.csv`)});F.get("/api/admin/export/kpi",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT km.id, km.account_id, xa.account_name, xa.x_username,
+       ORDER BY aj.id DESC LIMIT 10000`).bind(t.id).all(),n=W(["id","reservation_no","account_id","account_name","x_username","channel_type","content_mode","theme","keywords","prompt_text","title_memo","link_url","generate_at","publish_at","status","generated_post_id","external_post_id","error_message","created_at","updated_at"],s||[]);return Y(n,`ge365x_autopilot_${q()}.csv`)});B.get("/api/admin/export/drafts",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_id, title, body, link_url, hashtags, post_mode, created_at, updated_at
+       FROM drafts WHERE user_id = ? ORDER BY id DESC LIMIT 5000`).bind(t.id).all(),n=W(["id","account_id","title","body","link_url","hashtags","post_mode","created_at","updated_at"],s||[]);return Y(n,`ge365x_drafts_${q()}.csv`)});B.get("/api/admin/export/kpi",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT km.id, km.account_id, xa.account_name, xa.x_username,
             km.metric_date, km.posts_sent, km.posts_failed,
             km.impressions, km.engagements, km.followers_gained,
             km.created_at, km.updated_at
        FROM kpi_metrics km
        LEFT JOIN x_accounts xa ON xa.id = km.account_id
        WHERE km.user_id = ?
-       ORDER BY km.metric_date DESC, km.account_id ASC LIMIT 10000`).bind(t.id).all(),n=U(["id","account_id","account_name","x_username","metric_date","posts_sent","posts_failed","impressions","engagements","followers_gained","created_at","updated_at"],a||[]);return W(n,`ge365x_kpi_${P()}.csv`)});F.get("/api/admin/export/accounts",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
+       ORDER BY km.metric_date DESC, km.account_id ASC LIMIT 10000`).bind(t.id).all(),n=W(["id","account_id","account_name","x_username","metric_date","posts_sent","posts_failed","impressions","engagements","followers_gained","created_at","updated_at"],s||[]);return Y(n,`ge365x_kpi_${q()}.csv`)});B.get("/api/admin/export/accounts",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
             daily_post_count, daily_post_limit, last_posted_at,
             account_health_score, health_status, is_active, is_current,
             last_daily_reset_date, created_at, updated_at
-       FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),n=U(["id","account_name","x_user_id","x_username","daily_post_count","daily_post_limit","last_posted_at","account_health_score","health_status","is_active","is_current","last_daily_reset_date","created_at","updated_at"],a||[]);return W(n,`ge365x_accounts_${P()}.csv`)});F.get("/api/admin/export/targets",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, account_id, template_key, label, age_range, gender, genre, occupation,
+       FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),n=W(["id","account_name","x_user_id","x_username","daily_post_count","daily_post_limit","last_posted_at","account_health_score","health_status","is_active","is_current","last_daily_reset_date","created_at","updated_at"],s||[]);return Y(n,`ge365x_accounts_${q()}.csv`)});B.get("/api/admin/export/targets",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_id, template_key, label, age_range, gender, genre, occupation,
             pains, desires, purchase_triggers, problem, goal, knowledge, is_default
-       FROM target_templates WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),n=U(["id","account_id","template_key","label","age_range","gender","genre","occupation","pains","desires","purchase_triggers","problem","goal","knowledge","is_default"],a||[]);return W(n,`ge365x_targets_${P()}.csv`)});F.get("/api/admin/export/voices",f,async e=>{const t=e.get("user"),{results:a}=await e.env.DB.prepare(`SELECT id, account_id, voice_key, label, tone, worldview, personal_story,
+       FROM target_templates WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),n=W(["id","account_id","template_key","label","age_range","gender","genre","occupation","pains","desires","purchase_triggers","problem","goal","knowledge","is_default"],s||[]);return Y(n,`ge365x_targets_${q()}.csv`)});B.get("/api/admin/export/voices",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_id, voice_key, label, tone, worldview, personal_story,
             prohibited_words, sample_posts, is_default
-       FROM brand_voice WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),n=U(["id","account_id","voice_key","label","tone","worldview","personal_story","prohibited_words","sample_posts","is_default"],a||[]);return W(n,`ge365x_voices_${P()}.csv`)});F.get("/api/admin/export/all",f,async e=>{const t=e.get("user"),a=t.id,[s,n,i,r,o,d,l,c,p]=await Promise.all([e.env.DB.prepare(`SELECT pq.*, xa.account_name, xa.x_username
+       FROM brand_voice WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),n=W(["id","account_id","voice_key","label","tone","worldview","personal_story","prohibited_words","sample_posts","is_default"],s||[]);return Y(n,`ge365x_voices_${q()}.csv`)});B.get("/api/admin/export/all",m,async e=>{const t=e.get("user"),s=t.id,[a,n,i,r,o,d,l,c,p]=await Promise.all([e.env.DB.prepare(`SELECT pq.*, xa.account_name, xa.x_username
          FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id = xa.id
-         WHERE pq.user_id = ? ORDER BY pq.id DESC LIMIT 10000`).bind(a).all(),e.env.DB.prepare("SELECT * FROM post_logs WHERE user_id = ? ORDER BY id DESC LIMIT 10000").bind(a).all(),e.env.DB.prepare("SELECT * FROM generation_logs WHERE user_id = ? ORDER BY id DESC LIMIT 10000").bind(a).all(),e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE user_id = ? ORDER BY id DESC LIMIT 10000").bind(a).all(),e.env.DB.prepare("SELECT * FROM drafts WHERE user_id = ? ORDER BY id DESC LIMIT 5000").bind(a).all(),e.env.DB.prepare("SELECT * FROM kpi_metrics WHERE user_id = ? ORDER BY metric_date DESC LIMIT 10000").bind(a).all(),e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
+         WHERE pq.user_id = ? ORDER BY pq.id DESC LIMIT 10000`).bind(s).all(),e.env.DB.prepare("SELECT * FROM post_logs WHERE user_id = ? ORDER BY id DESC LIMIT 10000").bind(s).all(),e.env.DB.prepare("SELECT * FROM generation_logs WHERE user_id = ? ORDER BY id DESC LIMIT 10000").bind(s).all(),e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE user_id = ? ORDER BY id DESC LIMIT 10000").bind(s).all(),e.env.DB.prepare("SELECT * FROM drafts WHERE user_id = ? ORDER BY id DESC LIMIT 5000").bind(s).all(),e.env.DB.prepare("SELECT * FROM kpi_metrics WHERE user_id = ? ORDER BY metric_date DESC LIMIT 10000").bind(s).all(),e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
               daily_post_count, daily_post_limit, last_posted_at,
               account_health_score, health_status, is_active, is_current,
               created_at, updated_at
-         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(a).all(),e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id = ? ORDER BY id DESC").bind(a).all(),e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id = ? ORDER BY id DESC").bind(a).all()]),m={exported_at:new Date().toISOString(),user:{id:t.id,email:t.email},posts:s.results||[],post_logs:n.results||[],generation_logs:i.results||[],autopilot_jobs:r.results||[],drafts:o.results||[],kpi_metrics:d.results||[],x_accounts:l.results||[],target_templates:c.results||[],brand_voices:p.results||[]};return rs(m,`ge365x_all_data_${P()}.json`)});F.get("/api/admin/export/admin/users",f,Te,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT u.id, u.email, u.is_approved, u.is_admin,
+         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(s).all(),e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id = ? ORDER BY id DESC").bind(s).all(),e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id = ? ORDER BY id DESC").bind(s).all()]),_={exported_at:new Date().toISOString(),user:{id:t.id,email:t.email},posts:a.results||[],post_logs:n.results||[],generation_logs:i.results||[],autopilot_jobs:r.results||[],drafts:o.results||[],kpi_metrics:d.results||[],x_accounts:l.results||[],target_templates:c.results||[],brand_voices:p.results||[]};return Vs(_,`ge365x_all_data_${q()}.json`)});B.get("/api/admin/export/admin/users",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT u.id, u.email, u.is_approved, u.is_admin,
             u.trial_start, u.trial_end, u.created_at, u.updated_at,
             s.plan_code, s.status AS sub_status, s.current_period_end
        FROM users u
        LEFT JOIN user_subscriptions s ON s.user_id = u.id
-       ORDER BY u.id DESC LIMIT 10000`).all(),s=U(["id","email","is_approved","is_admin","trial_start","trial_end","created_at","updated_at","plan_code","sub_status","current_period_end"],t||[]);return W(s,`ge365x_admin_users_${P()}.csv`)});F.get("/api/admin/export/admin/licenses",f,Te,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT l.id, l.license_key, l.license_type, l.plan_code,
+       ORDER BY u.id DESC LIMIT 10000`).all(),a=W(["id","email","is_approved","is_admin","trial_start","trial_end","created_at","updated_at","plan_code","sub_status","current_period_end"],t||[]);return Y(a,`ge365x_admin_users_${q()}.csv`)});B.get("/api/admin/export/admin/licenses",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT l.id, l.license_key, l.license_type, l.plan_code,
             l.user_id, u.email AS user_email,
             l.is_active, l.activated_at, l.expires_at,
             l.issued_by, l.note, l.created_at, l.updated_at
        FROM licenses l
        LEFT JOIN users u ON u.id = l.user_id
-       ORDER BY l.id DESC LIMIT 10000`).all(),s=U(["id","license_key","license_type","plan_code","user_id","user_email","is_active","activated_at","expires_at","issued_by","note","created_at","updated_at"],t||[]);return W(s,`ge365x_admin_licenses_${P()}.csv`)});F.get("/api/admin/export/admin/subs",f,Te,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT s.id, s.user_id, u.email AS user_email,
+       ORDER BY l.id DESC LIMIT 10000`).all(),a=W(["id","license_key","license_type","plan_code","user_id","user_email","is_active","activated_at","expires_at","issued_by","note","created_at","updated_at"],t||[]);return Y(a,`ge365x_admin_licenses_${q()}.csv`)});B.get("/api/admin/export/admin/subs",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT s.id, s.user_id, u.email AS user_email,
             s.plan_code, s.status, s.started_at, s.current_period_end,
             s.cancel_at_period_end, s.created_at, s.updated_at
        FROM user_subscriptions s
        LEFT JOIN users u ON u.id = s.user_id
-       ORDER BY s.updated_at DESC LIMIT 10000`).all(),s=U(["id","user_id","user_email","plan_code","status","started_at","current_period_end","cancel_at_period_end","created_at","updated_at"],t||[]);return W(s,`ge365x_admin_subs_${P()}.csv`)});F.get("/api/admin/export/admin/audit",f,Te,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT id, user_id, email, event_type, ip_address, user_agent, metadata, created_at
-       FROM auth_logs ORDER BY id DESC LIMIT 10000`).all(),s=U(["id","user_id","email","event_type","ip_address","user_agent","metadata","created_at"],t||[]);return W(s,`ge365x_admin_audit_${P()}.csv`)});F.get("/api/admin/export/admin/all",f,Te,async e=>{const[t,a,s,n,i,r,o]=await Promise.all([e.env.DB.prepare(`SELECT id, email, is_approved, is_admin, trial_start, trial_end, created_at, updated_at
+       ORDER BY s.updated_at DESC LIMIT 10000`).all(),a=W(["id","user_id","user_email","plan_code","status","started_at","current_period_end","cancel_at_period_end","created_at","updated_at"],t||[]);return Y(a,`ge365x_admin_subs_${q()}.csv`)});B.get("/api/admin/export/admin/audit",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT id, user_id, email, event_type, ip_address, user_agent, metadata, created_at
+       FROM auth_logs ORDER BY id DESC LIMIT 10000`).all(),a=W(["id","user_id","email","event_type","ip_address","user_agent","metadata","created_at"],t||[]);return Y(a,`ge365x_admin_audit_${q()}.csv`)});B.get("/api/admin/export/admin/all",m,R,async e=>{const[t,s,a,n,i,r,o]=await Promise.all([e.env.DB.prepare(`SELECT id, email, is_approved, is_admin, trial_start, trial_end, created_at, updated_at
          FROM users ORDER BY id DESC LIMIT 10000`).all(),e.env.DB.prepare(`SELECT s.*, u.email AS user_email
          FROM user_subscriptions s LEFT JOIN users u ON u.id = s.user_id
          ORDER BY s.id DESC LIMIT 10000`).all(),e.env.DB.prepare(`SELECT l.*, u.email AS user_email
@@ -3256,4 +2984,4 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
               content, status, posted_at, error_message, created_at
          FROM post_logs ORDER BY id DESC LIMIT 10000`).all(),e.env.DB.prepare(`SELECT id, user_id, account_name, x_username, account_health_score,
               health_status, is_active, created_at
-         FROM x_accounts ORDER BY id DESC LIMIT 10000`).all()]),d={exported_at:new Date().toISOString(),users:t.results||[],user_subscriptions:a.results||[],licenses:s.results||[],auth_logs:n.results||[],post_queue:i.results||[],post_logs:r.results||[],x_accounts:o.results||[]};return rs(d,`ge365x_admin_all_${P()}.json`)});const T=new D;T.use("/static/*",en({root:"./",manifest:{}}));T.get("/healthz",e=>e.json({ok:!0,service:"ge365x-web",time:new Date().toISOString()}));T.route("/",Na);T.route("/",q);T.route("/",za);T.route("/",Z);T.route("/",fe);T.route("/",he);T.route("/",M);T.route("/",is);T.route("/",ge);T.route("/",ze);T.route("/",pt);T.route("/",ut);T.route("/",Kt);T.route("/",It);T.route("/",At);T.route("/",Dt);T.route("/",Ae);T.route("/",F);T.notFound(e=>e.json({error:"not_found",path:e.req.path},404));T.onError((e,t)=>(console.error("[ge365x-web] error:",e),t.json({error:"internal_error",message:e.message},500)));const ei={fetch:T.fetch,async scheduled(e,t,a){const s=e.cron;(!s||s==="*/1 * * * *")&&a.waitUntil(T.fetch(new Request("https://internal/cron/tick",{method:"POST"}),t,a).catch(n=>console.error("[tick]",n))),s==="*/5 * * * *"&&a.waitUntil(T.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}),t,a).catch(n=>console.error("[autopilot-tick]",n)))}},pa=new D,ti=Object.assign({"/src/index.tsx":ei});let os=!1;for(const[,e]of Object.entries(ti))e&&(pa.all("*",t=>{let a;try{a=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,a)}),pa.notFound(t=>{let a;try{a=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,a)}),os=!0);if(!os)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{pa as default};
+         FROM x_accounts ORDER BY id DESC LIMIT 10000`).all()]),d={exported_at:new Date().toISOString(),users:t.results||[],user_subscriptions:s.results||[],licenses:a.results||[],auth_logs:n.results||[],post_queue:i.results||[],post_logs:r.results||[],x_accounts:o.results||[]};return Vs(d,`ge365x_admin_all_${q()}.json`)});const S=new A;S.use("/static/*",Ua({root:"./",manifest:{}}));S.get("/healthz",e=>e.json({ok:!0,service:"ge365x-web",time:new Date().toISOString()}));S.route("/",js);S.route("/",H);S.route("/",F);S.route("/",fe);S.route("/",be);S.route("/",ge);S.route("/",U);S.route("/",zs);S.route("/",ve);S.route("/",tt);S.route("/",st);S.route("/",at);S.route("/",Pt);S.route("/",gt);S.route("/",vt);S.route("/",yt);S.route("/",He);S.route("/",B);S.notFound(e=>e.json({error:"not_found",path:e.req.path},404));S.onError((e,t)=>(console.error("[ge365x-web] error:",e),t.json({error:"internal_error",message:e.message},500)));const Hn={fetch:S.fetch,async scheduled(e,t,s){const a=e.cron;(!a||a==="*/1 * * * *")&&s.waitUntil(S.fetch(new Request("https://internal/cron/tick",{method:"POST"}),t,s).catch(n=>console.error("[tick]",n))),a==="*/5 * * * *"&&s.waitUntil(S.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}),t,s).catch(n=>console.error("[autopilot-tick]",n)))}},os=new A,Un=Object.assign({"/src/index.tsx":Hn});let Xs=!1;for(const[,e]of Object.entries(Un))e&&(os.all("*",t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),os.notFound(t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),Xs=!0);if(!Xs)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{os as default};
