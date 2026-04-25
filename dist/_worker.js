@@ -1373,9 +1373,13 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
 
   async function loadSchedule() {
     const stEl = document.getElementById('sc-status');
-    if (stEl) stEl.textContent = '読み込み中...';
+    if (stEl) { stEl.textContent = '読み込み中...'; stEl.style.color='var(--ink-muted)'; }
+    let timedOut = false;
+    const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const tmr = setTimeout(function(){ timedOut = true; if (ctrl) ctrl.abort(); }, 15000);
     try {
-      const r = await fetch('/api/admin/posts-scheduled');
+      const r = await fetch('/api/admin/posts-scheduled', ctrl ? {signal: ctrl.signal} : undefined);
+      clearTimeout(tmr);
       if (!r.ok) throw new Error('HTTP '+r.status);
       const j = await r.json();
       SCHEDULED = j.posts || [];
@@ -1384,11 +1388,13 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       buildCalendar();
       buildList();
     } catch(e) {
-      if (stEl) { stEl.textContent = '予約状況を取得できませんでした'; stEl.style.color='#dc2626'; }
+      clearTimeout(tmr);
+      const msg = timedOut ? '予約状況の取得がタイムアウトしました' : '予約状況を取得できませんでした';
+      if (stEl) { stEl.textContent = msg; stEl.style.color='#dc2626'; }
       const grid = document.getElementById('sc-cal-grid');
-      if (grid) grid.innerHTML = '<div style="grid-column:1 / span 7;padding:2rem;text-align:center;color:#dc2626;font-size:.85rem">予約状況を取得できませんでした</div>';
+      if (grid) grid.innerHTML = '<div style="grid-column:1 / span 7;padding:2rem;text-align:center;color:#dc2626;font-size:.85rem">'+msg+'</div>';
       const lb = document.getElementById('sc-list-body');
-      if (lb) lb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:2.5rem">予約状況を取得できませんでした</td></tr>';
+      if (lb) lb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:2.5rem">'+msg+'</td></tr>';
     }
   }
   window.reloadSchedule = loadSchedule;
