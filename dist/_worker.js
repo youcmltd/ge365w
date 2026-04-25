@@ -1373,13 +1373,9 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
 
   async function loadSchedule() {
     const stEl = document.getElementById('sc-status');
-    if (stEl) { stEl.textContent = '読み込み中...'; stEl.style.color='var(--ink-muted)'; }
-    let timedOut = false;
-    const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    const tmr = setTimeout(function(){ timedOut = true; if (ctrl) ctrl.abort(); }, 15000);
+    if (stEl) stEl.textContent = '読み込み中...';
     try {
-      const r = await fetch('/api/admin/posts-scheduled', ctrl ? {signal: ctrl.signal} : undefined);
-      clearTimeout(tmr);
+      const r = await fetch('/api/admin/posts-scheduled');
       if (!r.ok) throw new Error('HTTP '+r.status);
       const j = await r.json();
       SCHEDULED = j.posts || [];
@@ -1388,13 +1384,11 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       buildCalendar();
       buildList();
     } catch(e) {
-      clearTimeout(tmr);
-      const msg = timedOut ? '予約状況の取得がタイムアウトしました' : '予約状況を取得できませんでした';
-      if (stEl) { stEl.textContent = msg; stEl.style.color='#dc2626'; }
+      if (stEl) { stEl.textContent = '予約状況を取得できませんでした'; stEl.style.color='#dc2626'; }
       const grid = document.getElementById('sc-cal-grid');
-      if (grid) grid.innerHTML = '<div style="grid-column:1 / span 7;padding:2rem;text-align:center;color:#dc2626;font-size:.85rem">'+msg+'</div>';
+      if (grid) grid.innerHTML = '<div style="grid-column:1 / span 7;padding:2rem;text-align:center;color:#dc2626;font-size:.85rem">予約状況を取得できませんでした</div>';
       const lb = document.getElementById('sc-list-body');
-      if (lb) lb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:2.5rem">'+msg+'</td></tr>';
+      if (lb) lb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:2.5rem">予約状況を取得できませんでした</td></tr>';
     }
   }
   window.reloadSchedule = loadSchedule;
@@ -1806,7 +1800,7 @@ async function delAcct(id) {
   location.reload();
 }
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-<\/script>`}function fn(e){const t=[{key:"posts",label:"投稿キュー",desc:"全投稿データ（予約・投稿済・失敗含む）",icon:"fa-brands fa-x-twitter",color:"text-blue-600"},{key:"logs",label:"投稿ログ",desc:"投稿実行の全履歴（成功・失敗）",icon:"fa-clipboard-list",color:"text-emerald-600"},{key:"generations",label:"AI生成ログ",desc:"AI生成されたテキストの記録",icon:"fa-robot",color:"text-purple-600"},{key:"drafts",label:"下書き",desc:"保存済みの下書きデータ",icon:"fa-file-pen",color:"text-sky-600"},{key:"kpi",label:"KPI",desc:"日別投稿数・失敗数の統計",icon:"fa-chart-line",color:"text-rose-600"},{key:"accounts",label:"Xアカウント",desc:"アカウント情報（トークン除外）",icon:"fa-users-gear",color:"text-indigo-600"}],s=[{key:"admin/users",label:"ユーザー一覧",desc:"全ユーザー（プラン・承認状態含む）",icon:"fa-users",color:"text-blue-600"},{key:"admin/licenses",label:"ライセンス",desc:"ライセンスキーの全データ",icon:"fa-key",color:"text-amber-600"},{key:"admin/subs",label:"サブスクリプション",desc:"全契約情報",icon:"fa-credit-card",color:"text-emerald-600"},{key:"admin/audit",label:"監査ログ",desc:"認証・操作ログ",icon:"fa-shield-halved",color:"text-red-600"}];return`
+<\/script>`}function fn(e){const t=[{key:"posts",label:"投稿キュー",desc:"全投稿データ（予約・投稿済・失敗含む）",icon:"fa-brands fa-x-twitter",color:"text-blue-600"},{key:"logs",label:"投稿ログ",desc:"投稿実行の全履歴（成功・失敗）",icon:"fa-clipboard-list",color:"text-emerald-600"},{key:"generations",label:"AI生成ログ",desc:"AI生成されたテキストの記録",icon:"fa-robot",color:"text-purple-600"},{key:"autopilot",label:"オートパイロット",desc:"予約ジョブの一覧",icon:"fa-plane-departure",color:"text-amber-600"},{key:"drafts",label:"下書き",desc:"保存済みの下書きデータ",icon:"fa-file-pen",color:"text-sky-600"},{key:"kpi",label:"KPI",desc:"日別投稿数・失敗数の統計",icon:"fa-chart-line",color:"text-rose-600"},{key:"accounts",label:"Xアカウント",desc:"アカウント情報（トークン除外）",icon:"fa-users-gear",color:"text-indigo-600"},{key:"targets",label:"ターゲット設定",desc:"ターゲットテンプレート",icon:"fa-bullseye",color:"text-orange-600"},{key:"voices",label:"ブランドボイス",desc:"ボイスプロファイル",icon:"fa-palette",color:"text-pink-600"}],s=[{key:"admin/users",label:"ユーザー一覧",desc:"全ユーザー（プラン・承認状態含む）",icon:"fa-users",color:"text-blue-600"},{key:"admin/licenses",label:"ライセンス",desc:"ライセンスキーの全データ",icon:"fa-key",color:"text-amber-600"},{key:"admin/subs",label:"サブスクリプション",desc:"全契約情報",icon:"fa-credit-card",color:"text-emerald-600"},{key:"admin/audit",label:"監査ログ",desc:"認証・操作ログ",icon:"fa-shield-halved",color:"text-red-600"}];return`
 <div class="space-y-6">
   <div>
     <h1 class="section-title"><i class="fas fa-download"></i>一括ダウンロード</h1>
@@ -1969,7 +1963,11 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         ORDER BY pq.id DESC LIMIT 200`).bind(t.id,n).all(),d=(o||[]).length,l=(o||[]).filter(_=>_.status==="pending"||_.status==="approved").length,c=(o||[]).filter(_=>_.status==="posted").length,p=(o||[]).filter(_=>_.status==="failed").length;return cn({hasAccount:s,noAccountAlert:he,month:n,y:i,m:parseInt(r,10),posts:o||[],stats:{total:d,pending:l,posted:c,failed:p}})}));H.get("/dashboard/thread",m,async e=>K(e,"thread",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.status, pq.posted_at, pq.created_at, pq.thread_parent_id
          FROM post_queue pq
         WHERE pq.user_id = ? AND pq.post_mode = 'thread' AND pq.thread_parent_id IS NOT NULL
-        ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return un({hasAccount:s,noAccountAlert:he,history:a||[]})}));H.get("/dashboard/scheduled",m,async e=>K(e,"scheduled",async({hasAccount:s})=>mn({hasAccount:s,noAccountAlert:he})));H.get("/dashboard/autopilot",m,async e=>K(e,"autopilot",async({user:t,hasAccount:s,accounts:a})=>{const{results:n}=await e.env.DB.prepare(`SELECT aj.*, xa.x_username FROM autopilot_jobs aj
+        ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return un({hasAccount:s,noAccountAlert:he,history:a||[]})}));H.get("/dashboard/scheduled",m,async e=>K(e,"scheduled",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.scheduled_at, pq.status, xa.x_username
+         FROM post_queue pq LEFT JOIN x_accounts xa ON xa.id = pq.account_id
+        WHERE pq.user_id = ? AND pq.scheduled_at IS NOT NULL
+          AND pq.status NOT IN ('cancelled','rejected')
+        ORDER BY pq.scheduled_at ASC LIMIT 100`).bind(t.id).all();return mn({hasAccount:s,noAccountAlert:he,scheduled:a||[]})}));H.get("/dashboard/autopilot",m,async e=>K(e,"autopilot",async({user:t,hasAccount:s,accounts:a})=>{const{results:n}=await e.env.DB.prepare(`SELECT aj.*, xa.x_username FROM autopilot_jobs aj
          LEFT JOIN x_accounts xa ON xa.id = aj.account_id
         WHERE aj.user_id = ?
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
