@@ -564,7 +564,7 @@ async function doLicenseActivate(e) {
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-gauge-high"></i>ダッシュボード</h1>
-    <p class="section-desc">今日の投稿状況とアカウント健全性を一覧できます。</p>
+    <p class="section-desc">今日の投稿状況を一覧できます。</p>
   </div>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -574,24 +574,7 @@ async function doLicenseActivate(e) {
     <div class="card card-sm"><div class="text-xs text-ink-muted">本日失敗</div><div class="text-2xl font-bold text-red-600 mt-1">${t.failed}</div></div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <div class="card">
-      <h3 class="font-bold text-ink mb-3"><i class="fas fa-heart-pulse text-red-500"></i> アカウント健全性</h3>
-      ${s.length===0?`
-        <div class="text-ink-muted text-sm text-center py-6">アカウント未登録</div>
-      `:s.map(n=>`
-        <div class="flex items-center justify-between py-2 border-b border-line/50 last:border-0">
-          <div>
-            <div class="text-sm font-semibold text-ink">@${w(n.x_username||n.account_name)}</div>
-            <div class="text-xs text-ink-muted">${n.is_active?"稼働中":"停止中"}</div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="text-xl font-bold ${n.account_health_score>=80?"text-emerald-600":n.account_health_score>=60?"text-amber-600":"text-red-600"}">${n.account_health_score??100}</div>
-            <span class="pill ${n.health_status==="risk"?"pill-err":n.health_status==="caution"?"pill-warn":"pill-ok"}">${n.health_status||"healthy"}</span>
-          </div>
-        </div>
-      `).join("")}
-    </div>
+  <div class="grid grid-cols-1 gap-4">
     <div class="card">
       <h3 class="font-bold text-ink mb-3"><i class="fas fa-clock-rotate-left text-accent"></i> 直近の投稿ログ</h3>
       ${a.length===0?`
@@ -610,7 +593,7 @@ async function doLicenseActivate(e) {
     <h1 class="section-title"><i class="fas fa-bullseye"></i>ターゲット設定</h1>
     <p class="section-desc">投稿のターゲット読者を設定します。AI生成時に自動でプロンプトに注入されます。</p>
   </div>
-  ${e.hasAccount?"":e.noAccountAlert}
+  
   <div class="card">
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-bold text-ink">ターゲットテンプレート</h3>
@@ -681,7 +664,7 @@ async function saveTarget() {
     <h1 class="section-title"><i class="fas fa-palette"></i>ブランドボイス</h1>
     <p class="section-desc">あなたの発信スタイル・口調・世界観を定義します。AI生成時にトーンとして注入されます。</p>
   </div>
-  ${e.hasAccount?"":e.noAccountAlert}
+  
   <div class="card">
     <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
       <h3 class="font-bold text-ink">ボイスプロファイル</h3>
@@ -727,82 +710,74 @@ async function saveVoice() {
   if (j.success) { msg.textContent = '保存しました'; msg.className = 'text-xs ml-2 text-emerald-600'; }
   else { msg.textContent = '保存失敗'; msg.className = 'text-xs ml-2 text-red-600'; }
 }
-<\/script>`}function dn(e){var s,a,n;const t=[["problem","問題提起型","fa-circle-question"],["before_after","ビフォーアフター型","fa-right-left"],["contrarian","逆張り型","fa-rotate-left"],["howto","HowTo実演型","fa-list-ol"],["numbers","数字インパクト型","fa-hashtag"]];return`
+<\/script>`}function dn(e){var s,a,n;const t=[["problem","問題提起型","fa-circle-question","痛みを突く"],["before_after","ビフォーアフター型","fa-right-left","変化を見せる"],["contrarian","逆張り型","fa-rotate-left","常識を覆す"],["howto","HowTo実演型","fa-list-ol","手順で見せる"],["numbers","数字インパクト型","fa-hashtag","数字で訴く"]];return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-wand-magic-sparkles"></i>パターン別AI生成</h1>
-    <p class="section-desc">5種類の投稿パターンから選んで、テーマに沿った投稿案を複数生成します。</p>
+    <p class="section-desc">5つの投稿パターンから選んでAI生成。生成後の各カードに画像・動画を個別設定して投稿。</p>
   </div>
-  ${e.hasAccount?"":e.noAccountAlert}
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <div class="card lg:col-span-2 space-y-4">
-      <div>
-        <label class="field-label"><i class="fas fa-shapes icon-purple"></i>投稿パターン</label>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem" id="patt-grid">
-          ${t.map(([i,r,o],d)=>`
-            <div onclick="selectPatt(this,'${i}')" data-val="${i}"
-              style="display:flex;flex-direction:column;align-items:center;gap:.375rem;padding:.75rem .5rem;border:2px solid ${d===0?"var(--accent)":"var(--line)"};border-radius:.5rem;cursor:pointer;background:${d===0?"var(--accent-light)":"#fff"};color:${d===0?"var(--accent)":"var(--ink)"};transition:all .15s;text-align:center">
-              <i class="fas ${o}" style="font-size:1.1rem"></i>
-              <span style="font-size:.72rem;font-weight:600;line-height:1.2">${r}</span>
-            </div>
-          `).join("")}
+
+  <div class="card space-y-4">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem" id="patt-grid">
+      ${t.map(([i,r,o,p],d)=>`
+        <div onclick="selectPatt(this,'${i}')" data-val="${i}"
+          style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;padding:1.1rem .5rem;border:2px solid ${d===0?"var(--accent, #2563EB)":"var(--line)"};border-radius:.625rem;cursor:pointer;background:${d===0?"var(--accent-light, #EFF6FF)":"#fff"};color:${d===0?"var(--accent, #2563EB)":"var(--ink)"};transition:all .15s;text-align:center">
+          <i class="fas ${o}" style="font-size:1.35rem"></i>
+          <span style="font-size:.85rem;font-weight:700;line-height:1.2">${r}</span>
+          <span style="font-size:.7rem;color:#6B7280;font-weight:400">${p}</span>
         </div>
-        <input type="hidden" id="patt-val" value="problem">
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="field-label"><i class="fas fa-heading icon-blue"></i>テーマ</label>
-          <input type="text" id="pa-theme" class="inp" placeholder="例: FXで月10万円稼ぐ方法">
-        </div>
-        <div>
-          <label class="field-label"><i class="fas fa-tags icon-green"></i>キーワード</label>
-          <input type="text" id="pa-kw" class="inp" placeholder="例: 自動売買, EA, システムトレード">
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="field-label"><i class="fas fa-align-left icon-blue"></i>投稿モード</label>
-          <select id="pa-mode" class="inp">
-            <option value="body">フル文章</option>
-            <option value="140">140文字以内</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label"><i class="fas fa-link icon-blue"></i>リンクURL（任意）</label>
-          <input type="url" id="pa-link" class="inp" placeholder="https://...">
-        </div>
-        <div>
-          <label class="field-label"><i class="fas fa-hashtag icon-green"></i>ハッシュタグ（任意）</label>
-          <input type="text" id="pa-tag" class="inp" placeholder="#FX #システムトレード">
-        </div>
-      </div>
-      <div>
-        <label class="field-label"><i class="fas fa-list-ol icon-yellow"></i>生成件数</label>
-        <select id="pa-count" class="inp" style="width:8rem">
-          <option value="1">1件</option><option value="3" selected>3件</option>
-          <option value="5">5件</option><option value="10">10件</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="doPatternGenerate()"><i class="fas fa-wand-magic-sparkles"></i>AI生成</button>
+      `).join("")}
     </div>
-    <div class="card">
-      <h3 class="font-bold text-ink mb-3"><i class="fas fa-circle-info text-accent"></i> 現在の設定</h3>
-      <div class="space-y-2 text-sm">
-        <div class="p-2 bg-paper-soft rounded-md">
-          <div class="text-xs text-ink-muted">ターゲット</div>
-          <div class="text-ink">${w(((s=e.target)==null?void 0:s.age_range)||"未設定")} / ${w(((a=e.target)==null?void 0:a.gender)||"-")}</div>
+    <input type="hidden" id="patt-val" value="problem">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="field-label">テーマ <span style="color:#dc2626">*</span></label>
+        <input type="text" id="pa-theme" class="inp" placeholder="例: AI自動化で1日15分運用">
+      </div>
+      <div>
+        <label class="field-label">キーワード</label>
+        <input type="text" id="pa-kw" class="inp" placeholder="例: AI, 自動化, 時短, 仕組み">
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <label class="field-label" style="margin:0">生成数</label>
+      <select id="pa-count" class="inp" style="width:6rem">
+        <option value="1">1件</option><option value="2">2件</option><option value="3" selected>3件</option><option value="4">4件</option><option value="5">5件</option><option value="6">6件</option><option value="7">7件</option><option value="8">8件</option><option value="9">9件</option><option value="10">10件</option>
+      </select>
+    </div>
+
+    <div style="border:1px solid var(--line);border-radius:.5rem;padding:1rem;background:var(--paper-soft)">
+      <div style="font-weight:600;color:var(--accent);margin-bottom:.625rem"><i class="fas fa-sliders"></i> 投稿オプション</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">投稿末尾の追記（任意）</label>
+          <input type="text" id="pa-footer" class="inp" placeholder="例: 詳しくはプロフリンクから👇">
         </div>
-        <div class="p-2 bg-paper-soft rounded-md">
-          <div class="text-xs text-ink-muted">ブランドボイス</div>
-          <div class="text-ink text-xs">${w((((n=e.voice)==null?void 0:n.tone)||"未設定").slice(0,50))}...</div>
+        <div>
+          <label class="field-label">URL（任意）</label>
+          <input type="url" id="pa-link" class="inp" placeholder="https://">
         </div>
-        <div class="p-2 bg-paper-soft rounded-md">
-          <div class="text-xs text-ink-muted">投稿先アカウント</div>
-          <div class="text-ink">${e.currentAcct?"@"+w(e.currentAcct.x_username||e.currentAcct.account_name):"未選択"}</div>
+        <div>
+          <label class="field-label">本文モード</label>
+          <div style="display:flex;gap:1.5rem;margin-top:.25rem">
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="pa-mode" value="body" checked><span style="font-size:.9rem">本文（生成そのまま）</span></label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="pa-mode" value="140"><span style="font-size:.9rem">140文字以内</span></label>
+          </div>
         </div>
       </div>
     </div>
+
+    <input type="hidden" id="pa-tag" value="">
+
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" style="flex:1;justify-content:center;padding:.75rem" onclick="doPatternGenerate()"><i class="fas fa-wand-magic-sparkles"></i>選択パターンでAI生成</button>
+      <button class="btn btn-ghost" onclick="paSaveDraft()"><i class="fas fa-floppy-disk"></i>下書き保存</button>
+      <button class="btn btn-ghost" onclick="paLoadDraft()"><i class="fas fa-folder-open"></i>下書き再開</button>
+    </div>
   </div>
+
   <div id="pa-results"></div>
 </div>
 <script>
@@ -965,19 +940,62 @@ window.paPostNow = async function(pid) {
   else { stEl.textContent='失敗: '+(j.error||''); stEl.style.color='#dc2626'; toast('投稿失敗: '+(j.error||''),'err'); }
 };
 
+async function doPatternGenerate_legacy_unused() { /* removed */ }
+
+function paSaveDraft() {
+  const draft = {
+    pattern: document.getElementById('patt-val').value,
+    theme: document.getElementById('pa-theme').value,
+    kw: document.getElementById('pa-kw').value,
+    count: document.getElementById('pa-count').value,
+    footer: document.getElementById('pa-footer') ? document.getElementById('pa-footer').value : '',
+    link: document.getElementById('pa-link').value,
+    mode: (document.querySelector('input[name="pa-mode"]:checked')||{}).value || 'body',
+  };
+  try { sessionStorage.setItem('pa_draft', JSON.stringify(draft)); toast('下書きを保存しました','ok'); }
+  catch(e) { toast('保存失敗: '+e.message,'err'); }
+}
+window.paSaveDraft = paSaveDraft;
+function paLoadDraft() {
+  try {
+    const raw = sessionStorage.getItem('pa_draft');
+    if (!raw) { toast('保存された下書きがありません','info'); return; }
+    const d = JSON.parse(raw);
+    if (d.theme) document.getElementById('pa-theme').value = d.theme;
+    if (d.kw) document.getElementById('pa-kw').value = d.kw;
+    if (d.count) document.getElementById('pa-count').value = d.count;
+    if (d.footer && document.getElementById('pa-footer')) document.getElementById('pa-footer').value = d.footer;
+    if (d.link) document.getElementById('pa-link').value = d.link;
+    if (d.mode) {
+      const r = document.querySelector('input[name="pa-mode"][value="'+d.mode+'"]');
+      if (r) r.checked = true;
+    }
+    if (d.pattern) {
+      const cell = document.querySelector('#patt-grid > div[data-val="'+d.pattern+'"]');
+      if (cell) selectPatt(cell, d.pattern);
+    }
+    toast('下書きを再開しました','ok');
+  } catch(e) { toast('読込失敗: '+e.message,'err'); }
+}
+window.paLoadDraft = paLoadDraft;
+
 async function doPatternGenerate() {
   const patt = document.getElementById('patt-val').value;
   const theme = document.getElementById('pa-theme').value.trim();
   if (!theme) { toast('テーマを入力してください', 'err'); return; }
   const cntVal = parseInt(document.getElementById('pa-count').value, 10) || 1;
   const cnt = Math.min(Math.max(cntVal, 1), 10);
+  const modeEl = document.querySelector('input[name="pa-mode"]:checked');
+  const postMode = modeEl ? modeEl.value : 'body';
+  const footer = document.getElementById('pa-footer') ? document.getElementById('pa-footer').value : '';
   const body = {
     theme,
     keywords: document.getElementById('pa-kw').value,
     pattern_type: patt,
-    post_mode: document.getElementById('pa-mode').value,
+    post_mode: postMode,
     link_url: document.getElementById('pa-link').value,
     hashtags: document.getElementById('pa-tag').value,
+    footer: footer,
     count: cnt,
   };
   const root = document.getElementById('pa-results');
@@ -998,7 +1016,7 @@ async function doPatternGenerate() {
 window.doPatternGenerate = doPatternGenerate;
 <\/script>`}function ln(e){return`
 <div class="space-y-4">
-  ${e.hasAccount?"":e.noAccountAlert}
+  
   <div>
     <h1 class="section-title"><i class="fas fa-robot"></i>AI生成2</h1>
   </div>
@@ -1011,7 +1029,7 @@ window.doPatternGenerate = doPatternGenerate;
     <div>
       <label class="field-label"><i class="fas fa-list-ol icon-yellow"></i>生成数</label>
       <select id="ge-count" class="inp" style="width:8rem">
-        <option>1件</option><option selected>3件</option><option>5件</option>
+        <option value="1">1件</option><option value="2">2件</option><option value="3" selected>3件</option><option value="4">4件</option><option value="5">5件</option><option value="6">6件</option><option value="7">7件</option><option value="8">8件</option><option value="9">9件</option><option value="10">10件</option>
       </select>
     </div>
     <div class="border border-line rounded-lg p-4 bg-paper-soft">
@@ -1062,7 +1080,7 @@ async function doGen2() {
 }
 <\/script>`}function cn(e){const{month:t,y:s,m:a,posts:n,stats:i}=e;return`
 <div class="space-y-4">
-  ${e.hasAccount?"":e.noAccountAlert}
+  
   <div>
     <h1 class="section-title"><i class="fa-brands fa-x-twitter"></i>X投稿管理</h1>
   </div>
@@ -1173,7 +1191,7 @@ function statusPill(s) {
   <div>
     <h1 class="section-title"><i class="fas fa-reply"></i>ツリー投稿（既存投稿へのコメント追加）</h1>
   </div>
-  ${e.hasAccount?"":e.noAccountAlert}
+  
   <div class="card">
     <h3 class="font-bold text-ink mb-3"><i class="fas fa-reply text-accent"></i> コメント先投稿を選択 <span class="text-xs text-red-500 font-normal">（必須）</span></h3>
     <div class="alert alert-warn mb-3">
@@ -1195,20 +1213,13 @@ function statusPill(s) {
     </div>
     <div class="mt-4 flex items-center gap-2 flex-wrap">
       <button class="btn btn-ghost" onclick="addReply()"><i class="fas fa-plus"></i>返信追加</button>
-      <label class="btn btn-ghost" style="cursor:pointer">
-        <i class="fas fa-image"></i>画像
-        <input type="file" id="th-img" accept="image/*" class="hide" onchange="previewThMedia(this,'image')">
-      </label>
-      <label class="btn btn-ghost" style="cursor:pointer">
-        <i class="fas fa-video"></i>動画
-        <input type="file" id="th-vid" accept="video/*" class="hide" onchange="previewThMedia(this,'video')">
-      </label>
+      <span class="text-xs text-ink-muted" style="margin-left:.5rem">最大20件 / 各返信に画像・動画を最大4件添付可</span>
+      <span style="flex:1"></span>
       <button class="btn" style="background:#10B981;color:#fff;border-color:#10B981" onclick="submitNow()"><i class="fas fa-paper-plane"></i>今すぐ投稿</button>
       <button class="btn btn-primary" onclick="submitSchedule()"><i class="fas fa-calendar"></i>予約投稿</button>
       <button class="btn btn-ghost" onclick="saveDraft()"><i class="fas fa-floppy-disk"></i>下書き保存</button>
       <button class="btn btn-ghost" onclick="previewThread()"><i class="fas fa-eye"></i>プレビュー</button>
     </div>
-    <div id="th-media-preview" style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap"></div>
   </div>
   <div class="card">
     <h3 class="font-bold text-ink mb-3">返信履歴</h3>
@@ -1227,18 +1238,38 @@ function statusPill(s) {
 </div>
 <script>
 function renderReplyItemJs(n) {
-  return '<div class="reply-item"><div class="flex items-center justify-between mb-1"><label class="text-sm font-semibold text-accent">返信 ' + n + '</label>' +
-    (n > 1 ? '<button class="btn btn-danger btn-sm" onclick="this.closest(\\'.reply-item\\').remove();renumber()"><i class="fas fa-times"></i></button>' : '') +
-    '</div><textarea class="inp th-reply" placeholder="返信' + n + 'の本文を入力" maxlength="280"></textarea></div>';
+  return '<div class="reply-item" data-idx="'+n+'">' +
+    '<div class="flex items-center justify-between mb-1">' +
+      '<label class="text-sm font-semibold text-accent">返信 '+n+'</label>' +
+      (n > 1 ? '<button class="btn btn-danger btn-sm" type="button" onclick="removeReplyItem(this)"><i class="fas fa-times"></i></button>' : '') +
+    '</div>' +
+    '<textarea class="inp th-reply" placeholder="返信'+n+'の本文を入力" maxlength="280"></textarea>' +
+    '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem">' +
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="thAttachUrl(this,\\'image\\')"><i class="fas fa-image"></i>画像URL</button>' +
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="thAttachFile(this,\\'image\\')"><i class="fas fa-upload"></i>画像アップ</button>' +
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="thAttachUrl(this,\\'video\\')"><i class="fas fa-film"></i>動画URL</button>' +
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="thAttachFile(this,\\'video\\')"><i class="fas fa-upload"></i>動画アップ</button>' +
+    '</div>' +
+    '<div class="th-media-list" style="display:flex;flex-wrap:wrap;margin-top:.3rem"></div>' +
+  '</div>';
 }
 function addReply() {
   const list = document.getElementById('th-replies');
+  if (list.children.length >= 20) { toast('返信は最大20件までです','err'); return; }
   const n = list.children.length + 1;
   list.insertAdjacentHTML('beforeend', renderReplyItemJs(n));
 }
+window.addReply = addReply;
+function removeReplyItem(btn){
+  const item = btn.closest('.reply-item');
+  if (item) item.remove();
+  renumber();
+}
+window.removeReplyItem = removeReplyItem;
 function renumber() {
   [...document.getElementById('th-replies').children].forEach((el, i) => {
     const lbl = el.querySelector('label'); if (lbl) lbl.textContent = '返信 ' + (i+1);
+    el.dataset.idx = i+1;
   });
 }
 function loadRecent() {
@@ -1253,53 +1284,130 @@ function loadRecent() {
     }
   });
 }
-function previewThMedia(input, type) {
-  const f = input.files[0]; if (!f) return;
-  const prev = document.getElementById('th-media-preview');
-  if (type === 'image') {
-    const url = URL.createObjectURL(f);
-    prev.innerHTML = '<div style="position:relative;display:inline-block"><img src="'+url+'" style="height:80px;border-radius:4px;border:1px solid var(--line)"><button onclick="clearThMedia()" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px">×</button></div>';
-  } else {
-    prev.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;background:var(--paper-soft);padding:.5rem;border-radius:.5rem"><i class="fas fa-video" style="color:var(--accent)"></i><span style="font-size:.8rem">'+f.name+'</span><button onclick="clearThMedia()" style="background:#ef4444;color:#fff;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:.7rem">削除</button></div>';
-  }
-  toast((type==='image'?'画像':'動画')+'を選択しました', 'ok');
+window.loadRecent = loadRecent;
+
+// 返信アイテムごとの添付メディア
+function thRenderItemMedia(item){
+  const arr = item._media || [];
+  const list = item.querySelector('.th-media-list');
+  if (!list) return;
+  list.innerHTML = arr.map(m =>
+    '<div style="display:inline-flex;align-items:center;gap:.25rem;background:#F3F4F6;border-radius:.25rem;padding:.15rem .4rem;font-size:.7rem;margin:.1rem">'+
+      '<i class="fas '+(m.type==='video'?'fa-film':'fa-image')+'"></i>'+
+      '<span style="max-width:9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(m.name||'').replace(/"/g,'&quot;')+'">'+(m.name||'media')+'</span>'+
+      '<button type="button" data-mid="'+m.id+'" onclick="thRemoveItemMedia(this)" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="fas fa-xmark"></i></button>'+
+    '</div>'
+  ).join('');
 }
-function clearThMedia() {
-  document.getElementById('th-img').value='';
-  document.getElementById('th-vid').value='';
-  document.getElementById('th-media-preview').innerHTML='';
+window.thRemoveItemMedia = function(btn){
+  const item = btn.closest('.reply-item');
+  const mid = parseInt(btn.dataset.mid, 10);
+  item._media = (item._media||[]).filter(m => m.id !== mid);
+  thRenderItemMedia(item);
+};
+window.thAttachUrl = async function(btn, kind){
+  const item = btn.closest('.reply-item');
+  item._media = item._media || [];
+  if (item._media.length >= 4) { toast('1返信あたり最大4件','err'); return; }
+  const u = prompt(kind==='image'?'画像のURLを入力':'動画のURLを入力'); if (!u) return;
+  const r = await fetch('/api/admin/media/url',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:u, file_type:kind})});
+  const j = await r.json();
+  if(!j.success){ toast('登録失敗: '+(j.error||''),'err'); return; }
+  item._media.push({id:j.id, type:kind, name:u.split('/').pop()||'remote'});
+  thRenderItemMedia(item);
+};
+window.thAttachFile = async function(btn, kind){
+  const item = btn.closest('.reply-item');
+  item._media = item._media || [];
+  if (item._media.length >= 4) { toast('1返信あたり最大4件','err'); return; }
+  const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fd = new FormData(); fd.append('file', f);
+    toast('アップロード中...','info');
+    const r = await fetch('/api/admin/media',{method:'POST', body: fd});
+    const j = await r.json();
+    if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
+    item._media.push({id:j.id, type:kind, name:f.name});
+    thRenderItemMedia(item);
+  };
+  inp.click();
+};
+
+function saveDraft() { toast('下書きを保存しました（簡易）','info'); }
+window.saveDraft = saveDraft;
+function previewThread() {
+  const d = collect(); if (!d) return;
+  const total = d.tweets.reduce((a,t)=>a+(t.media_ids||[]).length,0);
+  toast(d.tweets.length+'件の返信 / 添付'+total+'件','info');
 }
-function saveDraft() { toast('下書きを保存しました（実装中）','info'); }
-function previewThread() { toast('プレビュー（実装中）','info'); }
+window.previewThread = previewThread;
+
 function updateTarget() {
   const v = document.getElementById('th-target-id').value.trim();
   const el = document.getElementById('th-target-info');
   if (!v) el.innerHTML = '<div class="text-xs text-red-600"><i class="fas fa-triangle-exclamation"></i> コメント先が未選択です</div>';
   else el.innerHTML = '<div class="text-xs text-emerald-700"><i class="fas fa-check"></i> コメント先: <span class="font-mono">' + escapeHtml(v) + '</span></div>';
 }
+window.updateTarget = updateTarget;
+
 function collect() {
   const tid = document.getElementById('th-target-id').value.trim();
   if (!tid) { toast('コメント先を選択してください','err'); return null; }
-  const items = [...document.querySelectorAll('.th-reply')].map(t => t.value.trim()).filter(Boolean);
-  if (!items.length) { toast('返信本文を入力してください','err'); return null; }
-  return { target_tweet_id: tid, tweets: items.map(body => ({ body })) };
+  const items = [...document.querySelectorAll('#th-replies .reply-item')];
+  const tweets = items.map(it => {
+    const ta = it.querySelector('.th-reply');
+    const body = (ta ? ta.value : '').trim();
+    const media_ids = (it._media || []).map(m => m.id);
+    return { body, media_ids };
+  }).filter(t => t.body.length > 0);
+  if (!tweets.length) { toast('返信本文を入力してください','err'); return null; }
+  if (tweets.length > 20) { toast('返信は最大20件までです','err'); return null; }
+  return { target_tweet_id: tid, tweets };
 }
+
 async function submitNow() {
   const d = collect(); if (!d) return;
-  // TODO: 実APIでツリー送信
-  toast('実装中: ツリー送信は次フェーズで実装','info');
+  if (!confirm(d.tweets.length+'件のツリー投稿を実行しますか？')) return;
+  toast('送信中...','info');
+  try {
+    const r = await fetch('/api/admin/thread/post-now',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(d)});
+    const j = await r.json();
+    if (j.success) { toast('送信完了('+(j.posted||d.tweets.length)+'件)','ok'); setTimeout(()=>location.reload(),1500); }
+    else toast('送信失敗: '+(j.error||''),'err');
+  } catch(e) { toast('エラー: '+e.message,'err'); }
 }
+window.submitNow = submitNow;
+
 async function submitSchedule() {
   const d = collect(); if (!d) return;
-  toast('実装中: 予約は次フェーズで実装','info');
+  const dt = prompt('予約日時を YYYY-MM-DD HH:MM 形式で入力してください', '');
+  if (!dt) return;
+  d.scheduled_at = dt + (dt.length===16?':00':'');
+  try {
+    const r = await fetch('/api/admin/thread/schedule',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(d)});
+    const j = await r.json();
+    if (j.success) { toast('予約しました','ok'); setTimeout(()=>location.reload(),1200); }
+    else toast('予約失敗: '+(j.error||''),'err');
+  } catch(e) { toast('エラー: '+e.message,'err'); }
 }
+window.submitSchedule = submitSchedule;
+
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 <\/script>`}function pn(e){return`
-    <div class="reply-item">
+    <div class="reply-item" data-idx="${e}">
       <div class="flex items-center justify-between mb-1">
         <label class="text-sm font-semibold text-accent">返信 ${e}</label>
+        ${e>1?`<button class="btn btn-danger btn-sm" onclick="removeReplyItem(this)" type="button"><i class="fas fa-times"></i></button>`:""}
       </div>
       <textarea class="inp th-reply" placeholder="返信${e}の本文を入力" maxlength="280"></textarea>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="thAttachUrl(this,'image')"><i class="fas fa-image"></i>画像URL</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="thAttachFile(this,'image')"><i class="fas fa-upload"></i>画像アップ</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="thAttachUrl(this,'video')"><i class="fas fa-film"></i>動画URL</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="thAttachFile(this,'video')"><i class="fas fa-upload"></i>動画アップ</button>
+      </div>
+      <div class="th-media-list" style="display:flex;flex-wrap:wrap;margin-top:.3rem"></div>
     </div>`}function mn(e){return`
 <div class="space-y-4">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
@@ -1310,10 +1418,9 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     <div style="display:flex;gap:.5rem">
       <button id="btn-cal" class="btn btn-primary btn-sm" onclick="setView('cal')"><i class="fas fa-calendar"></i>カレンダー</button>
       <button id="btn-list" class="btn btn-ghost btn-sm" onclick="setView('list')"><i class="fas fa-list"></i>一覧</button>
-      <button class="btn btn-ghost btn-sm" onclick="reloadSchedule()"><i class="fas fa-rotate"></i>再読込</button>
     </div>
   </div>
-  ${e.hasAccount?"":e.noAccountAlert}
+  
 
   <div id="sc-cal-view">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap">
@@ -1439,12 +1546,13 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         const textColor = col===0?'#ef4444':col===6?'#2563EB':'var(--ink)';
         const cursor = isCurrentMonth ? 'cursor:pointer;' : '';
         const click = isCurrentMonth ? ' onclick="scOpenDay(\\''+dateStr+'\\')"' : '';
-        html += '<div'+click+' style="min-height:5.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
+        html += '<div'+click+' style="position:relative;min-height:5.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
         if (isCurrentMonth) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">';
           html += '<span style="font-size:.8rem;font-weight:'+(isToday?'700':'400')+';color:'+textColor+'">' + day + '</span>';
-          if (posts.length > 0) html += '<span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'</span>';
+          html += '<button type="button" onclick="event.stopPropagation();scNewAP(\\''+dateStr+'\\')" title="この日にオートパイロット新規作成" style="background:#F3F4F6;border:1px solid var(--line);border-radius:.25rem;padding:0 .35rem;font-size:.7rem;color:#6B7280;cursor:pointer;line-height:1.2"><i class="fas fa-plus"></i></button>';
           html += '</div>';
+          if (posts.length > 0) html += '<div style="margin-bottom:2px"><span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'件</span></div>';
           posts.slice(0,3).forEach(p => {
             const color = p.status==='posted'?'#065F46':p.status==='failed'?'#991B1B':'#1D4ED8';
             const bg = p.status==='posted'?'#ECFDF5':p.status==='failed'?'#FEF2F2':p.source_type==='autopilot'?'#FEF3C7':'#EFF6FF';
@@ -1516,6 +1624,11 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   };
   window.scCloseModal = function() { document.getElementById('sc-modal').style.display = 'none'; };
 
+  window.scNewAP = function(dateStr) {
+    // オートパイロット画面に日付クエリ付きで遷移
+    location.href = '/dashboard/autopilot?date=' + encodeURIComponent(dateStr) + '&new=1';
+  };
+
   window.scEditPost = function(pid) {
     const p = SCHEDULED.find(x => String(x.id) === String(pid));
     if (!p) return;
@@ -1577,7 +1690,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
 })();
 <\/script>`}function _n(e){return`
 <div class="space-y-4">
-  ${e.hasAccount?"":e.noAccountAlert}
+  
   <div>
     <h1 class="section-title"><i class="fas fa-plane-departure"></i>オートパイロット</h1>
     <p class="section-desc">カレンダー予約枠に対して、生成方式・内容・投稿設定を事前登録できます。</p>
@@ -1663,6 +1776,16 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
             </div>
           </div>
         </div>
+        <div class="border border-line rounded-lg p-3 bg-paper-soft">
+          <div class="font-semibold text-accent mb-2"><i class="fas fa-photo-film"></i> メディア添付（任意・最大4件）</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="apAttachUrl('image')"><i class="fas fa-image"></i>画像URL</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="apAttachFile('image')"><i class="fas fa-upload"></i>画像アップ</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="apAttachUrl('video')"><i class="fas fa-film"></i>動画URL</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="apAttachFile('video')"><i class="fas fa-upload"></i>動画アップ</button>
+          </div>
+          <div id="ap-media-list" style="display:flex;flex-wrap:wrap"></div>
+        </div>
         <div class="flex gap-2 pt-2 justify-end">
           <button class="btn btn-ghost" onclick="closeApModal()">キャンセル</button>
           <button class="btn btn-primary" onclick="submitApJob()"><i class="fas fa-check"></i>作成</button>
@@ -1672,8 +1795,10 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   </div>
 </div>
 <script>
-function openApModal() { const m=document.getElementById('ap-modal'); m.style.display='flex'; }
+function openApModal() { const m=document.getElementById('ap-modal'); m.style.display='flex'; m.style.alignItems='flex-start'; m.style.justifyContent='center'; }
 function closeApModal() { document.getElementById('ap-modal').style.display='none'; }
+window.openApModal = openApModal;
+window.closeApModal = closeApModal;
 function deriveGenAt() {
   const pub = document.getElementById('ap-pub').value;
   if (!pub || document.getElementById('ap-gen').value) return;
@@ -1681,6 +1806,46 @@ function deriveGenAt() {
   const pad = n => String(n).padStart(2,'0');
   document.getElementById('ap-gen').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
 }
+window.deriveGenAt = deriveGenAt;
+
+// 添付メディア管理
+window.apMedia = [];
+function apRenderMedia(){
+  const el=document.getElementById('ap-media-list'); if(!el) return;
+  el.innerHTML = window.apMedia.map(m=>
+    '<div style="display:inline-flex;align-items:center;gap:.25rem;background:#F3F4F6;border-radius:.25rem;padding:.15rem .4rem;font-size:.7rem;margin:.15rem">'+
+      '<i class="fas '+(m.type==='video'?'fa-film':'fa-image')+'"></i>'+
+      '<span style="max-width:9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(m.name||'').replace(/"/g,'&quot;')+'">'+(m.name||'media')+'</span>'+
+      '<button type="button" onclick="apRemoveMedia('+m.id+')" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="fas fa-xmark"></i></button>'+
+    '</div>'
+  ).join('');
+}
+window.apRemoveMedia = function(mid){ window.apMedia = window.apMedia.filter(m=>m.id!==mid); apRenderMedia(); };
+window.apAttachUrl = async function(kind){
+  const u = prompt(kind==='image'?'画像のURLを入力':'動画のURLを入力'); if(!u) return;
+  const r = await fetch('/api/admin/media/url',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:u, file_type:kind})});
+  const j = await r.json();
+  if(!j.success){ toast('登録失敗: '+(j.error||''),'err'); return; }
+  if(window.apMedia.length>=4){ toast('添付は最大4件まで','err'); return; }
+  window.apMedia.push({id:j.id, type:kind, name:u.split('/').pop()||'remote'});
+  apRenderMedia();
+};
+window.apAttachFile = async function(kind){
+  const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fd = new FormData(); fd.append('file', f);
+    toast('アップロード中...','info');
+    const r = await fetch('/api/admin/media',{method:'POST', body: fd});
+    const j = await r.json();
+    if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
+    if(window.apMedia.length>=4){ toast('添付は最大4件まで','err'); return; }
+    window.apMedia.push({id:j.id, type:kind, name:f.name});
+    apRenderMedia();
+  };
+  inp.click();
+};
+
 async function submitApJob() {
   const body = {
     account_id: parseInt(document.getElementById('ap-account').value, 10) || null,
@@ -1690,24 +1855,57 @@ async function submitApJob() {
     theme: document.getElementById('ap-theme').value.trim(),
     keywords: document.getElementById('ap-kw').value,
     link_url: document.getElementById('ap-url').value,
+    media_ids: window.apMedia.map(m=>m.id),
   };
   if (!body.theme) { toast('テーマを入力','err'); return; }
-  const r = await fetch('/api/admin/autopilot/jobs', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
-  const j = await r.json();
-  if (j.success) { toast('作成しました','ok'); location.reload(); } else toast('失敗','err');
+  if (!body.publish_at) { toast('投稿日時を入力','err'); return; }
+  if (!body.account_id) { toast('アカウントを選択','err'); return; }
+  try {
+    const r = await fetch('/api/admin/autopilot/jobs', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (j.success) { toast('作成しました','ok'); setTimeout(()=>location.reload(), 600); }
+    else toast('失敗: '+(j.error||''),'err');
+  } catch(e) { toast('エラー: '+e.message,'err'); }
 }
+window.submitApJob = submitApJob;
 async function delApJob(id) {
   if (!confirm('削除しますか?')) return;
-  await fetch('/api/admin/autopilot/jobs/' + id, { method:'DELETE' });
-  location.reload();
+  try {
+    const r = await fetch('/api/admin/autopilot/jobs/' + id, { method:'DELETE' });
+    const j = await r.json();
+    if (j.success) location.reload();
+    else toast('削除失敗','err');
+  } catch(e) { toast('エラー: '+e.message,'err'); }
 }
+window.delApJob = delApJob;
+
+// URL ?new=1 で自動的にモーダルを開き、?date=YYYY-MM-DD を投稿日時に反映
+(function autoOpenAP(){
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get('new') === '1') {
+      setTimeout(()=>{
+        openApModal();
+        const dateStr = params.get('date');
+        if (dateStr) {
+          const pubEl = document.getElementById('ap-pub');
+          if (pubEl) {
+            pubEl.value = dateStr + 'T09:00';
+            deriveGenAt();
+          }
+        }
+      }, 100);
+    }
+  } catch(e) {}
+})();
+
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 <\/script>`}function hn(e){return`
 <div class="space-y-4">
   <div class="flex items-center justify-between">
     <div>
       <h1 class="section-title"><i class="fas fa-users-gear"></i>アカウント管理</h1>
-      <p class="section-desc">Xアカウントの登録・トークン管理・健全性を確認します。</p>
+      <p class="section-desc">Xアカウントの登録・トークン管理を行います。</p>
     </div>
     <button class="btn btn-primary" onclick="openAddAcct()"><i class="fas fa-plus"></i>アカウント追加</button>
   </div>
@@ -1720,13 +1918,12 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   `:`
     <div class="card" style="padding:0">
       <table class="data">
-        <thead><tr><th>アカウント名</th><th>@handle</th><th>健全性</th><th>日次</th><th>最終投稿</th><th>状態</th><th></th></tr></thead>
+        <thead><tr><th>アカウント名</th><th>@handle</th><th>日次</th><th>最終投稿</th><th>状態</th><th></th></tr></thead>
         <tbody>
           ${e.accounts.map(t=>`
             <tr>
               <td class="font-semibold">${w(t.account_name)}</td>
               <td class="text-accent">@${w(t.x_username||"未認証")}</td>
-              <td><span class="font-bold ${t.account_health_score>=80?"text-emerald-600":t.account_health_score>=60?"text-amber-600":"text-red-600"}">${t.account_health_score??100}</span> <span class="pill ${t.health_status==="risk"?"pill-err":t.health_status==="caution"?"pill-warn":"pill-ok"} ml-1">${t.health_status||"healthy"}</span></td>
               <td class="text-xs">${t.daily_post_count??0} / ${t.daily_post_limit??5}</td>
               <td class="text-xs text-ink-muted">${t.last_posted_at||"-"}</td>
               <td>${t.is_active?'<span class="pill pill-ok">有効</span>':'<span class="pill pill-soft">停止</span>'}</td>
@@ -1800,7 +1997,7 @@ async function delAcct(id) {
   location.reload();
 }
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-<\/script>`}function fn(e){const t=[{key:"posts",label:"投稿キュー",desc:"全投稿データ（予約・投稿済・失敗含む）",icon:"fa-brands fa-x-twitter",color:"text-blue-600"},{key:"logs",label:"投稿ログ",desc:"投稿実行の全履歴（成功・失敗）",icon:"fa-clipboard-list",color:"text-emerald-600"},{key:"generations",label:"AI生成ログ",desc:"AI生成されたテキストの記録",icon:"fa-robot",color:"text-purple-600"},{key:"autopilot",label:"オートパイロット",desc:"予約ジョブの一覧",icon:"fa-plane-departure",color:"text-amber-600"},{key:"drafts",label:"下書き",desc:"保存済みの下書きデータ",icon:"fa-file-pen",color:"text-sky-600"},{key:"kpi",label:"KPI",desc:"日別投稿数・失敗数の統計",icon:"fa-chart-line",color:"text-rose-600"},{key:"accounts",label:"Xアカウント",desc:"アカウント情報（トークン除外）",icon:"fa-users-gear",color:"text-indigo-600"},{key:"targets",label:"ターゲット設定",desc:"ターゲットテンプレート",icon:"fa-bullseye",color:"text-orange-600"},{key:"voices",label:"ブランドボイス",desc:"ボイスプロファイル",icon:"fa-palette",color:"text-pink-600"}],s=[{key:"admin/users",label:"ユーザー一覧",desc:"全ユーザー（プラン・承認状態含む）",icon:"fa-users",color:"text-blue-600"},{key:"admin/licenses",label:"ライセンス",desc:"ライセンスキーの全データ",icon:"fa-key",color:"text-amber-600"},{key:"admin/subs",label:"サブスクリプション",desc:"全契約情報",icon:"fa-credit-card",color:"text-emerald-600"},{key:"admin/audit",label:"監査ログ",desc:"認証・操作ログ",icon:"fa-shield-halved",color:"text-red-600"}];return`
+<\/script>`}function fn(e){const t=[{key:"posts",label:"投稿キュー",desc:"全投稿データ（予約・投稿済・失敗含む）",icon:"fa-brands fa-x-twitter",color:"text-blue-600"},{key:"logs",label:"投稿ログ",desc:"投稿実行の全履歴（成功・失敗）",icon:"fa-clipboard-list",color:"text-emerald-600"},{key:"drafts",label:"下書き",desc:"保存済みの下書きデータ",icon:"fa-file-pen",color:"text-sky-600"},{key:"kpi",label:"KPI",desc:"日別投稿数・失敗数の統計",icon:"fa-chart-line",color:"text-rose-600"},{key:"accounts",label:"Xアカウント",desc:"アカウント情報（トークン除外）",icon:"fa-users-gear",color:"text-indigo-600"}],s=[{key:"admin/users",label:"ユーザー一覧",desc:"全ユーザー（プラン・承認状態含む）",icon:"fa-users",color:"text-blue-600"},{key:"admin/licenses",label:"ライセンス",desc:"ライセンスキーの全データ",icon:"fa-key",color:"text-amber-600"},{key:"admin/subs",label:"サブスクリプション",desc:"全契約情報",icon:"fa-credit-card",color:"text-emerald-600"},{key:"admin/audit",label:"監査ログ",desc:"認証・操作ログ",icon:"fa-shield-halved",color:"text-red-600"}];return`
 <div class="space-y-6">
   <div>
     <h1 class="section-title"><i class="fas fa-download"></i>一括ダウンロード</h1>
@@ -1924,33 +2121,141 @@ function dlExport(key) {
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-key"></i>API設定</h1>
-    <p class="section-desc">X API (Consumer Key/Secret)・OpenAI・Telegram の設定を行います。</p>
+    <p class="section-desc">X API / OpenAI / Google Gemini / Telegram の設定を行います。</p>
   </div>
+
   <div class="card space-y-4">
-    <h3 class="font-bold text-ink"><i class="fa-brands fa-x-twitter"></i> X API（アプリ共通）</h3>
-    <div class="alert alert-info">
-      <i class="fas fa-info-circle mt-0.5"></i>
-      <div>Consumer Key / Secret はアプリ共通です。ユーザー毎の Access Token は <a href="/dashboard/accounts" class="underline">アカウント管理</a> で登録してください。</div>
+    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fa-brands fa-x-twitter"></i> X API設定（OAuth 1.0a User Context）</h3>
+    <div class="alert alert-warn">
+      <i class="fas fa-triangle-exclamation" style="margin-top:2px"></i>
+      <div style="font-size:.82rem">重要: App permissions を「Read」から「Read and Write」に変更した場合、必ず「Keys and tokens」タブで <strong>Access Token &amp; Secret を Regenerate（再発行）</strong> してください。</div>
     </div>
     <div>
-      <label class="field-label"><i class="fas fa-key icon-yellow"></i>Consumer Key (API Key)</label>
-      <input type="text" id="api-xk" class="inp input-mono" value="${w(t.api_key||"")}">
+      <label class="field-label"><i class="fas fa-key icon-yellow"></i>API Key (Consumer Key)</label>
+      <input type="text" id="api-xk" class="inp input-mono" placeholder="未設定" value="${w(t.api_key||"")}">
     </div>
     <div>
-      <label class="field-label"><i class="fas fa-key icon-yellow"></i>Consumer Secret (API Secret)</label>
-      <input type="password" id="api-xs" class="inp input-mono" value="${w(t.api_secret||"")}">
+      <label class="field-label"><i class="fas fa-key icon-yellow"></i>API Secret (Consumer Secret)</label>
+      <input type="password" id="api-xs" class="inp input-mono" placeholder="未設定" value="${w(t.api_secret||"")}">
     </div>
-    <div class="flex gap-2">
-      <button class="btn btn-primary" onclick="saveApi()"><i class="fas fa-save"></i>保存</button>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveXApi()"><i class="fas fa-save"></i>保存</button>
+      <button class="btn btn-ghost" onclick="testApi('x')"><i class="fas fa-plug"></i>接続テスト</button>
+      <span id="xapi-status" style="font-size:.8rem;color:var(--ink-muted)">未接続確認（保存後に「接続テスト」を実行してください）</span>
     </div>
-    <span id="api-msg" class="text-xs"></span>
+  </div>
+
+  <div class="card space-y-4">
+    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fas fa-circle-nodes" style="color:#10A37F"></i> OpenAI API設定</h3>
+    <p style="font-size:.82rem;color:var(--ink-muted)">AI記事生成に使用するOpenAI APIキーを設定します。</p>
+    <div>
+      <label class="field-label"><i class="fas fa-key icon-green"></i>OpenAI API Key</label>
+      <input type="password" id="api-oai" class="inp input-mono" placeholder="${t.openai_api_key?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
+    </div>
+    <div>
+      <label class="field-label"><i class="fas fa-microchip icon-blue"></i>モデル</label>
+      <select id="api-model" class="inp" style="max-width:16rem">
+        <option value="gpt-4o-mini" ${(t.openai_model||"gpt-4o-mini")==="gpt-4o-mini"?"selected":""}>gpt-4o-mini（推奨・低コスト）</option>
+        <option value="gpt-4o" ${(t.openai_model||"")==="gpt-4o"?"selected":""}>gpt-4o（高性能）</option>
+        <option value="gpt-4-turbo" ${(t.openai_model||"")==="gpt-4-turbo"?"selected":""}>gpt-4-turbo</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveOpenAI()"><i class="fas fa-save"></i>保存</button>
+      <button class="btn btn-ghost" onclick="testApi('openai')"><i class="fas fa-plug"></i>接続テスト</button>
+      <span id="oai-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
+    </div>
+  </div>
+
+  <div class="card space-y-4">
+    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fas fa-gem" style="color:#4285F4"></i> Google Gemini API設定</h3>
+    <p style="font-size:.82rem;color:var(--ink-muted)">Google AI Studio で取得した API キーを入力してください。</p>
+    <div>
+      <label class="field-label"><i class="fas fa-key icon-blue"></i>Gemini API Key</label>
+      <input type="password" id="api-gem" class="inp input-mono" placeholder="${t.gemini_api_key?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
+    </div>
+    <div>
+      <label class="field-label"><i class="fas fa-microchip icon-blue"></i>モデル</label>
+      <select id="api-gem-model" class="inp" style="max-width:16rem">
+        <option value="gemini-1.5-flash" ${(t.gemini_model||"gemini-1.5-flash")==="gemini-1.5-flash"?"selected":""}>gemini-1.5-flash（推奨）</option>
+        <option value="gemini-1.5-pro" ${(t.gemini_model||"")==="gemini-1.5-pro"?"selected":""}>gemini-1.5-pro</option>
+        <option value="gemini-2.0-flash" ${(t.gemini_model||"")==="gemini-2.0-flash"?"selected":""}>gemini-2.0-flash</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveGemini()"><i class="fas fa-save"></i>保存</button>
+      <button class="btn btn-ghost" onclick="testApi('gemini')"><i class="fas fa-plug"></i>接続テスト</button>
+      <span id="gem-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
+    </div>
+  </div>
+
+  <div class="card space-y-4">
+    <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fa-brands fa-telegram" style="color:#2AABEE"></i> Telegram 通知設定</h3>
+    <p style="font-size:.82rem;color:var(--ink-muted)">投稿成功・失敗を Telegram に通知します（任意）。</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <label class="field-label"><i class="fas fa-robot icon-blue"></i>Bot Token</label>
+        <input type="password" id="api-tg-tok" class="inp input-mono" placeholder="${t.telegram_bot_token?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
+      </div>
+      <div>
+        <label class="field-label"><i class="fas fa-hashtag icon-blue"></i>Chat ID</label>
+        <input type="text" id="api-tg-chat" class="inp input-mono" placeholder="例: -1001234567890" value="${w(t.telegram_chat_id||"")}" pattern="-?[0-9]+">
+      </div>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveTelegram()"><i class="fas fa-save"></i>保存</button>
+      <button class="btn btn-ghost" onclick="testApi('telegram')"><i class="fas fa-paper-plane"></i>テスト送信</button>
+      <span id="tg-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
+    </div>
   </div>
 </div>
 <script>
-async function saveApi() {
-  toast('X API設定保存:次フェーズで本実装','info');
+function setStatus(id,msg,ok){const el=document.getElementById(id);if(el){el.textContent=msg;el.style.color=ok?'#059669':'#DC2626';}}
+async function saveXApi(){
+  const r=await fetch('/api/admin/api-settings/x',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({api_key:document.getElementById('api-xk').value,api_secret:document.getElementById('api-xs').value})});
+  const j=await r.json();
+  if(j.success){toast('X API設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
 }
-function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+window.saveXApi = saveXApi;
+async function saveOpenAI(){
+  const key=document.getElementById('api-oai').value.trim();
+  const r=await fetch('/api/admin/api-settings/openai',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({openai_key:key,openai_model:document.getElementById('api-model').value})});
+  const j=await r.json();
+  if(j.success){toast('OpenAI設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
+}
+window.saveOpenAI = saveOpenAI;
+async function saveGemini(){
+  const key=document.getElementById('api-gem').value.trim();
+  const r=await fetch('/api/admin/api-settings/gemini',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({gemini_key:key,gemini_model:document.getElementById('api-gem-model').value})});
+  const j=await r.json();
+  if(j.success){toast('Gemini設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
+}
+window.saveGemini = saveGemini;
+async function saveTelegram(){
+  const chatId = document.getElementById('api-tg-chat').value.trim();
+  if (chatId && !/^-?[0-9]+$/.test(chatId)) {
+    toast('Chat IDは数字のみ（例: -1001234567890）','err'); return;
+  }
+  const r=await fetch('/api/admin/api-settings/telegram',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({telegram_token:document.getElementById('api-tg-tok').value,telegram_chat_id:chatId})});
+  const j=await r.json();
+  if(j.success){toast('Telegram設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
+}
+window.saveTelegram = saveTelegram;
+async function testApi(kind){
+  const statusId = kind==='x'?'xapi-status':kind==='openai'?'oai-status':kind==='gemini'?'gem-status':'tg-status';
+  setStatus(statusId,'テスト中...', true);
+  try {
+    const r=await fetch('/api/admin/api-settings/'+kind+'/test',{method:'POST'});
+    const j=await r.json();
+    if(j.success||j.ok){setStatus(statusId,'✓ 接続OK: '+(j.message||j.username||''),true);}
+    else{setStatus(statusId,'✗ '+(j.error||'接続失敗'),false);}
+  } catch(e){setStatus(statusId,'✗ ネットワークエラー',false);}
+}
+window.testApi = testApi;
 <\/script>`}const H=new A;async function gn(e,t){const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, is_current
        FROM x_accounts WHERE user_id = ? AND is_active = 1 ORDER BY id`).bind(t.id).all(),a=(s||[]).map(i=>({id:i.id,account_name:i.account_name,x_username:i.x_username})),n=(s||[]).find(i=>i.is_current===1);return{accounts:a,currentAccountId:(n==null?void 0:n.id)??null}}H.get("/",e=>e.redirect("/login"));async function K(e,t,s){const a=e.get("user"),{accounts:n,currentAccountId:i}=await gn(e,a),r=n.length>0&&i!==null,o=await Promise.resolve(s({user:a,hasAccount:r,accounts:n,currentAccountId:i})),d=an({active:t,user:a,accounts:n,currentAccountId:i,pageBody:o});return e.html(It("GE365x",d))}H.get("/dashboard",m,async e=>K(e,"dashboard",async({user:t,hasAccount:s})=>{const a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND DATE(created_at)=DATE('now','+9 hours') AND status='posted'").bind(t.id).first(),i=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE user_id=? AND status IN ('pending','approved')").bind(t.id).first(),r=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND status='failed' AND DATE(created_at)=DATE('now','+9 hours')").bind(t.id).first(),{results:o}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status, is_active
          FROM x_accounts WHERE user_id = ? ORDER BY id`).bind(t.id).all(),{results:d}=await e.env.DB.prepare(`SELECT pl.content, pl.status, pl.posted_at, xa.x_username
@@ -1972,7 +2277,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         WHERE aj.user_id = ?
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
               daily_post_count, daily_post_limit, last_posted_at, is_active
-         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();return bn({settings:s})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;F.get("/admin",m,R,e=>{const t=`
+         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:Object.assign({},s||{},{openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||""})})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;F.get("/admin",m,R,e=>{const t=`
 <div class="min-h-screen flex flex-col">
   <!-- ヘッダ -->
   <header class="border-b border-brand-800/40 bg-surface-raised/80 backdrop-blur">
@@ -2533,7 +2838,7 @@ td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8
        FROM payment_history
       WHERE user_id = ?
       ORDER BY created_at DESC
-      LIMIT 50`).bind(t.id).all();return e.json({payments:s||[]})});be.post("/api/subscription/stripe/checkout",m,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));be.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const Qt=new TextEncoder,vn="https://api.x.com/2";class $ extends Error{constructor(s,a=0,n="api_error"){super(s);h(this,"statusCode");h(this,"errorType");this.name="XApiError",this.statusCode=a,this.errorType=n}}class Mt extends ${constructor(s){super("Rate limited by X API (429)",429,"rate_limit");h(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=s}}function oe(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function yn(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(s=>s.toString(16).padStart(2,"0")).join("")}function En(){return yn(16)}async function xn(e,t){const s=await crypto.subtle.importKey("raw",Qt.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),a=await crypto.subtle.sign("HMAC",s,Qt.encode(t)),n=new Uint8Array(a);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function wn(e,t,s,a){const n={oauth_consumer_key:s.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:s.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};i.searchParams.forEach((_,b)=>{r[b]=_});const o=Object.keys(r).sort().map(_=>`${oe(_)}=${oe(r[_])}`).join("&"),d=[e.toUpperCase(),oe(`${i.origin}${i.pathname}`),oe(o)].join("&"),l=`${oe(s.consumerSecret)}&${oe(s.accessTokenSecret)}`,c=await xn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(_=>`${oe(_)}="${oe(n[_])}"`).join(", ")}`}async function $t(e,t,s,a){const n=`${vn}${t}`,i=await wn(e,n,a),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};s!==void 0&&(r.body=JSON.stringify(s));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new Mt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();throw new $(`X API ${e} ${t} failed: ${o.status} ${d.slice(0,500)}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Ms(e,t){var a,n;const s=await $t("POST","/tweets",{text:t},e);return{id:((a=s==null?void 0:s.data)==null?void 0:a.id)||"",text:((n=s==null?void 0:s.data)==null?void 0:n.text)||t}}async function $s(e,t,s,a){var r,o;const n={text:t};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function kn(e){var s,a,n,i;if(!e)throw new $("credentials未設定",0,"missing_credentials");if(!((s=e.consumerKey)!=null&&s.trim()))throw new $("API Key未設定",0,"missing_credentials");if(!((a=e.consumerSecret)!=null&&a.trim()))throw new $("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new $("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new $("Access Token Secret未設定",0,"missing_token");const t=await $t("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Ft(e,t,s){var o,d;const a=((s==null?void 0:s.apiKey)??e.X_API_KEY??"").trim(),n=((s==null?void 0:s.apiSecret)??e.X_API_SECRET??"").trim();if(!a||!n)throw new $("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new $("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new $("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await At(t.access_token,e.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await At(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new $("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:a,consumerSecret:n,accessToken:i,accessTokenSecret:r}}
+      LIMIT 50`).bind(t.id).all();return e.json({payments:s||[]})});be.post("/api/subscription/stripe/checkout",m,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));be.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const Qt=new TextEncoder,vn="https://api.x.com/2";class $ extends Error{constructor(s,a=0,n="api_error"){super(s);h(this,"statusCode");h(this,"errorType");this.name="XApiError",this.statusCode=a,this.errorType=n}}class Mt extends ${constructor(s){super("Rate limited by X API (429)",429,"rate_limit");h(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=s}}function oe(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function yn(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(s=>s.toString(16).padStart(2,"0")).join("")}function En(){return yn(16)}async function xn(e,t){const s=await crypto.subtle.importKey("raw",Qt.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),a=await crypto.subtle.sign("HMAC",s,Qt.encode(t)),n=new Uint8Array(a);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function wn(e,t,s,a){const n={oauth_consumer_key:s.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:s.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};i.searchParams.forEach((_,b)=>{r[b]=_});const o=Object.keys(r).sort().map(_=>`${oe(_)}=${oe(r[_])}`).join("&"),d=[e.toUpperCase(),oe(`${i.origin}${i.pathname}`),oe(o)].join("&"),l=`${oe(s.consumerSecret)}&${oe(s.accessTokenSecret)}`,c=await xn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(_=>`${oe(_)}="${oe(n[_])}"`).join(", ")}`}async function $t(e,t,s,a){const n=`${vn}${t}`,i=await wn(e,n,a),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};s!==void 0&&(r.body=JSON.stringify(s));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new Mt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();throw new $(`X API ${e} ${t} failed: ${o.status} ${d.slice(0,500)}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Ms(e,t){var a,n;const s=await $t("POST","/tweets",{text:t},e);return{id:((a=s==null?void 0:s.data)==null?void 0:a.id)||"",text:((n=s==null?void 0:s.data)==null?void 0:n.text)||t}}async function $s(e,t,s,a){var r,o;const n={text:t};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function $sReply(e,t,parentId,s){var r,o;const n={text:t,reply:{in_reply_to_tweet_id:parentId}};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function kn(e){var s,a,n,i;if(!e)throw new $("credentials未設定",0,"missing_credentials");if(!((s=e.consumerKey)!=null&&s.trim()))throw new $("API Key未設定",0,"missing_credentials");if(!((a=e.consumerSecret)!=null&&a.trim()))throw new $("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new $("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new $("Access Token Secret未設定",0,"missing_token");const t=await $t("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Ft(e,t,s){var o,d;const a=((s==null?void 0:s.apiKey)??e.X_API_KEY??"").trim(),n=((s==null?void 0:s.apiSecret)??e.X_API_SECRET??"").trim();if(!a||!n)throw new $("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new $("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new $("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await At(t.access_token,e.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await At(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new $("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:a,consumerSecret:n,accessToken:i,accessTokenSecret:r}}
 const xMU_URL="https://upload.twitter.com/1.1/media/upload.json";
 async function xMU_oauth(method,url,creds,bodyParams){
   const oa={oauth_consumer_key:creds.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:creds.accessToken,oauth_version:"1.0"};
@@ -2779,21 +3084,21 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
       ORDER BY COALESCE(aj.generate_at, aj.publish_at, aj.created_at) DESC LIMIT 100`).bind(t.id).all(),{results:a}=await e.env.DB.prepare("SELECT id, account_name FROM x_accounts WHERE user_id = ? AND is_active = 1").bind(t.id).all();return e.json({jobs:s||[],accounts:a||[]})});ve.get("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).first();return s?e.json(s):e.json({error:"not found"})});ve.post("/api/admin/autopilot/jobs",m,async e=>{const t=e.get("user"),s=await e.req.json(),a=g(),n=(s.publish_at||s.generate_at||a).slice(0,10),i=await e.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM autopilot_jobs
        WHERE user_id=? AND account_id=?
          AND SUBSTR(COALESCE(publish_at, generate_at, created_at), 1, 10)=?
-         AND status NOT IN ('cancelled')`).bind(t.id,s.account_id||0,n).first();if(((i==null?void 0:i.cnt)??0)>=10)return e.json({success:!1,error:"この日は既に10件の予約があります"});const r=await e.env.DB.prepare("SELECT MAX(CAST(reservation_no AS INTEGER)) AS mx FROM autopilot_jobs").first(),o=String(((r==null?void 0:r.mx)??0)+1).padStart(4,"0");let d=s.generate_at??null;if(s.publish_at&&!s.generate_at)try{const p=new Date(s.publish_at.replace(" ","T"));p.setMinutes(p.getMinutes()-2),d=p.toISOString().replace("T"," ").slice(0,19)}catch{}const l=d||s.publish_at?"configured":"draft",c=await e.env.DB.prepare(`INSERT INTO autopilot_jobs
+         AND status NOT IN ('cancelled')`).bind(t.id,s.account_id||0,n).first();if(((i==null?void 0:i.cnt)??0)>=10)return e.json({success:!1,error:"この日は既に10件の予約があります"});const r=await e.env.DB.prepare("SELECT MAX(CAST(reservation_no AS INTEGER)) AS mx FROM autopilot_jobs").first(),o=String(((r==null?void 0:r.mx)??0)+1).padStart(4,"0");let d=s.generate_at??null;if(s.publish_at&&!s.generate_at)try{const p=new Date(s.publish_at.replace(" ","T"));p.setMinutes(p.getMinutes()-2),d=p.toISOString().replace("T"," ").slice(0,19)}catch{}const l=d||s.publish_at?"configured":"draft";let optsJson=s.options_json||"{}";try{const o2=typeof optsJson==="string"?JSON.parse(optsJson):optsJson;if(Array.isArray(s.media_ids)&&s.media_ids.length>0)o2.media_ids=s.media_ids.slice(0,4);optsJson=JSON.stringify(o2)}catch{if(Array.isArray(s.media_ids)&&s.media_ids.length>0)optsJson=JSON.stringify({media_ids:s.media_ids.slice(0,4)})}const c=await e.env.DB.prepare(`INSERT INTO autopilot_jobs
        (reservation_no, user_id, account_id, channel_type, content_mode, theme, keywords,
         prompt_text, options_json, title_memo, link_url, generate_at, publish_at, status, created_at, updated_at)
-     VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",s.options_json||"{}",s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T"));o.setMinutes(o.getMinutes()-2),i=o.toISOString().replace("T"," ").slice(0,19)}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
+     VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",optsJson,s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T"));o.setMinutes(o.getMinutes()-2),i=o.toISOString().replace("T"," ").slice(0,19)}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
        content_mode=?, theme=?, keywords=?, prompt_text=?, options_json=?, title_memo=?,
        link_url=?, generate_at=?, publish_at=?, status=?, updated_at=?
      WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/cron/autopilot-tick",async e=>{if(!e.env.OPENAI_API_KEY)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
        WHERE status = 'configured'
          AND generate_at IS NOT NULL
          AND generate_at <= datetime('now','+9 hours')
-       ORDER BY generate_at ASC LIMIT 5`).all();let s=0;for(const a of t||[])try{const n=String(a.account_id??"default");let i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();i||(i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();r||(r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let o;a.content_mode&&a.content_mode!=="freetext"?o=await Us(e.env.OPENAI_API_KEY,a.content_mode,a.theme||"",a.keywords||"",i,r,"body"):o=await Hs(e.env.OPENAI_API_KEY,a.theme||"",a.keywords||"",i,r,"body");const d=await Ae(o),l=g(),c=await e.env.DB.prepare(`INSERT INTO post_queue
+       ORDER BY generate_at ASC LIMIT 5`).all();let s=0;for(const a of t||[])try{const n=String(a.account_id??"default");let i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();i||(i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();r||(r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let o;a.content_mode&&a.content_mode!=="freetext"?o=await Us(e.env.OPENAI_API_KEY,a.content_mode,a.theme||"",a.keywords||"",i,r,"body"):o=await Hs(e.env.OPENAI_API_KEY,a.theme||"",a.keywords||"",i,r,"body");const d=await Ae(o),l=g();let mediaJsonStr=null,mediaTypeStr=null;try{const opts=a.options_json?JSON.parse(a.options_json):{};if(Array.isArray(opts.media_ids)&&opts.media_ids.length>0){mediaJsonStr=JSON.stringify(opts.media_ids.slice(0,4));const ft=await e.env.DB.prepare("SELECT file_type FROM media_assets WHERE id=? AND user_id=?").bind(opts.media_ids[0],a.user_id).first();mediaTypeStr=(ft==null?void 0:ft.file_type)||null}}catch{}const c=await e.env.DB.prepare(`INSERT INTO post_queue
            (platform, user_id, account_id, body, link_url, post_mode,
             scheduled_at, effective_scheduled_at, base_scheduled_at,
-            content_hash, generation_type, source_type, status, created_at, updated_at)
-         VALUES ('x', ?, ?, ?, ?, 'body', ?, ?, ?, ?, ?, 'autopilot', 'approved', ?, ?)`).bind(a.user_id,a.account_id,o,a.link_url,a.publish_at,a.publish_at,a.publish_at,d,a.content_mode,l,l).run();await e.env.DB.prepare("UPDATE autopilot_jobs SET status='generated', generated_post_id=?, updated_at=? WHERE id=?").bind(c.meta.last_row_id,l,a.id).run(),s++}catch(n){await e.env.DB.prepare("UPDATE autopilot_jobs SET status='error', error_message=?, updated_at=? WHERE id=?").bind((n==null?void 0:n.message)||"unknown_error",g(),a.id).run()}return e.json({ok:!0,generated:s,total:(t||[]).length})});const is={topics:[{title:"投稿の基本",keywords:["投稿","ポスト","ツイート","post","tweet"],answer:"[新規投稿] タブから本文を入力し「投稿キューへ」で予約できます。即時投稿は [今すぐ投稿] ボタンから。"},{title:"オートパイロット",keywords:["オートパイロット","autopilot","自動投稿","自動"],answer:"[オートパイロット] タブでジョブを作成すると、指定時刻に OpenAI が投稿案を生成しキューに入ります。"},{title:"アカウント連携",keywords:["連携","アカウント","追加","OAuth","トークン"],answer:"X Developer Portal で Consumer Key/Secret と Access Token/Secret を取得し、[アカウント管理] から追加してください。OAuth 1.0a User Context を使用します。"},{title:"ライセンス",keywords:["ライセンス","認証","license","VPS-GE365X"],answer:"ログイン画面の [ライセンス] タブから VPS-GE365X-XXXXXXXX 形式のキーを入力するとプランが有効化されます。"},{title:"類似度制御",keywords:["類似","重複","ブロック","similarity"],answer:"同一アカウントの直近5件と Jaccard係数 0.7 以上の類似があると投稿がブロックされます。"},{title:"投稿間隔",keywords:["間隔","時間","cooldown","spacing"],answer:"最低投稿間隔は15分、推奨は30〜120分のランダム。jitter で ±5分の微分散も付与されます。"}],default_response:"該当するトピックが見つかりませんでした。[アカウント管理][投稿][オートパイロット][ライセンス] 等のキーワードで試してください。"},tt=new A;async function qt(e){const t=await e.DB.prepare("SELECT json_data FROM chatbot_kb WHERE id = 1").first();if(t!=null&&t.json_data)try{return JSON.parse(t.json_data)}catch{}return await e.DB.prepare("INSERT OR IGNORE INTO chatbot_kb (id, json_data) VALUES (1, ?)").bind(JSON.stringify(is)).run(),is}tt.get("/api/admin/chatbot/topics",m,async e=>{const t=await qt(e.env);return e.json({topics:(t.topics||[]).map((s,a)=>({id:a,title:s.title,keywords:s.keywords}))})});tt.post("/api/admin/chatbot/ask",m,async e=>{const t=await qt(e.env),a=((await e.req.json().catch(()=>({}))).question||"").toLowerCase().trim();if(!a)return e.json({answer:t.default_response});let n=null,i=0;for(const r of t.topics||[]){let o=0;for(const d of r.keywords||[])a.includes(d.toLowerCase())&&(o+=d.length);o>i&&(i=o,n=r)}return n?e.json({answer:n.answer,title:n.title,matched:!0}):e.json({answer:t.default_response,matched:!1})});tt.get("/api/admin/chatbot/topic/:id",m,async e=>{const s=((await qt(e.env)).topics||[])[parseInt(e.req.param("id"),10)];return s?e.json({topic:s}):e.json({error:"トピック未登録"},404)});tt.put("/api/admin/chatbot/kb",m,R,async e=>{const t=await e.req.json();return!t||!Array.isArray(t.topics)?e.json({error:"invalid_kb"},400):(await e.env.DB.prepare(`INSERT INTO chatbot_kb (id, json_data, updated_at)
+            content_hash, generation_type, source_type, status, media_json, media_type, created_at, updated_at)
+         VALUES ('x', ?, ?, ?, ?, 'body', ?, ?, ?, ?, ?, 'autopilot', 'approved', ?, ?, ?, ?)`).bind(a.user_id,a.account_id,o,a.link_url,a.publish_at,a.publish_at,a.publish_at,d,a.content_mode,mediaJsonStr,mediaTypeStr,l,l).run();await e.env.DB.prepare("UPDATE autopilot_jobs SET status='generated', generated_post_id=?, updated_at=? WHERE id=?").bind(c.meta.last_row_id,l,a.id).run(),s++}catch(n){await e.env.DB.prepare("UPDATE autopilot_jobs SET status='error', error_message=?, updated_at=? WHERE id=?").bind((n==null?void 0:n.message)||"unknown_error",g(),a.id).run()}return e.json({ok:!0,generated:s,total:(t||[]).length})});const is={topics:[{title:"投稿の基本",keywords:["投稿","ポスト","ツイート","post","tweet"],answer:"[新規投稿] タブから本文を入力し「投稿キューへ」で予約できます。即時投稿は [今すぐ投稿] ボタンから。"},{title:"オートパイロット",keywords:["オートパイロット","autopilot","自動投稿","自動"],answer:"[オートパイロット] タブでジョブを作成すると、指定時刻に OpenAI が投稿案を生成しキューに入ります。"},{title:"アカウント連携",keywords:["連携","アカウント","追加","OAuth","トークン"],answer:"X Developer Portal で Consumer Key/Secret と Access Token/Secret を取得し、[アカウント管理] から追加してください。OAuth 1.0a User Context を使用します。"},{title:"ライセンス",keywords:["ライセンス","認証","license","VPS-GE365X"],answer:"ログイン画面の [ライセンス] タブから VPS-GE365X-XXXXXXXX 形式のキーを入力するとプランが有効化されます。"},{title:"類似度制御",keywords:["類似","重複","ブロック","similarity"],answer:"同一アカウントの直近5件と Jaccard係数 0.7 以上の類似があると投稿がブロックされます。"},{title:"投稿間隔",keywords:["間隔","時間","cooldown","spacing"],answer:"最低投稿間隔は15分、推奨は30〜120分のランダム。jitter で ±5分の微分散も付与されます。"}],default_response:"該当するトピックが見つかりませんでした。[アカウント管理][投稿][オートパイロット][ライセンス] 等のキーワードで試してください。"},tt=new A;async function qt(e){const t=await e.DB.prepare("SELECT json_data FROM chatbot_kb WHERE id = 1").first();if(t!=null&&t.json_data)try{return JSON.parse(t.json_data)}catch{}return await e.DB.prepare("INSERT OR IGNORE INTO chatbot_kb (id, json_data) VALUES (1, ?)").bind(JSON.stringify(is)).run(),is}tt.get("/api/admin/chatbot/topics",m,async e=>{const t=await qt(e.env);return e.json({topics:(t.topics||[]).map((s,a)=>({id:a,title:s.title,keywords:s.keywords}))})});tt.post("/api/admin/chatbot/ask",m,async e=>{const t=await qt(e.env),a=((await e.req.json().catch(()=>({}))).question||"").toLowerCase().trim();if(!a)return e.json({answer:t.default_response});let n=null,i=0;for(const r of t.topics||[]){let o=0;for(const d of r.keywords||[])a.includes(d.toLowerCase())&&(o+=d.length);o>i&&(i=o,n=r)}return n?e.json({answer:n.answer,title:n.title,matched:!0}):e.json({answer:t.default_response,matched:!1})});tt.get("/api/admin/chatbot/topic/:id",m,async e=>{const s=((await qt(e.env)).topics||[])[parseInt(e.req.param("id"),10)];return s?e.json({topic:s}):e.json({error:"トピック未登録"},404)});tt.put("/api/admin/chatbot/kb",m,R,async e=>{const t=await e.req.json();return!t||!Array.isArray(t.topics)?e.json({error:"invalid_kb"},400):(await e.env.DB.prepare(`INSERT INTO chatbot_kb (id, json_data, updated_at)
      VALUES (1, ?, datetime('now','+9 hours'))
      ON CONFLICT(id) DO UPDATE SET json_data=excluded.json_data, updated_at=excluded.updated_at`).bind(JSON.stringify(t)).run(),e.json({success:!0,topic_count:t.topics.length}))});const st=new A;st.get("/api/admin/drafts",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_id, title, body, link_url, hashtags, post_mode, created_at, updated_at
        FROM drafts WHERE user_id = ? ORDER BY updated_at DESC LIMIT 200`).bind(t.id).all();return e.json({drafts:s||[]})});st.post("/api/admin/drafts",m,async e=>{const t=e.get("user"),s=await e.req.json();if(!s.body)return e.json({error:"body required"},400);const a=await e.env.DB.prepare(`INSERT INTO drafts (user_id, account_id, title, body, link_url, hashtags, post_mode)
@@ -2867,6 +3172,83 @@ at.post("/api/admin/posts/:id/attach-media",m,async e=>{
   await e.env.DB.prepare("UPDATE post_queue SET media_json=?, media_type=?, updated_at=? WHERE id=? AND user_id=?").bind(JSON.stringify(mids.slice(0,4)),mediaType,g(),pid,t.id).run();
   return e.json({success:!0});
 });
+at.post("/api/admin/thread/post-now",m,async e=>{
+  const t=e.get("user");
+  const{target_tweet_id:tid,tweets:arr}=await e.req.json().catch(()=>({}));
+  if(!tid||!Array.isArray(arr)||arr.length===0)return e.json({success:!1,error:"target_tweet_id and tweets are required"},400);
+  if(arr.length>20)return e.json({success:!1,error:"max 20 replies"},400);
+  const acct=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_current=1 LIMIT 1").bind(t.id).first()||await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();
+  if(!acct)return e.json({success:!1,error:"No active X account"},400);
+  let creds;try{creds=await Ft(e.env,acct)}catch(err){return e.json({success:!1,error:(err&&err.message)||"creds_failed"},400)}
+  let parent=tid;const posted=[];const errs=[];
+  for(let i=0;i<arr.length;i++){
+    const it=arr[i];
+    if(!it.body||!it.body.trim()){errs.push({index:i,error:"empty body"});continue;}
+    const xMids=[];
+    if(Array.isArray(it.media_ids)&&it.media_ids.length>0){
+      for(const mid of it.media_ids.slice(0,4)){
+        const v=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(mid,t.id).first();
+        if(!v)continue;
+        if(v.x_media_id){xMids.push(v.x_media_id);continue;}
+        try{
+          let bytes,mime;
+          if(v.storage_path&&v.storage_path.startsWith("/media/")&&e.env.MEDIA_BUCKET){
+            const obj=await e.env.MEDIA_BUCKET.get(v.storage_path.slice(7));
+            if(obj){bytes=await obj.arrayBuffer();mime=v.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"}
+          }else if(v.storage_path&&/^https?:/i.test(v.storage_path)){
+            const rr=await fetch(v.storage_path,{signal:AbortSignal.timeout(3e4)});
+            if(rr.ok){bytes=await rr.arrayBuffer();mime=v.mime_type||rr.headers.get("content-type")||"image/jpeg"}
+          }
+          if(bytes){
+            const xid=await xMU_upload(creds,bytes,mime);
+            await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),v.id).run();
+            xMids.push(xid);
+          }
+        }catch(uErr){console.error("[thread-mediaUp]",uErr&&uErr.message)}
+      }
+    }
+    try{
+      const r=xMids.length>0?await $sReply(creds,it.body,parent,xMids):await $sReply(creds,it.body,parent);
+      posted.push({index:i,id:r.id});parent=r.id;
+      const tt=g();
+      await e.env.DB.prepare(`INSERT INTO post_queue
+         (platform, user_id, account_id, body, post_mode, scheduled_at, effective_scheduled_at,
+          status, source_type, thread_parent_id, external_post_id, posted_at, media_json, media_type, created_at, updated_at)
+         VALUES ('x', ?, ?, ?, 'body', ?, ?, 'posted', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
+          t.id, acct.id, it.body, tt, tt, parent===r.id?tid:parent, r.id, tt,
+          xMids.length>0?JSON.stringify(it.media_ids.slice(0,4)):null,
+          xMids.length>0?"image":null, tt, tt
+        ).run().catch(()=>{});
+    }catch(err){
+      errs.push({index:i,error:(err&&err.message)||"post_failed"});
+      break;
+    }
+  }
+  return e.json({success:errs.length===0,posted:posted.length,errors:errs,results:posted});
+});
+at.post("/api/admin/thread/schedule",m,async e=>{
+  const t=e.get("user");
+  const{target_tweet_id:tid,tweets:arr,scheduled_at:sched}=await e.req.json().catch(()=>({}));
+  if(!tid||!Array.isArray(arr)||arr.length===0)return e.json({success:!1,error:"target_tweet_id and tweets are required"},400);
+  if(!sched)return e.json({success:!1,error:"scheduled_at required"},400);
+  if(arr.length>20)return e.json({success:!1,error:"max 20 replies"},400);
+  const acct=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_current=1 LIMIT 1").bind(t.id).first()||await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();
+  if(!acct)return e.json({success:!1,error:"No active X account"},400);
+  const tt=g();const ids=[];
+  for(let i=0;i<arr.length;i++){
+    const it=arr[i];if(!it.body||!it.body.trim())continue;
+    const mediaJson=Array.isArray(it.media_ids)&&it.media_ids.length>0?JSON.stringify(it.media_ids.slice(0,4)):null;
+    const r=await e.env.DB.prepare(`INSERT INTO post_queue
+       (platform, user_id, account_id, body, post_mode, scheduled_at, effective_scheduled_at,
+        status, source_type, thread_parent_id, media_json, media_type, created_at, updated_at)
+       VALUES ('x', ?, ?, ?, 'body', ?, ?, 'approved', 'thread', ?, ?, ?, ?, ?)`).bind(
+        t.id, acct.id, it.body, sched, sched, i===0?tid:"prev:"+(ids[i-1]||""),
+        mediaJson, mediaJson?"image":null, tt, tt
+      ).run();
+    ids.push(r.meta.last_row_id);
+  }
+  return e.json({success:!0,ids});
+});
 at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e.req.path.replace(/^\/media\//,""),s=await e.env.MEDIA_BUCKET.get(t);if(!s)return e.notFound();const a=new Headers;return s.writeHttpMetadata(a),a.set("etag",s.httpEtag),new Response(s.body,{headers:a})});const Pt=new A;Pt.get("/api/admin/kpi",m,async e=>{const t=e.get("user"),s=e.req.query("account_id"),a=parseInt(e.req.query("days")||"30",10),n=[t.id,a];let i="WHERE km.user_id = ? AND km.metric_date >= date('now','+9 hours','-' || ? || ' days')";s&&(i+=" AND km.account_id = ?",n.push(Number(s)));const{results:r}=await e.env.DB.prepare(`SELECT km.*, xa.account_name
        FROM kpi_metrics km LEFT JOIN x_accounts xa ON xa.id = km.account_id
        ${i} ORDER BY km.metric_date DESC, km.account_id ASC`).bind(...n).all();return e.json({metrics:r||[]})});Pt.get("/api/admin/kpi/summary",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
@@ -2892,7 +3274,7 @@ at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e
        WHERE id=?`).bind(s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0,n,i.id).run(),e.json({success:!0,id:i.id});{const r=await e.env.DB.prepare(`INSERT INTO brand_voice
          (account_id, user_id, voice_key, label, tone, worldview, personal_story,
           prohibited_words, sample_posts, is_default)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(a,t.id,s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const He=new A;He.get("/api/admin/api-settings",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first(),a=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','telegram_bot_token','telegram_chat_id')").all(),n={};for(const l of a.results||[])n[l.key]=l.value;const i=s!=null&&s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):"",r=s!=null&&s.api_secret?"••••••••":"",o=n.openai_api_key?"••••••••":"",d=n.telegram_bot_token?"••••••••":"";return e.json({api_key:i,api_secret:r,openai_key:o,openai_model:n.openai_model||"gpt-4o-mini",telegram_token:d,telegram_chat_id:n.telegram_chat_id||""})});He.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a}=await e.req.json();if(!s||s.includes("•"))return e.json({success:!1,error:"api_key required"},400);const n=await _e(s.trim(),e.env.ENCRYPTION_KEY),i=a&&!a.includes("•")?await _e(a.trim(),e.env.ENCRYPTION_KEY):null;return await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first()?i?await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,i,t.id).run():await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,t.id).run():await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,n,i||"").run(),e.json({success:!0})});He.post("/api/admin/api-settings/openai",m,async e=>{const{openai_key:t,openai_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"openai_api_key",a,"OpenAI API Key (AES暗号化)")}return s&&await _t(e,"openai_model",s,"OpenAI モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/telegram",m,async e=>{const{telegram_token:t,telegram_chat_id:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"telegram_bot_token",a,"Telegram Bot Token (AES暗号化)")}return s&&await _t(e,"telegram_chat_id",s,"Telegram Chat ID"),e.json({success:!0})});He.post("/api/admin/api-settings/:kind/test",m,async e=>{const t=e.req.param("kind"),s=e.get("user");try{if(t==="x"){const a=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(s.id).first();if(!(a!=null&&a.api_key))return e.json({success:!1,error:"X API Key 未設定"});const n=await lt(a.api_key,e.env.ENCRYPTION_KEY);return e.json({success:!!n,message:n?"Consumer Key 正常に復号できました":"復号失敗"})}if(t==="openai"){const a=await Tt(e,"openai_api_key");if(!a)return e.json({success:!1,error:"OpenAI Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch("https://api.openai.com/v1/models",{headers:{Authorization:`Bearer ${n}`}});return i.ok?e.json({success:!0,message:"OpenAI 接続OK"}):e.json({success:!1,error:`OpenAI API ${i.status}`})}if(t==="telegram"){const a=await Tt(e,"telegram_bot_token"),n=await Tt(e,"telegram_chat_id");if(!a||!n)return e.json({success:!1,error:"Telegram 未設定"});const i=await lt(a,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const o=await(await fetch(`https://api.telegram.org/bot${i}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:n,text:"✅ GE365x-web: Telegram 接続テスト成功"})})).json();return o!=null&&o.ok?e.json({success:!0,message:"Telegram 送信成功"}):e.json({success:!1,error:(o==null?void 0:o.description)||"Telegram 送信失敗"})}return e.json({success:!1,error:"unknown kind"},400)}catch(a){return e.json({success:!1,error:(a==null?void 0:a.message)||String(a)})}});async function _t(e,t,s,a){await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(a,t.id,s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const He=new A;He.get("/api/admin/api-settings",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first(),a=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','telegram_bot_token','telegram_chat_id')").all(),n={};for(const l of a.results||[])n[l.key]=l.value;const i=s!=null&&s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):"",r=s!=null&&s.api_secret?"••••••••":"",o=n.openai_api_key?"••••••••":"",d=n.telegram_bot_token?"••••••••":"";return e.json({api_key:i,api_secret:r,openai_key:o,openai_model:n.openai_model||"gpt-4o-mini",telegram_token:d,telegram_chat_id:n.telegram_chat_id||""})});He.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a}=await e.req.json();if(!s||s.includes("•"))return e.json({success:!1,error:"api_key required"},400);const n=await _e(s.trim(),e.env.ENCRYPTION_KEY),i=a&&!a.includes("•")?await _e(a.trim(),e.env.ENCRYPTION_KEY):null;return await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first()?i?await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,i,t.id).run():await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,t.id).run():await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,n,i||"").run(),e.json({success:!0})});He.post("/api/admin/api-settings/openai",m,async e=>{const{openai_key:t,openai_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"openai_api_key",a,"OpenAI API Key (AES暗号化)")}return s&&await _t(e,"openai_model",s,"OpenAI モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/gemini",m,async e=>{const{gemini_key:t,gemini_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"gemini_api_key",a,"Gemini API Key (AES暗号化)")}return s&&await _t(e,"gemini_model",s,"Gemini モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/telegram",m,async e=>{const{telegram_token:t,telegram_chat_id:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"telegram_bot_token",a,"Telegram Bot Token (AES暗号化)")}return s&&await _t(e,"telegram_chat_id",s,"Telegram Chat ID"),e.json({success:!0})});He.post("/api/admin/api-settings/:kind/test",m,async e=>{const t=e.req.param("kind"),s=e.get("user");try{if(t==="x"){const a=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(s.id).first();if(!(a!=null&&a.api_key))return e.json({success:!1,error:"X API Key 未設定"});const n=await lt(a.api_key,e.env.ENCRYPTION_KEY);return e.json({success:!!n,message:n?"Consumer Key 正常に復号できました":"復号失敗"})}if(t==="openai"){const a=await Tt(e,"openai_api_key");if(!a)return e.json({success:!1,error:"OpenAI Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch("https://api.openai.com/v1/models",{headers:{Authorization:`Bearer ${n}`}});return i.ok?e.json({success:!0,message:"OpenAI 接続OK"}):e.json({success:!1,error:`OpenAI API ${i.status}`})}if(t==="gemini"){const a=await Tt(e,"gemini_api_key");if(!a)return e.json({success:!1,error:"Gemini Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${n}`);return i.ok?e.json({success:!0,message:"Gemini 接続OK"}):e.json({success:!1,error:`Gemini API ${i.status}`})}if(t==="telegram"){const a=await Tt(e,"telegram_bot_token"),n=await Tt(e,"telegram_chat_id");if(!a||!n)return e.json({success:!1,error:"Telegram 未設定"});const i=await lt(a,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const o=await(await fetch(`https://api.telegram.org/bot${i}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:n,text:"✅ GE365x-web: Telegram 接続テスト成功"})})).json();return o!=null&&o.ok?e.json({success:!0,message:"Telegram 送信成功"}):e.json({success:!1,error:(o==null?void 0:o.description)||"Telegram 送信失敗"})}return e.json({success:!1,error:"unknown kind"},400)}catch(a){return e.json({success:!1,error:(a==null?void 0:a.message)||String(a)})}});async function _t(e,t,s,a){await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
      VALUES (?, ?, ?, datetime('now','+9 hours'))
      ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind(t,s,a).run()}async function Tt(e,t){const s=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key = ?").bind(t).first();return(s==null?void 0:s.value)||null}async function lt(e,t){try{return await At(e,t)}catch{return""}}const B=new A;function rs(e){if(e==null)return"";const t=String(e);return t.includes(",")||t.includes('"')||t.includes(`
 `)||t.includes("\r")?'"'+t.replace(/"/g,'""')+'"':t}function W(e,t){const a=e.map(rs).join(","),n=t.map(i=>e.map(r=>rs(i[r])).join(","));return"\uFEFF"+a+`
