@@ -224,6 +224,32 @@ html, body { font-size: 15px; }
 /* p-3, gap-6 */
 .p-3{padding:.75rem}.gap-6{gap:1.5rem}
 
+/* ===== モバイル レスポンシブ ===== */
+.mobile-menu-toggle{display:none;position:fixed;top:.6rem;left:.6rem;z-index:60;background:var(--sidebar);color:#fff;border:none;border-radius:.4rem;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:45}
+@media(max-width:767px){
+  html,body{font-size:14px}
+  .mobile-menu-toggle{display:flex;align-items:center;justify-content:center}
+  aside.w-56{position:fixed;top:0;left:0;height:100vh;z-index:50;transform:translateX(-100%);transition:transform .25s ease}
+  aside.w-56.is-open{transform:translateX(0)}
+  body.menu-open .mobile-overlay{display:block}
+  main,.flex-1{padding-left:0!important}
+  main{padding-top:3.5rem!important;padding-left:.75rem!important;padding-right:.75rem!important}
+  .card{padding:1rem}
+  .section-title{font-size:1.15rem}
+  .section-desc{font-size:.78rem}
+  .grid-cols-1.md\:grid-cols-2,.grid-cols-1.md\:grid-cols-3,.grid-cols-1.md\:grid-cols-4,.grid-cols-1.md\:grid-cols-5{grid-template-columns:1fr!important}
+  table.data{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .btn{padding:.55rem .8rem;font-size:.85rem}
+  .inp{font-size:16px;padding:.55rem .7rem}
+  /* パターン別AI生成 5カードを2列に */
+  #patt-grid{grid-template-columns:repeat(2,1fr)!important}
+  #voice-grid{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:480px){
+  #patt-grid,#voice-grid{grid-template-columns:1fr 1fr!important}
+}
+
 /* hover系 */
 .hover:bg-paper-soft:hover{background:var(--paper-soft)}
 .hover:bg-accent-light:hover{background:var(--accent-light)}
@@ -544,6 +570,8 @@ async function doLicenseActivate(e) {
   }
 <\/script>
 `;function an(e){return`
+<button class="mobile-menu-toggle" onclick="(function(){var a=document.querySelector('aside.w-56');var b=document.body;a.classList.toggle('is-open');b.classList.toggle('menu-open');})()" aria-label="メニュー" type="button"><i class="fas fa-bars"></i></button>
+<div class="mobile-overlay" onclick="document.querySelector('aside.w-56').classList.remove('is-open');document.body.classList.remove('menu-open');"></div>
 <div class="min-h-screen flex bg-paper">
   ${en(e.active,e.user)}
 
@@ -553,9 +581,70 @@ async function doLicenseActivate(e) {
       ${e.pageBody}
     </div>
   </main>
+</div>
 
-  ${sn}
-</div>`}const he=`
+<!-- AIサポートチャットボタン -->
+<button id="ai-chat-btn" type="button" onclick="aiChatToggle()" style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:60;background:#2563EB;color:#fff;border:none;width:3.4rem;height:3.4rem;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.4);font-size:1.4rem" aria-label="AIサポート"><i class="fas fa-robot"></i></button>
+
+<!-- AIサポートチャット窓 -->
+<div id="ai-chat-modal" style="display:none;position:fixed;bottom:5.25rem;right:1.25rem;z-index:65;width:22rem;max-width:calc(100vw - 2rem);max-height:32rem;background:#fff;border:1px solid var(--line);border-radius:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden;flex-direction:column">
+  <div style="background:linear-gradient(135deg,#2563EB,#1E40AF);color:#fff;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:.5rem;font-weight:600"><i class="fas fa-robot"></i>AIサポート</div>
+    <button onclick="aiChatToggle()" type="button" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1rem"><i class="fas fa-xmark"></i></button>
+  </div>
+  <div id="ai-chat-log" style="flex:1;overflow-y:auto;padding:.75rem;background:#F9FAFB;min-height:14rem;max-height:22rem;font-size:.85rem">
+    <div style="background:#EFF6FF;color:#1E40AF;padding:.6rem .8rem;border-radius:.6rem;margin-bottom:.5rem">こんにちは！GE365xの使い方をご案内します。下の「よくある質問」から選ぶか、メッセージを直接入力してください。</div>
+    <div id="ai-chat-topics" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem"></div>
+  </div>
+  <div style="padding:.5rem;border-top:1px solid var(--line);display:flex;gap:.4rem">
+    <input type="text" id="ai-chat-input" placeholder="質問を入力..." style="flex:1;padding:.5rem .7rem;border:1px solid var(--line);border-radius:.4rem;font-size:.85rem;outline:none" onkeydown="if(event.key==='Enter')aiChatSend()">
+    <button type="button" onclick="aiChatSend()" style="background:#2563EB;color:#fff;border:none;border-radius:.4rem;padding:0 .8rem;cursor:pointer"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<script>
+window.aiChatToggle = function() {
+  const m = document.getElementById('ai-chat-modal');
+  const isShown = m.style.display === 'flex';
+  m.style.display = isShown ? 'none' : 'flex';
+  if (!isShown && !window.__aiTopicsLoaded) {
+    window.__aiTopicsLoaded = true;
+    fetch('/api/admin/chatbot/topics').then(r => r.json()).then(j => {
+      const root = document.getElementById('ai-chat-topics');
+      if (!root) return;
+      root.innerHTML = (j.topics || []).map(t =>
+        '<button type="button" onclick="aiChatAsk(\\''+t.title.replace(/\\'/g,'\\\\\\'')+'\\')" style="background:#fff;border:1px solid #DBEAFE;color:#1D4ED8;padding:.3rem .55rem;border-radius:.5rem;font-size:.72rem;cursor:pointer">' + t.title + '</button>'
+      ).join('');
+    }).catch(()=>{});
+  }
+};
+window.aiChatAppend = function(text, isUser) {
+  const log = document.getElementById('ai-chat-log');
+  const div = document.createElement('div');
+  div.style.cssText = isUser
+    ? 'background:#2563EB;color:#fff;padding:.55rem .75rem;border-radius:.55rem;margin-bottom:.45rem;margin-left:2rem;text-align:right;white-space:pre-wrap'
+    : 'background:#fff;color:#111827;border:1px solid var(--line);padding:.55rem .75rem;border-radius:.55rem;margin-bottom:.45rem;margin-right:2rem;white-space:pre-wrap';
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+};
+window.aiChatAsk = async function(question) {
+  aiChatAppend(question, true);
+  try {
+    const r = await fetch('/api/admin/chatbot/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question})});
+    const j = await r.json();
+    aiChatAppend((j.title?'【'+j.title+'】\\n':'') + (j.answer || '回答が見つかりませんでした'), false);
+  } catch(e) { aiChatAppend('通信エラー: '+e.message, false); }
+};
+window.aiChatSend = function() {
+  const inp = document.getElementById('ai-chat-input');
+  const v = inp.value.trim();
+  if (!v) return;
+  inp.value = '';
+  aiChatAsk(v);
+};
+<\/script>
+`;}const he=`
 <div class="alert alert-warn">
   <i class="fas fa-triangle-exclamation mt-0.5"></i>
   <div>アカウントが選択されていません。<a href="/dashboard/accounts" class="underline font-semibold">アカウント管理</a>で登録してください。</div>
@@ -618,20 +707,22 @@ async function doLicenseActivate(e) {
         <input type="text" id="tg-occ" class="inp" value="${w(t.occupation)}" placeholder="例: 会社員 / フリーランス">
       </div>
     </div>
-    <div class="mb-4">
+    <div class="mb-3">
       <label class="field-label"><i class="fas fa-heart icon-red"></i>痛み・悩み</label>
-      <textarea id="tg-pains" class="inp" placeholder="読者が抱えている具体的な悩み・痛みを書く">${w(t.pains)}</textarea>
+      <textarea id="tg-pains" class="inp" rows="2" style="min-height:4rem" placeholder="読者が抱えている具体的な悩み・痛みを書く">${w(t.pains)}</textarea>
     </div>
-    <div class="mb-4">
+    <div class="mb-3">
       <label class="field-label"><i class="fas fa-star icon-yellow"></i>欲求・願望</label>
-      <textarea id="tg-desires" class="inp" placeholder="読者が「こうなりたい」と思っている理想像">${w(t.desires)}</textarea>
+      <textarea id="tg-desires" class="inp" rows="2" style="min-height:4rem" placeholder="読者が「こうなりたい」と思っている理想像">${w(t.desires)}</textarea>
     </div>
-    <div class="mb-4">
+    <div class="mb-3">
       <label class="field-label"><i class="fas fa-bolt icon-yellow"></i>行動トリガー（反応するきっかけ）</label>
-      <textarea id="tg-trigger" class="inp" placeholder="この読者がアクションを起こす瞬間・キーワード">${w(t.purchase_triggers)}</textarea>
+      <textarea id="tg-trigger" class="inp" rows="2" style="min-height:4rem" placeholder="この読者がアクションを起こす瞬間・キーワード">${w(t.purchase_triggers)}</textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveTarget()"><i class="fas fa-save"></i>保存</button>
-    <span id="tg-msg" class="text-xs ml-2"></span>
+    <div style="display:flex;align-items:center;gap:.5rem;padding-top:.5rem">
+      <button class="btn btn-primary" onclick="saveTarget()"><i class="fas fa-save"></i>保存</button>
+      <span id="tg-msg" class="text-xs"></span>
+    </div>
   </div>
 </div>
 <script>
@@ -1246,6 +1337,14 @@ async function doGen2() {
     <div>投稿済: <span class="font-bold text-emerald-600">${i.posted}件</span></div>
     <div>失敗: <span class="font-bold text-red-600">${i.failed}件</span></div>
   </div>
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:.5rem">
+    <button type="button" class="btn btn-sm xst-tab xst-active" data-st="all" onclick="filterPosts(this,'all')"><i class="fas fa-list"></i>すべて</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="pending" onclick="filterPosts(this,'pending')"><i class="fas fa-clock"></i>未投稿</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="posted" onclick="filterPosts(this,'posted')"><i class="fas fa-check"></i>投稿済</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="draft" onclick="filterPosts(this,'draft')"><i class="fas fa-file-pen"></i>下書き</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="failed" onclick="filterPosts(this,'failed')"><i class="fas fa-triangle-exclamation"></i>失敗</button>
+    <style>.xst-tab{background:#fff;border:1px solid var(--line);color:var(--ink-muted)}.xst-tab.xst-active{background:var(--accent);color:#fff;border-color:var(--accent)}</style>
+  </div>
   <div class="card" style="padding:0">
     <table class="data">
       <thead><tr>
@@ -1254,7 +1353,7 @@ async function doGen2() {
       </tr></thead>
       <tbody>
         ${n.length===0?'<tr><td colspan="8" class="text-center text-ink-muted py-10">この月の投稿データがありません</td></tr>':n.map(r=>`
-            <tr>
+            <tr data-status="${r.status||""}" class="post-row">
               <td><input type="checkbox" class="post-chk" value="${r.id}" onchange="updateBulk()"></td>
               <td class="font-mono text-xs text-ink-faint">${r.id}</td>
               <td class="max-w-md"><div class="truncate">${w((r.body||"").slice(0,80))}</div></td>
@@ -1309,6 +1408,22 @@ async function doGen2() {
   </div>
 </div>
 <script>
+window.filterPosts = function(btn, st) {
+  document.querySelectorAll('.xst-tab').forEach(b => b.classList.remove('xst-active'));
+  btn.classList.add('xst-active');
+  const map = {
+    all: null,
+    pending: ['pending','approved','publishing'],
+    posted: ['posted'],
+    draft: ['draft'],
+    failed: ['failed','rejected'],
+  };
+  const allow = map[st];
+  document.querySelectorAll('tr.post-row').forEach(tr => {
+    const s = tr.getAttribute('data-status') || '';
+    tr.style.display = (!allow || allow.includes(s)) ? '' : 'none';
+  });
+};
 window.openSchedModal = function() {
   window.psMedia = [];
   psRenderMedia();
@@ -2463,11 +2578,11 @@ function dlExport(key) {
     </div>
     <div>
       <label class="field-label"><i class="fas fa-key icon-yellow"></i>API Key (Consumer Key)</label>
-      <input type="text" id="api-xk" class="inp input-mono" placeholder="未設定" value="${w(t.api_key||"")}">
+      <input type="text" id="api-xk" class="inp input-mono" placeholder="${t.api_key_set?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
     </div>
     <div>
       <label class="field-label"><i class="fas fa-key icon-yellow"></i>API Secret (Consumer Secret)</label>
-      <input type="password" id="api-xs" class="inp input-mono" placeholder="未設定" value="${w(t.api_secret||"")}">
+      <input type="password" id="api-xs" class="inp input-mono" placeholder="${t.api_secret_set?"✓ 設定済み（変更する場合は新しいキーを入力）":"未設定"}" value="">
     </div>
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="saveXApi()"><i class="fas fa-save"></i>保存</button>
@@ -2608,7 +2723,7 @@ window.testApi = testApi;
         WHERE aj.user_id = ?
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
               daily_post_count, daily_post_limit, last_posted_at, is_active
-         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:Object.assign({},s||{},{openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||""})})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;F.get("/admin",m,R,e=>{const t=`
+         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();let xKeyDec="",xSecDec="";if(s){try{xKeyDec=s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):""}catch{}try{xSecDec=s.api_secret?await lt(s.api_secret,e.env.ENCRYPTION_KEY):""}catch{}}const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:{api_key:xKeyDec,api_secret:xSecDec,api_key_set:!!xKeyDec,api_secret_set:!!xSecDec,openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||""}})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;F.get("/admin",m,R,e=>{const t=`
 <div class="min-h-screen flex flex-col">
   <!-- ヘッダ -->
   <header class="border-b border-brand-800/40 bg-surface-raised/80 backdrop-blur">
@@ -3232,6 +3347,29 @@ async function xMU_upload(creds,bytes,mime){
   if(mime&&mime.startsWith("video/"))return xMU_video(creds,bytes,mime);
   return xMU_image(creds,bytes);
 }
+async function readMediaBytes(env,asset){
+  if(!asset||!asset.storage_path)return{bytes:null,mime:asset&&asset.mime_type||"application/octet-stream"};
+  const sp=asset.storage_path;
+  if(sp.startsWith("data:")){
+    const m=sp.match(/^data:([^;]+);base64,(.+)$/);
+    if(!m)return{bytes:null,mime:asset.mime_type||"application/octet-stream"};
+    const bin=atob(m[2]);const u8=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+    return{bytes:u8.buffer,mime:m[1]||asset.mime_type||"image/jpeg"};
+  }
+  if(sp.startsWith("/media/")){
+    if(!env.MEDIA_BUCKET)return{bytes:null,mime:asset.mime_type||"image/jpeg"};
+    const obj=await env.MEDIA_BUCKET.get(sp.slice(7));
+    if(!obj)return{bytes:null,mime:asset.mime_type||"image/jpeg"};
+    return{bytes:await obj.arrayBuffer(),mime:asset.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"};
+  }
+  if(/^https?:/i.test(sp)){
+    const rr=await fetch(sp,{signal:AbortSignal.timeout(3e4)});
+    if(!rr.ok)return{bytes:null,mime:asset.mime_type||"image/jpeg"};
+    return{bytes:await rr.arrayBuffer(),mime:asset.mime_type||rr.headers.get("content-type")||"image/jpeg"};
+  }
+  return{bytes:null,mime:asset.mime_type||"application/octet-stream"};
+}
 const ge=new A;ge.get("/api/admin/accounts",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
             daily_post_count, daily_post_limit, last_posted_at,
             account_health_score, health_status, is_active, is_current, created_at
@@ -3356,7 +3494,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
        schedule_resolution_log=?, updated_at=?
      WHERE id=?`).bind(a,c,c,n?1:0,i,r?1:0,o,JSON.stringify(p),g(),s).run(),await Nn(e.env,d.id,d.account_id,p),e.json({success:!0,base_scheduled_at:a,effective_scheduled_at:c,scheduled_at:c,audit:p})});U.post("/api/admin/posts/:id/post-now",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=(await e.req.json().catch(()=>({}))).force_override===!0,n=await e.env.DB.prepare("SELECT * FROM post_queue WHERE id=? AND user_id=?").bind(s,t.id).first();if(!n)return e.json({success:!1,error:"Not found"},404);let i=null;if(n.account_id&&(i=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=?").bind(n.account_id,t.id).first()),i||(i=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first(),i&&await e.env.DB.prepare("UPDATE post_queue SET account_id=? WHERE id=?").bind(i.id,s).run()),!i)return e.json({success:!1,error:"No active X account"});const r=await Ks(e.env,i.id,n.body||"",n.link_url,n.hashtags),o=r.errors.filter(d=>!(a&&d.overridable));if(o.length>0){const d=r.errors.find(l=>l.overridable);return d&&!a?e.json({success:!1,error:d.message,overridable:!0,cooldown_override:!0}):e.json({success:!1,error:"Safety: "+o.map(l=>l.message).join("; ")})}if(!await Ys(e.env,i.id))return e.json({success:!1,error:"Account busy"});try{await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=?").bind(g(),s).run();const d=await Ft(e.env,i);let l=bt(n.body||"",n.post_mode);n.link_url&&(l+=`
 `+n.link_url),n.hashtags&&(l+=`
-`+n.hashtags);const c=[];if(n.media_json)try{const _=JSON.parse(n.media_json);for(const b of(_||[]).slice(0,4)){const v=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(b,t.id).first();if(v){if(!v.x_media_id){try{let bytes,mime;if(v.storage_path&&v.storage_path.startsWith("/media/")&&e.env.MEDIA_BUCKET){const obj=await e.env.MEDIA_BUCKET.get(v.storage_path.slice(7));if(obj){bytes=await obj.arrayBuffer();mime=v.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"}}else if(v.storage_path&&/^https?:/i.test(v.storage_path)){const rr=await fetch(v.storage_path,{signal:AbortSignal.timeout(3e4)});if(rr.ok){bytes=await rr.arrayBuffer();mime=v.mime_type||rr.headers.get("content-type")||"image/jpeg"}}if(bytes){const xid=await xMU_upload(d,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),v.id).run();c.push(xid)}}catch(uErr){console.error("[mediaUp]",uErr&&uErr.message)}}else c.push(v.x_media_id)}}}catch{}const p=c.length>0?await $s(d,l,c,null):await Ms(d,l);return await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(p.id||"",g(),g(),s).run(),await e.env.DB.prepare(`UPDATE x_accounts SET last_posted_at=?, daily_post_count=daily_post_count+1,
+`+n.hashtags);const c=[];if(n.media_json)try{const _=JSON.parse(n.media_json);for(const b of(_||[]).slice(0,4)){const v=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(b,t.id).first();if(v){if(!v.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,v);if(bytes){const xid=await xMU_upload(d,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),v.id).run();c.push(xid)}}catch(uErr){console.error("[mediaUp]",uErr&&uErr.message)}}else c.push(v.x_media_id)}}}catch{}const p=c.length>0?await $s(d,l,c,null):await Ms(d,l);return await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(p.id||"",g(),g(),s).run(),await e.env.DB.prepare(`UPDATE x_accounts SET last_posted_at=?, daily_post_count=daily_post_count+1,
          last_daily_reset_date = DATE('now','+9 hours'), updated_at=? WHERE id=?`).bind(g(),g(),i.id).run(),await ns(e.env,{record_id:s,account_id:i.id,user_id:t.id,account_name:i.account_name,source_type:n.source_type||"manual_post",generation_type:n.generation_type,post_mode:n.post_mode,content:n.body||"",content_hash:n.content_hash||"",link_url:n.link_url,posted_at:g(),status:"posted",api_response_summary:JSON.stringify({tweet_id:p.id})}),await as(e.env,`X posted @${i.x_username||i.account_name} ID:${p.id}`),e.json({success:!0,tweet_id:p.id})}catch(d){return await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(d.message,g(),s).run(),await ns(e.env,{record_id:s,account_id:i.id,user_id:t.id,account_name:i.account_name,source_type:n.source_type,post_mode:n.post_mode,content:n.body||"",content_hash:n.content_hash||"",status:"failed",error_message:d.message}),d instanceof Mt?await mt(e.env,i.id,"rate_limit",-15):await mt(e.env,i.id,"error",-5,{message:d.message}),await as(e.env,`X post FAILED #${s} ${d.message}`),e.json({success:!1,error:d.message})}finally{await Js(e.env,i.id)}});U.put("/api/admin/posts/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g(),i=a.body?await Ae(a.body):null;return a.media_json!==void 0&&a.body===void 0?(await e.env.DB.prepare("UPDATE post_queue SET media_json=?, updated_at=? WHERE id=? AND user_id=?").bind(a.media_json,n,s,t.id).run(),e.json({success:!0})):a.account_id!==void 0&&a.body===void 0?(await e.env.DB.prepare("UPDATE post_queue SET account_id=?, updated_at=? WHERE id=? AND user_id=?").bind(a.account_id,n,s,t.id).run(),e.json({success:!0})):(await e.env.DB.prepare(`UPDATE post_queue SET
        body=?, link_url=?, hashtags=?, scheduled_at=?, post_mode=?,
        media_json=COALESCE(?, media_json), content_hash=COALESCE(?, content_hash),
@@ -3387,7 +3525,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
       ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC
       LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{if(!r.account_id)throw new Error("account_id is null");const d=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=?").bind(r.account_id).first();if(!d)throw new Error("account_not_found");const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id))throw new Error("account_busy");try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
-`+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{let bytes,mime;if(E.storage_path&&E.storage_path.startsWith("/media/")&&e.env.MEDIA_BUCKET){const obj=await e.env.MEDIA_BUCKET.get(E.storage_path.slice(7));if(obj){bytes=await obj.arrayBuffer();mime=E.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"}}else if(E.storage_path&&/^https?:/i.test(E.storage_path)){const rr=await fetch(E.storage_path,{signal:AbortSignal.timeout(3e4)});if(rr.ok){bytes=await rr.arrayBuffer();mime=E.mime_type||rr.headers.get("content-type")||"image/jpeg"}}if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}const b=_.length>0?await $s(c,p,_,null):await Ms(c,p);await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),await e.env.DB.prepare(`UPDATE x_accounts SET
+`+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}const b=_.length>0?await $s(c,p,_,null):await Ms(c,p);await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),await e.env.DB.prepare(`UPDATE x_accounts SET
              last_posted_at = ?,
              daily_post_count = CASE
                WHEN last_daily_reset_date != DATE('now','+9 hours') THEN 1
@@ -3443,8 +3581,9 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
        updated_at = ?
      WHERE id = ? AND user_id = ?`).bind(a.title??null,a.body??null,a.link_url??null,a.hashtags??null,a.post_mode??null,a.account_id??null,g(),s,t.id).run(),e.json({success:!0})});st.delete("/api/admin/drafts/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM drafts WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});const at=new A;at.get("/api/admin/media",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT id, file_type, mime_type, file_name, byte_size, storage_path, x_media_id,
             upload_status, last_error, created_at
-       FROM media_assets WHERE user_id = ? ORDER BY id DESC LIMIT 200`).bind(t.id).all();return e.json({assets:s||[]})});at.post("/api/admin/media",m,async e=>{const t=e.get("user");if(!e.env.MEDIA_BUCKET)return e.json({error:"R2 bucket (MEDIA_BUCKET) not configured"},501);const a=(await e.req.parseBody()).file;if(!a)return e.json({error:"file required"},400);const n=a.type.startsWith("video/")?"video":"image",i=`u${t.id}/${Date.now()}-${a.name}`;await e.env.MEDIA_BUCKET.put(i,await a.arrayBuffer(),{httpMetadata:{contentType:a.type}});const r=await e.env.DB.prepare(`INSERT INTO media_assets (user_id, file_type, mime_type, file_name, byte_size, storage_path, upload_status)
-     VALUES (?, ?, ?, ?, ?, ?, 'ready')`).bind(t.id,n,a.type,a.name,a.size,`/media/${i}`).run();return e.json({success:!0,id:r.meta.last_row_id,storage_path:`/media/${i}`})});at.delete("/api/admin/media/:id",m,async e=>{var n;const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.env.DB.prepare("SELECT storage_path FROM media_assets WHERE id=? AND user_id=?").bind(s,t.id).first();if((n=a==null?void 0:a.storage_path)!=null&&n.startsWith("/media/")&&e.env.MEDIA_BUCKET){const i=a.storage_path.slice(7);await e.env.MEDIA_BUCKET.delete(i).catch(()=>{})}return await e.env.DB.prepare("DELETE FROM media_assets WHERE id=? AND user_id=?").bind(s,t.id).run(),e.json({success:!0})});
+       FROM media_assets WHERE user_id = ? ORDER BY id DESC LIMIT 200`).bind(t.id).all();return e.json({assets:s||[]})});at.post("/api/admin/media",m,async e=>{const t=e.get("user");try{const fb=await e.req.parseBody();const a=fb.file;if(!a||typeof a==="string")return e.json({success:!1,error:"file required"},400);const mime=a.type||"application/octet-stream";const n=mime.startsWith("video/")?"video":"image";const sz=a.size||0;if(sz>20*1024*1024)return e.json({success:!1,error:"ファイルサイズが大きすぎます (20MB上限)"},413);const fileName=a.name||"upload.bin";if(e.env.MEDIA_BUCKET){const i=`u${t.id}/${Date.now()}-${fileName.replace(/[^\w.\-]/g,"_")}`;await e.env.MEDIA_BUCKET.put(i,await a.arrayBuffer(),{httpMetadata:{contentType:mime}});const r=await e.env.DB.prepare(`INSERT INTO media_assets (user_id, file_type, mime_type, file_name, byte_size, storage_path, upload_status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'ready', ?, ?)`).bind(t.id,n,mime,fileName,sz,`/media/${i}`,g(),g()).run();return e.json({success:!0,id:r.meta.last_row_id,storage_path:`/media/${i}`})}else{const buf=await a.arrayBuffer();const u8=new Uint8Array(buf);let bin="";const CH=8192;for(let i=0;i<u8.length;i+=CH)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));const b64="data:"+mime+";base64,"+btoa(bin);const r=await e.env.DB.prepare(`INSERT INTO media_assets (user_id, file_type, mime_type, file_name, byte_size, storage_path, upload_status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'ready', ?, ?)`).bind(t.id,n,mime,fileName,sz,b64,g(),g()).run();return e.json({success:!0,id:r.meta.last_row_id,storage_path:"data:..."})}}catch(err){console.error("[media-upload]",err);return e.json({success:!1,error:(err&&err.message)||"upload error"},500)}});at.delete("/api/admin/media/:id",m,async e=>{var n;const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.env.DB.prepare("SELECT storage_path FROM media_assets WHERE id=? AND user_id=?").bind(s,t.id).first();if((n=a==null?void 0:a.storage_path)!=null&&n.startsWith("/media/")&&e.env.MEDIA_BUCKET){const i=a.storage_path.slice(7);await e.env.MEDIA_BUCKET.delete(i).catch(()=>{})}return await e.env.DB.prepare("DELETE FROM media_assets WHERE id=? AND user_id=?").bind(s,t.id).run(),e.json({success:!0})});
 at.post("/api/admin/media/url",m,async e=>{
   const t=e.get("user");const{url:u,file_type:ft}=await e.req.json().catch(()=>({}));
   if(!u||typeof u!=="string"||!/^https?:\/\//i.test(u))return e.json({error:"valid url required"},400);
@@ -3605,7 +3744,7 @@ at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e
        WHERE id=?`).bind(s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0,n,i.id).run(),e.json({success:!0,id:i.id});{const r=await e.env.DB.prepare(`INSERT INTO brand_voice
          (account_id, user_id, voice_key, label, tone, worldview, personal_story,
           prohibited_words, sample_posts, is_default)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(a,t.id,s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const He=new A;He.get("/api/admin/api-settings",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first(),a=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','telegram_bot_token','telegram_chat_id')").all(),n={};for(const l of a.results||[])n[l.key]=l.value;const i=s!=null&&s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):"",r=s!=null&&s.api_secret?"••••••••":"",o=n.openai_api_key?"••••••••":"",d=n.telegram_bot_token?"••••••••":"";return e.json({api_key:i,api_secret:r,openai_key:o,openai_model:n.openai_model||"gpt-4o-mini",telegram_token:d,telegram_chat_id:n.telegram_chat_id||""})});He.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a}=await e.req.json();if(!s||s.includes("•"))return e.json({success:!1,error:"api_key required"},400);const n=await _e(s.trim(),e.env.ENCRYPTION_KEY),i=a&&!a.includes("•")?await _e(a.trim(),e.env.ENCRYPTION_KEY):null;return await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first()?i?await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,i,t.id).run():await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(n,t.id).run():await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,n,i||"").run(),e.json({success:!0})});He.post("/api/admin/api-settings/openai",m,async e=>{const{openai_key:t,openai_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"openai_api_key",a,"OpenAI API Key (AES暗号化)")}return s&&await _t(e,"openai_model",s,"OpenAI モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/gemini",m,async e=>{const{gemini_key:t,gemini_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"gemini_api_key",a,"Gemini API Key (AES暗号化)")}return s&&await _t(e,"gemini_model",s,"Gemini モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/telegram",m,async e=>{const{telegram_token:t,telegram_chat_id:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"telegram_bot_token",a,"Telegram Bot Token (AES暗号化)")}return s&&await _t(e,"telegram_chat_id",s,"Telegram Chat ID"),e.json({success:!0})});He.post("/api/admin/api-settings/:kind/test",m,async e=>{const t=e.req.param("kind"),s=e.get("user");try{if(t==="x"){const a=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(s.id).first();if(!(a!=null&&a.api_key))return e.json({success:!1,error:"X API Key 未設定"});const n=await lt(a.api_key,e.env.ENCRYPTION_KEY);return e.json({success:!!n,message:n?"Consumer Key 正常に復号できました":"復号失敗"})}if(t==="openai"){const a=await Tt(e,"openai_api_key");if(!a)return e.json({success:!1,error:"OpenAI Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch("https://api.openai.com/v1/models",{headers:{Authorization:`Bearer ${n}`}});return i.ok?e.json({success:!0,message:"OpenAI 接続OK"}):e.json({success:!1,error:`OpenAI API ${i.status}`})}if(t==="gemini"){const a=await Tt(e,"gemini_api_key");if(!a)return e.json({success:!1,error:"Gemini Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${n}`);return i.ok?e.json({success:!0,message:"Gemini 接続OK"}):e.json({success:!1,error:`Gemini API ${i.status}`})}if(t==="telegram"){const a=await Tt(e,"telegram_bot_token"),n=await Tt(e,"telegram_chat_id");if(!a||!n)return e.json({success:!1,error:"Telegram 未設定"});const i=await lt(a,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const o=await(await fetch(`https://api.telegram.org/bot${i}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:n,text:"✅ GE365x-web: Telegram 接続テスト成功"})})).json();return o!=null&&o.ok?e.json({success:!0,message:"Telegram 送信成功"}):e.json({success:!1,error:(o==null?void 0:o.description)||"Telegram 送信失敗"})}return e.json({success:!1,error:"unknown kind"},400)}catch(a){return e.json({success:!1,error:(a==null?void 0:a.message)||String(a)})}});async function _t(e,t,s,a){await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(a,t.id,s.voice_key??null,s.label??null,s.tone??null,s.worldview??null,s.personal_story??null,s.prohibited_words??null,s.sample_posts??null,s.is_default?1:0).run();return e.json({success:!0,id:r.meta.last_row_id})}});const He=new A;He.get("/api/admin/api-settings",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first(),a=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','telegram_bot_token','telegram_chat_id')").all(),n={};for(const l of a.results||[])n[l.key]=l.value;const i=s!=null&&s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):"",r=s!=null&&s.api_secret?"••••••••":"",o=n.openai_api_key?"••••••••":"",d=n.telegram_bot_token?"••••••••":"";return e.json({api_key:i,api_secret:r,openai_key:o,openai_model:n.openai_model||"gpt-4o-mini",telegram_token:d,telegram_chat_id:n.telegram_chat_id||""})});He.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a}=await e.req.json();const newKey=s&&!s.includes("•")?s.trim():null;const newSecret=a&&!a.includes("•")?a.trim():null;if(!newKey&&!newSecret){const ex=await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first();if(!ex)return e.json({success:!1,error:"少なくともAPI Keyを入力してください"},400);return e.json({success:!0,unchanged:!0})}const encKey=newKey?await _e(newKey,e.env.ENCRYPTION_KEY):null;const encSec=newSecret?await _e(newSecret,e.env.ENCRYPTION_KEY):null;const exist=await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first();if(exist){if(encKey&&encSec)await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encKey,encSec,t.id).run();else if(encKey)await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encKey,t.id).run();else if(encSec)await e.env.DB.prepare("UPDATE x_api_settings SET api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encSec,t.id).run();}else{if(!encKey)return e.json({success:!1,error:"API Keyを入力してください"},400);await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,encKey,encSec||"").run()}return e.json({success:!0})});He.post("/api/admin/api-settings/openai",m,async e=>{const{openai_key:t,openai_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"openai_api_key",a,"OpenAI API Key (AES暗号化)")}return s&&await _t(e,"openai_model",s,"OpenAI モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/gemini",m,async e=>{const{gemini_key:t,gemini_model:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"gemini_api_key",a,"Gemini API Key (AES暗号化)")}return s&&await _t(e,"gemini_model",s,"Gemini モデル名"),e.json({success:!0})});He.post("/api/admin/api-settings/telegram",m,async e=>{const{telegram_token:t,telegram_chat_id:s}=await e.req.json();if(t&&!t.includes("•")){const a=await _e(t.trim(),e.env.ENCRYPTION_KEY);await _t(e,"telegram_bot_token",a,"Telegram Bot Token (AES暗号化)")}return s&&await _t(e,"telegram_chat_id",s,"Telegram Chat ID"),e.json({success:!0})});He.post("/api/admin/api-settings/:kind/test",m,async e=>{const t=e.req.param("kind"),s=e.get("user");try{if(t==="x"){const a=await e.env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(s.id).first();if(!(a!=null&&a.api_key))return e.json({success:!1,error:"X API Key 未設定"});const n=await lt(a.api_key,e.env.ENCRYPTION_KEY);return e.json({success:!!n,message:n?"Consumer Key 正常に復号できました":"復号失敗"})}if(t==="openai"){const a=await Tt(e,"openai_api_key");if(!a)return e.json({success:!1,error:"OpenAI Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch("https://api.openai.com/v1/models",{headers:{Authorization:`Bearer ${n}`}});return i.ok?e.json({success:!0,message:"OpenAI 接続OK"}):e.json({success:!1,error:`OpenAI API ${i.status}`})}if(t==="gemini"){const a=await Tt(e,"gemini_api_key");if(!a)return e.json({success:!1,error:"Gemini Key 未設定"});const n=await lt(a,e.env.ENCRYPTION_KEY);if(!n)return e.json({success:!1,error:"復号失敗"});const i=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${n}`);return i.ok?e.json({success:!0,message:"Gemini 接続OK"}):e.json({success:!1,error:`Gemini API ${i.status}`})}if(t==="telegram"){const a=await Tt(e,"telegram_bot_token"),n=await Tt(e,"telegram_chat_id");if(!a||!n)return e.json({success:!1,error:"Telegram 未設定"});const i=await lt(a,e.env.ENCRYPTION_KEY);if(!i)return e.json({success:!1,error:"復号失敗"});const o=await(await fetch(`https://api.telegram.org/bot${i}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:n,text:"✅ GE365x-web: Telegram 接続テスト成功"})})).json();return o!=null&&o.ok?e.json({success:!0,message:"Telegram 送信成功"}):e.json({success:!1,error:(o==null?void 0:o.description)||"Telegram 送信失敗"})}return e.json({success:!1,error:"unknown kind"},400)}catch(a){return e.json({success:!1,error:(a==null?void 0:a.message)||String(a)})}});async function _t(e,t,s,a){await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
      VALUES (?, ?, ?, datetime('now','+9 hours'))
      ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind(t,s,a).run()}async function Tt(e,t){const s=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key = ?").bind(t).first();return(s==null?void 0:s.value)||null}async function lt(e,t){try{return await At(e,t)}catch{return""}}const B=new A;function rs(e){if(e==null)return"";const t=String(e);return t.includes(",")||t.includes('"')||t.includes(`
 `)||t.includes("\r")?'"'+t.replace(/"/g,'""')+'"':t}function W(e,t){const a=e.map(rs).join(","),n=t.map(i=>e.map(r=>rs(i[r])).join(","));return"\uFEFF"+a+`
