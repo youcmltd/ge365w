@@ -542,9 +542,6 @@ async function doLicenseActivate(e) {
     setInterval(updateClock, 30000);
   })();
 <\/script>`}const sn=`
-<button class="fab" onclick="toast && toast('Chatbot は次フェーズで実装','info')" title="AIチャットボット">
-  <i class="fas fa-comment-dots text-xl"></i>
-</button>
 <div id="toast-host"></div>
 <script>
   function doLogout() {
@@ -582,6 +579,8 @@ async function doLicenseActivate(e) {
     </div>
   </main>
 </div>
+
+${sn}
 
 <!-- AIサポートチャットボタン -->
 <button id="ai-chat-btn" type="button" onclick="aiChatToggle()" style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:60;background:#2563EB;color:#fff;border:none;width:3.4rem;height:3.4rem;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.4);font-size:1.4rem" aria-label="AIサポート"><i class="fas fa-robot"></i></button>
