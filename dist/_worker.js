@@ -224,6 +224,34 @@ html, body { font-size: 14px; }
 /* p-3, gap-6 */
 .p-3{padding:.75rem}.gap-6{gap:1.5rem}
 
+/* ===== 管理画面 (/admin) 専用スタイル ===== */
+.bg-surface{background:#FFFFFF}
+.bg-surface-raised{background:#F8FAFC}
+.text-brand-400{color:#64748B}
+.border-brand-800\/40{border-color:#E5E7EB}
+.bg-surface-raised\/80{background:rgba(248,250,252,.95)}
+.brand-logo{background:linear-gradient(135deg,#1E40AF,#2563EB)}
+.tab-trigger{padding:.55rem 1rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab-trigger:hover{color:#1E40AF;background:#F1F5F9}
+.tab-trigger.active{color:#1E40AF;border-bottom-color:#2563EB;background:#EFF6FF}
+.data-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.data-table thead th{text-align:left;padding:.7rem .85rem;background:#F1F5F9;color:#1F2937;font-weight:600;font-size:.85rem;border-bottom:1px solid #E5E7EB}
+.data-table tbody td{padding:.7rem .85rem;border-bottom:1px solid #F1F5F9;color:#1F2937;vertical-align:middle}
+.data-table tbody tr:hover{background:#F8FAFC}
+.input-field{display:block;width:100%;padding:.5rem .75rem;border-radius:.4rem;background:#fff;border:1px solid #E5E7EB;color:#1F2937;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .15s}
+.input-field:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.btn-ghost.text-xs{padding:.3rem .55rem;font-size:.72rem}
+/* 管理画面 .text-white を実色に */
+header.bg-surface-raised\/80 .text-white{color:#1F2937}
+nav.bg-surface .text-white{color:#1F2937}
+section .text-white{color:#1F2937}
+.hidden-force{display:none!important}
+.pill-warn{background:#FEF3C7;color:#92400E;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
+.pill-ok{background:#ECFDF5;color:#065F46;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
+.pill-blue{background:#EFF6FF;color:#1D4ED8;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
+.pill-soft{background:#F3F4F6;color:#6B7280;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
+.pill-err{background:#FEF2F2;color:#991B1B;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
+
 /* ===== モバイル レスポンシブ ===== */
 .mobile-menu-toggle{display:none;position:fixed;top:.6rem;left:.6rem;z-index:60;background:var(--sidebar);color:#fff;border:none;border-radius:.4rem;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:45}
@@ -288,6 +316,37 @@ table.data tbody td { padding:.5rem .75rem; }
 <head>
 ${Wa}
 <title>${e} — ${G.name}</title>
+<script>
+// 早期グローバル定義: 各ページscriptで toast() を直接呼べるように
+window.toast = window.toast || function(msg, kind) {
+  kind = kind || 'info';
+  var host = document.getElementById('toast-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'toast-host';
+    if (document.body) document.body.appendChild(host);
+    else { document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(host); }); }
+  }
+  var bg = kind === 'ok' ? '#065F46' : kind === 'err' ? '#991B1B' : '#1F2937';
+  var icon = kind === 'ok' ? 'fa-check' : kind === 'err' ? 'fa-xmark' : 'fa-info-circle';
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:1rem;right:1rem;z-index:100;background:' + bg + ';color:#fff;padding:.65rem 1rem;border-radius:.45rem;font-size:.82rem;box-shadow:0 8px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:.5rem;';
+  t.innerHTML = '<i class="fas ' + icon + '"></i>' + msg;
+  host.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
+};
+window.doLogout = window.doLogout || function() {
+  fetch('/api/auth/logout', { method: 'POST' }).then(function(){ location.href = '/login'; });
+};
+window.switchAccount = window.switchAccount || function(id) {
+  if (!id) return;
+  fetch('/api/admin/accounts/' + id + '/current', { method: 'POST' }).then(function(){ location.reload(); });
+};
+// グローバル名前空間の var として再宣言（各ページ <script> から直接 toast() を呼べるよう var 宣言）
+var toast = window.toast;
+var doLogout = window.doLogout;
+var switchAccount = window.switchAccount;
+<\/script>
 </head>
 <body class="${s.bodyClass??Ya}">
 ${t}
@@ -569,10 +628,6 @@ async function doLicenseActivate(e) {
     host.appendChild(t);
     setTimeout(function(){ t.remove(); }, 3000);
   };
-  // 互換用ローカル名
-  var toast = window.toast;
-  var doLogout = window.doLogout;
-  var switchAccount = window.switchAccount;
 <\/script>
 `;function an(e){return`
 ${sn}
@@ -715,18 +770,18 @@ window.aiChatSend = function() {
     </div>
     <div class="mb-3">
       <label class="field-label"><i class="fas fa-heart icon-red"></i>痛み・悩み</label>
-      <textarea id="tg-pains" class="inp" rows="2" style="min-height:3.2rem" placeholder="読者が抱えている具体的な悩み・痛みを書く">${w(t.pains)}</textarea>
+      <textarea id="tg-pains" class="inp" rows="3" style="min-height:5rem" placeholder="読者が抱えている具体的な悩み・痛みを書く">${w(t.pains)}</textarea>
     </div>
     <div class="mb-3">
       <label class="field-label"><i class="fas fa-star icon-yellow"></i>欲求・願望</label>
-      <textarea id="tg-desires" class="inp" rows="2" style="min-height:3.2rem" placeholder="読者が「こうなりたい」と思っている理想像">${w(t.desires)}</textarea>
+      <textarea id="tg-desires" class="inp" rows="3" style="min-height:5rem" placeholder="読者が「こうなりたい」と思っている理想像">${w(t.desires)}</textarea>
     </div>
     <div class="mb-3">
       <label class="field-label"><i class="fas fa-bolt icon-yellow"></i>行動トリガー（反応するきっかけ）</label>
-      <textarea id="tg-trigger" class="inp" rows="2" style="min-height:3.2rem" placeholder="この読者がアクションを起こす瞬間・キーワード">${w(t.purchase_triggers)}</textarea>
+      <textarea id="tg-trigger" class="inp" rows="3" style="min-height:5rem" placeholder="この読者がアクションを起こす瞬間・キーワード">${w(t.purchase_triggers)}</textarea>
     </div>
     <div style="display:flex;align-items:center;gap:.5rem;padding-top:.5rem">
-      <button class="btn btn-primary" onclick="saveTarget()"><i class="fas fa-save"></i>保存</button>
+      <button class="btn btn-primary" onclick="saveTarget()" style="padding:.85rem 2.5rem;font-size:1rem;font-weight:700"><i class="fas fa-save"></i>保存</button>
       <span id="tg-msg" class="text-xs"></span>
     </div>
   </div>
@@ -791,8 +846,8 @@ async function saveTarget() {
       <label class="field-label">禁止ワード（改行区切り）</label>
       <textarea id="vc-ng" class="inp" placeholder="絶対に使わないワード">${w(t.prohibited_words)}</textarea>
     </div>
-    <div style="display:flex;gap:.5rem">
-      <button class="btn btn-primary" onclick="saveVoice()"><i class="fas fa-save"></i>保存</button>
+    <div style="display:flex;gap:.5rem;align-items:center;padding-top:.5rem">
+      <button class="btn btn-primary" onclick="saveVoice()" style="padding:.85rem 2.5rem;font-size:1rem;font-weight:700"><i class="fas fa-save"></i>保存</button>
       <span id="vc-msg" style="font-size:.85rem;align-self:center"></span>
     </div>
   </div>
@@ -1368,9 +1423,9 @@ async function doGen2() {
               <td>${Lt(r.status)}</td>
               <td class="text-xs">@${w(r.x_username||"-")}</td>
               <td class="text-right">
-                ${r.status!=="posted"?`<button class="btn btn-subtle btn-sm" onclick="postNow(${r.id})" title="今すぐ投稿"><i class="fa-brands fa-x-twitter"></i></button>`:""}
-                ${r.status!=="posted"?`<button class="btn btn-ghost btn-sm" onclick="openSchedRowModal(${r.id})" title="予約日時を設定" style="background:#FEF3C7;color:#92400E;border-color:#FDE68A"><i class="fas fa-calendar-plus"></i></button>`:""}
-                <button class="btn btn-danger btn-sm" onclick="delPost(${r.id})"><i class="fas fa-trash"></i></button>
+                ${r.status!=="posted"?`<button class="btn btn-subtle btn-sm" onclick="postNow(${r.id})" title="今すぐ投稿"><i class="fa-brands fa-x-twitter"></i>今すぐ投稿</button>`:""}
+                ${r.status!=="posted"?`<button class="btn btn-ghost btn-sm" onclick="openSchedRowModal(${r.id})" title="予約日時を設定" style="background:#FEF3C7;color:#92400E;border-color:#FDE68A"><i class="fas fa-calendar-plus"></i>予約投稿</button>`:""}
+                <button class="btn btn-danger btn-sm" onclick="delPost(${r.id})"><i class="fas fa-trash"></i>削除</button>
               </td>
             </tr>
           `).join("")}
@@ -3309,7 +3364,7 @@ td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8
        FROM payment_history
       WHERE user_id = ?
       ORDER BY created_at DESC
-      LIMIT 50`).bind(t.id).all();return e.json({payments:s||[]})});be.post("/api/subscription/stripe/checkout",m,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));be.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const Qt=new TextEncoder,vn="https://api.x.com/2";class $ extends Error{constructor(s,a=0,n="api_error"){super(s);h(this,"statusCode");h(this,"errorType");this.name="XApiError",this.statusCode=a,this.errorType=n}}class Mt extends ${constructor(s){super("Rate limited by X API (429)",429,"rate_limit");h(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=s}}function oe(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function yn(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(s=>s.toString(16).padStart(2,"0")).join("")}function En(){return yn(16)}async function xn(e,t){const s=await crypto.subtle.importKey("raw",Qt.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),a=await crypto.subtle.sign("HMAC",s,Qt.encode(t)),n=new Uint8Array(a);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function wn(e,t,s,a){const n={oauth_consumer_key:s.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:s.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};i.searchParams.forEach((_,b)=>{r[b]=_});const o=Object.keys(r).sort().map(_=>`${oe(_)}=${oe(r[_])}`).join("&"),d=[e.toUpperCase(),oe(`${i.origin}${i.pathname}`),oe(o)].join("&"),l=`${oe(s.consumerSecret)}&${oe(s.accessTokenSecret)}`,c=await xn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(_=>`${oe(_)}="${oe(n[_])}"`).join(", ")}`}async function $t(e,t,s,a){const n=`${vn}${t}`,i=await wn(e,n,a),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};s!==void 0&&(r.body=JSON.stringify(s));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new Mt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();throw new $(`X API ${e} ${t} failed: ${o.status} ${d.slice(0,500)}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Ms(e,t){var a,n;const s=await $t("POST","/tweets",{text:t},e);return{id:((a=s==null?void 0:s.data)==null?void 0:a.id)||"",text:((n=s==null?void 0:s.data)==null?void 0:n.text)||t}}async function $s(e,t,s,a){var r,o;const n={text:t};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function $sReply(e,t,parentId,s){var r,o;const n={text:t,reply:{in_reply_to_tweet_id:parentId}};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function kn(e){var s,a,n,i;if(!e)throw new $("credentials未設定",0,"missing_credentials");if(!((s=e.consumerKey)!=null&&s.trim()))throw new $("API Key未設定",0,"missing_credentials");if(!((a=e.consumerSecret)!=null&&a.trim()))throw new $("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new $("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new $("Access Token Secret未設定",0,"missing_token");const t=await $t("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Ft(e,t,s){var o,d;const a=((s==null?void 0:s.apiKey)??e.X_API_KEY??"").trim(),n=((s==null?void 0:s.apiSecret)??e.X_API_SECRET??"").trim();if(!a||!n)throw new $("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new $("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new $("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await At(t.access_token,e.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await At(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new $("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:a,consumerSecret:n,accessToken:i,accessTokenSecret:r}}
+      LIMIT 50`).bind(t.id).all();return e.json({payments:s||[]})});be.post("/api/subscription/stripe/checkout",m,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));be.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const Qt=new TextEncoder,vn="https://api.x.com/2";class $ extends Error{constructor(s,a=0,n="api_error"){super(s);h(this,"statusCode");h(this,"errorType");this.name="XApiError",this.statusCode=a,this.errorType=n}}class Mt extends ${constructor(s){super("Rate limited by X API (429)",429,"rate_limit");h(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=s}}function oe(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function yn(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(s=>s.toString(16).padStart(2,"0")).join("")}function En(){return yn(16)}async function xn(e,t){const s=await crypto.subtle.importKey("raw",Qt.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),a=await crypto.subtle.sign("HMAC",s,Qt.encode(t)),n=new Uint8Array(a);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function wn(e,t,s,a){const n={oauth_consumer_key:s.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:s.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};i.searchParams.forEach((_,b)=>{r[b]=_});const o=Object.keys(r).sort().map(_=>`${oe(_)}=${oe(r[_])}`).join("&"),d=[e.toUpperCase(),oe(`${i.origin}${i.pathname}`),oe(o)].join("&"),l=`${oe(s.consumerSecret)}&${oe(s.accessTokenSecret)}`,c=await xn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(_=>`${oe(_)}="${oe(n[_])}"`).join(", ")}`}async function $t(e,t,s,a){const n=`${vn}${t}`,i=await wn(e,n,a),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};s!==void 0&&(r.body=JSON.stringify(s));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new Mt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();throw new $(`X API ${e} ${t} failed: ${o.status} ${d.slice(0,500)}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Ms(e,t){var a,n;const s=await $t("POST","/tweets",{text:t},e);return{id:((a=s==null?void 0:s.data)==null?void 0:a.id)||"",text:((n=s==null?void 0:s.data)==null?void 0:n.text)||t}}async function $s(e,t,s,a){var r,o;const n={text:t};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function $sReply(e,t,parentId,s){var r,o;const n={text:t,reply:{in_reply_to_tweet_id:parentId}};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function kn(e){var s,a,n,i;if(!e)throw new $("credentials未設定",0,"missing_credentials");if(!((s=e.consumerKey)!=null&&s.trim()))throw new $("API Key未設定",0,"missing_credentials");if(!((a=e.consumerSecret)!=null&&a.trim()))throw new $("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new $("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new $("Access Token Secret未設定",0,"missing_token");const t=await $t("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Ft(e,t,s){var o,d;let a=((s==null?void 0:s.apiKey)??e.X_API_KEY??"").trim();let n=((s==null?void 0:s.apiSecret)??e.X_API_SECRET??"").trim();if((!a||!n)&&e.DB&&t&&t.user_id){try{const row=await e.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.user_id).first();if(row){if(!a&&row.api_key){try{a=(await At(row.api_key,e.ENCRYPTION_KEY)).trim()}catch{}}if(!n&&row.api_secret){try{n=(await At(row.api_secret,e.ENCRYPTION_KEY)).trim()}catch{}}}}catch{}}if(!a||!n)throw new $("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new $("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new $("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await At(t.access_token,e.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await At(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new $("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:a,consumerSecret:n,accessToken:i,accessTokenSecret:r}}
 const xMU_URL="https://upload.twitter.com/1.1/media/upload.json";
 async function xMU_oauth(method,url,creds,bodyParams){
   const oa={oauth_consumer_key:creds.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:creds.accessToken,oauth_version:"1.0"};
