@@ -231,15 +231,17 @@ html, body { font-size: 14px; }
 .border-brand-800\/40{border-color:#E5E7EB}
 .bg-surface-raised\/80{background:rgba(248,250,252,.95)}
 .brand-logo{background:linear-gradient(135deg,#1E40AF,#2563EB)}
-/* 管理画面 中央寄せ強制 */
+/* 管理画面 中央寄せ強制 + 幅を狭める */
 body.admin-body{background:#F1F5F9}
 body.admin-body .min-h-screen{max-width:100%;margin:0 auto}
 body.admin-body header > div,
 body.admin-body nav > div,
 body.admin-body main{margin-left:auto!important;margin-right:auto!important;width:100%}
-body.admin-body main{max-width:80rem!important;padding-left:1.5rem;padding-right:1.5rem}
+body.admin-body main{max-width:64rem!important;padding-left:1.5rem;padding-right:1.5rem}
 body.admin-body header > div,
-body.admin-body nav > div{max-width:80rem;padding-left:1.5rem;padding-right:1.5rem}
+body.admin-body nav > div{max-width:64rem;padding-left:1.5rem;padding-right:1.5rem}
+body.admin-body nav{border-bottom:1px solid #E5E7EB}
+body.admin-body section{max-width:64rem;margin:0 auto}
 .tab-trigger{padding:.55rem 1rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab-trigger:hover{color:#1E40AF;background:#F1F5F9}
 .tab-trigger.active{color:#1E40AF;border-bottom-color:#2563EB;background:#EFF6FF}
@@ -1625,14 +1627,38 @@ async function bulkDel() {
 async function postNow(id) {
   const r = await fetch('/api/admin/posts/' + id + '/post-now', { method: 'POST', headers:{'content-type':'application/json'}, body: '{}' });
   const j = await r.json();
-  if (j.success) { toast('投稿しました', 'ok'); location.reload(); }
+  if (j.success) { toast('投稿しました', 'ok'); setTimeout(()=>location.reload(), 800); }
   else toast('失敗: ' + (j.error||''), 'err');
 }
+window.postNow = postNow;
 async function delPost(id) {
   if (!confirm('削除しますか?')) return;
-  await fetch('/api/admin/posts/' + id, { method: 'DELETE' });
-  location.reload();
+  const r = await fetch('/api/admin/posts/' + id, { method: 'DELETE' });
+  const j = await r.json().catch(()=>({success:true}));
+  if (j.success !== false) { toast('削除しました', 'ok'); setTimeout(()=>location.reload(), 600); }
+  else toast('削除失敗: ' + (j.error||''), 'err');
 }
+window.delPost = delPost;
+window.checkAll = function(checked) {
+  document.querySelectorAll('.post-chk').forEach(c => c.checked = checked);
+  updateBulk();
+};
+window.updateBulk = function() {
+  const n = document.querySelectorAll('.post-chk:checked').length;
+  const btn = document.getElementById('bulk-del-btn');
+  if (btn) btn.disabled = n === 0;
+};
+window.bulkDel = async function() {
+  const ids = [...document.querySelectorAll('.post-chk:checked')].map(c => c.value);
+  if (!ids.length) return;
+  if (!confirm(ids.length + '件を削除しますか?')) return;
+  await Promise.all(ids.map(id => fetch('/api/admin/posts/' + id, { method:'DELETE' })));
+  toast(ids.length + '件を削除しました', 'ok');
+  setTimeout(()=>location.reload(), 600);
+};
+window.dlExportPosts = function() {
+  location.href = '/api/admin/export/posts.csv';
+};
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 function statusPill(s) {
   const map = {pending:'pill-warn',approved:'pill-blue',publishing:'pill-blue',posted:'pill-ok',failed:'pill-err',cancelled:'pill-soft'};
@@ -1652,8 +1678,10 @@ function statusPill(s) {
     </div>
     <div class="flex items-center gap-2 flex-wrap">
       <button class="btn btn-ghost" onclick="loadRecent()"><i class="fas fa-rotate"></i>直近の投稿を取得</button>
-      <span class="text-xs text-ink-muted">または</span>
-      <input type="text" id="th-target-id" class="inp" style="width:20rem;font-family:monospace" placeholder="x post_id を直接入力" oninput="updateTarget()">
+      <select id="th-target-pick" class="inp" style="width:30rem;display:none" onchange="onPickTarget(this.value)">
+        <option value="">— 直近の投稿から選択 —</option>
+      </select>
+      <input type="hidden" id="th-target-id" value="">
     </div>
     <div id="th-target-info" class="mt-3">
       <div class="text-xs text-red-600"><i class="fas fa-triangle-exclamation"></i> コメント先が未選択です</div>
@@ -1724,18 +1752,37 @@ function renumber() {
   });
 }
 function loadRecent() {
-  fetch('/api/admin/logs/posts?status=success').then(r => r.json()).then(j => {
-    const p = (j.logs || []).find(x => x.tweet_id);
-    if (p && p.tweet_id) {
-      document.getElementById('th-target-id').value = p.tweet_id;
-      updateTarget();
-      toast('直近の投稿IDを取得しました','ok');
-    } else {
-      toast('直近の投稿が見つかりません','err');
+  const sel = document.getElementById('th-target-pick');
+  if (sel) sel.innerHTML = '<option value="">読込中...</option>';
+  fetch('/api/admin/logs/posts?status=posted').then(r => r.json()).then(j => {
+    const items = (j.logs || []).filter(x => x.external_post_id || x.tweet_id).slice(0, 30);
+    if (!sel) return;
+    if (!items.length) {
+      sel.innerHTML = '<option value="">— 投稿済みの記事が見つかりません —</option>';
+      sel.style.display = '';
+      toast('投稿済み記事が見つかりません','err');
+      return;
     }
+    sel.innerHTML = '<option value="">— 直近の投稿から選択 ('+items.length+'件) —</option>' +
+      items.map(it => {
+        const id = it.external_post_id || it.tweet_id;
+        const acct = it.joined_account_name || it.x_username || '';
+        const txt = (it.content || '').slice(0, 40).replace(/\\n/g,' ').replace(/</g,'&lt;');
+        const dt = (it.posted_at || it.created_at || '').slice(5, 16);
+        return '<option value="' + id + '">[' + dt + '] @' + acct + ': ' + txt + '...</option>';
+      }).join('');
+    sel.style.display = '';
+    toast('直近 ' + items.length + ' 件を取得しました','ok');
+  }).catch(e => {
+    if (sel) sel.innerHTML = '<option value="">— 取得失敗 —</option>';
+    toast('取得失敗: ' + e.message, 'err');
   });
 }
 window.loadRecent = loadRecent;
+window.onPickTarget = function(id) {
+  document.getElementById('th-target-id').value = id || '';
+  updateTarget();
+};
 
 // 返信アイテムごとの添付メディア
 function thRenderItemMedia(item){
@@ -1817,7 +1864,42 @@ window.saveDraft = saveDraft;
 function previewThread() {
   const d = collect(); if (!d) return;
   const total = d.tweets.reduce((a,t)=>a+(t.media_ids||[]).length,0);
-  toast(d.tweets.length+'件の返信 / 添付'+total+'件','info');
+
+  // 既存のプレビュー要素を削除
+  const old = document.getElementById('th-preview-modal');
+  if (old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'th-preview-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
+
+  const safeId = (d.target_tweet_id || '').replace(/[^0-9a-zA-Z]/g, '');
+  let html = '<div style="background:#fff;border-radius:.75rem;max-width:42rem;width:100%;padding:1.5rem;margin:2rem auto;position:relative">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">';
+  html += '<h3 style="font-size:1.1rem;font-weight:700"><i class="fas fa-eye"></i> ツリー投稿プレビュー</h3>';
+  html += '<button onclick="document.getElementById(\\'th-preview-modal\\').remove()" type="button" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:1.25rem"><i class="fas fa-xmark"></i></button>';
+  html += '</div>';
+  html += '<div style="font-size:.8rem;color:#6B7280;margin-bottom:.75rem">コメント先 ID: <code style="background:#F3F4F6;padding:.1rem .35rem;border-radius:.25rem">' + safeId + '</code> / 返信 ' + d.tweets.length + ' 件 / 添付 ' + total + ' 件</div>';
+
+  d.tweets.forEach((t, i) => {
+    html += '<div style="position:relative;padding:.85rem 1rem;border:1px solid #E5E7EB;border-radius:.5rem;margin-bottom:.6rem;background:#F9FAFB">';
+    html += '<div style="font-size:.7rem;color:#2563EB;font-weight:700;margin-bottom:.35rem">返信 ' + (i+1) + '</div>';
+    const txt = (t.body || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\\n/g,'<br>');
+    html += '<div style="font-size:.92rem;line-height:1.55;color:#1F2937;white-space:pre-line">' + txt + '</div>';
+    html += '<div style="font-size:.7rem;color:#9CA3AF;margin-top:.4rem">' + (t.body||'').length + ' 文字' + ((t.media_ids||[]).length > 0 ? ' / メディア ' + t.media_ids.length + ' 件添付' : '') + '</div>';
+    html += '</div>';
+    if (i < d.tweets.length - 1) {
+      html += '<div style="text-align:center;color:#9CA3AF;margin:-.2rem 0 .2rem"><i class="fas fa-arrow-down"></i></div>';
+    }
+  });
+
+  html += '<div style="display:flex;justify-content:flex-end;margin-top:1rem;padding-top:.75rem;border-top:1px solid #E5E7EB">';
+  html += '<button type="button" onclick="document.getElementById(\\'th-preview-modal\\').remove()" class="btn btn-primary">閉じる</button>';
+  html += '</div>';
+  html += '</div>';
+
+  modal.innerHTML = html;
+  document.body.appendChild(modal);
 }
 window.previewThread = previewThread;
 
@@ -2022,20 +2104,22 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         const textColor = col===0?'#ef4444':col===6?'#2563EB':'var(--ink)';
         const cursor = isCurrentMonth ? 'cursor:pointer;' : '';
         const click = isCurrentMonth ? ' onclick="scOpenDay(\\''+dateStr+'\\')"' : '';
-        html += '<div'+click+' style="position:relative;min-height:5.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
+        html += '<div'+click+' style="position:relative;min-height:9rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
         if (isCurrentMonth) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">';
           html += '<span style="font-size:.8rem;font-weight:'+(isToday?'700':'400')+';color:'+textColor+'">' + day + '</span>';
           html += '<button type="button" onclick="event.stopPropagation();scNewAP(\\''+dateStr+'\\')" title="この日にオートパイロット新規作成" style="background:#F3F4F6;border:1px solid var(--line);border-radius:.25rem;padding:0 .35rem;font-size:.7rem;color:#6B7280;cursor:pointer;line-height:1.2"><i class="fas fa-plus"></i></button>';
           html += '</div>';
           if (posts.length > 0) html += '<div style="margin-bottom:2px"><span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'件</span></div>';
-          posts.slice(0,3).forEach(p => {
+          posts.slice(0,10).forEach(p => {
             const color = p.status==='posted'?'#065F46':p.status==='failed'?'#991B1B':'#1D4ED8';
             const bg = p.status==='posted'?'#ECFDF5':p.status==='failed'?'#FEF2F2':p.source_type==='autopilot'?'#FEF3C7':'#EFF6FF';
             const label = p.source_type==='autopilot' ? '[AP] ' : '';
-            html += '<div style="background:'+bg+';color:'+color+';font-size:.65rem;padding:2px 4px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + label + ((p.body||'').slice(0,16)||'投稿') + '</div>';
+            // 時刻 HH:MM (4桁) を抽出
+            const timeStr = (p.scheduled_at||'').slice(11,16) || '--:--';
+            html += '<div style="background:'+bg+';color:'+color+';font-size:.65rem;padding:1px 3px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.25" title="'+timeStr+' '+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + '<span style="font-weight:700;font-family:monospace">' + timeStr + '</span> ' + label + '</div>';
           });
-          if (posts.length > 3) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-3) + '件</div>';
+          if (posts.length > 10) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-10) + '件</div>';
         }
         html += '</div>';
         day++;
@@ -2396,7 +2480,7 @@ async function submitApJob() {
   try {
     const r = await fetch('/api/admin/autopilot/jobs', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
     const j = await r.json();
-    if (j.success) { toast('作成しました','ok'); setTimeout(()=>location.reload(), 600); }
+    if (j.success) { toast('作成しました','ok'); closeApModal(); setTimeout(()=>location.reload(), 600); }
     else toast('失敗: '+(j.error||''),'err');
   } catch(e) { toast('エラー: '+e.message,'err'); }
 }
@@ -3528,9 +3612,9 @@ ${Rt[e.patternType].instruction}`);let n=`テーマ: ${e.theme||""}${e.keywords?
 140文字以内のX投稿を作成。簡潔かつインパクト重視。ハッシュタグは含めない。`:n+=`
 X投稿用のフル文章を作成。読みやすく改行を入れる。ハッシュタグは含めない。`,e.cta&&(n+=`
 CTA: ${e.cta}`),e.userInput&&(n+=`
-追加指示: ${e.userInput}`);const i=t+a+s;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}async function Hs(e,t,s,a,n,i="body"){const{messages:r}=Ps({theme:t,keywords:s,brandVoice:n,targetDna:a,postMode:i||"body"}),o=await qs(r,{apiKey:e,temperature:.8});return bt(o,i)}async function Us(e,t,s,a,n,i,r="body"){if(!Rt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Ps({theme:s,keywords:a,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await qs(o,{apiKey:e,temperature:.8});return bt(d,r)}function bt(e,t){if(!e)return"";let s=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"・").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
+追加指示: ${e.userInput}`);const i=t+a+s;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}async function Hs(e,t,s,a,n,i="body"){const{messages:r}=Ps({theme:t,keywords:s,brandVoice:n,targetDna:a,postMode:i||"body"}),o=await qs(r,{apiKey:e,temperature:.8});return bt(o,i)}async function Us(e,t,s,a,n,i,r="body"){if(!Rt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Ps({theme:s,keywords:a,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await qs(o,{apiKey:e,temperature:.8});return bt(d,r)}function bt(e,t){if(!e)return"";let s=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
 
-`).trim();return s=jn(s),t==="140"&&s.length>140&&(s=s.slice(0,137)+"..."),s}function jn(e){if(!e)return"";const t=e.split(`
+`).trim();return s=insertBreaks20(s),s=jn(s),t==="140"&&s.length>140&&(s=s.slice(0,137)+"..."),s}function insertBreaks20(text){if(!text)return"";const lines=text.split("\n");const out=[];for(const ln of lines){if(!ln.trim()){out.push(ln);continue;}if(/^https?:\/\//.test(ln.trim())||/^#/.test(ln.trim())){out.push(ln);continue;}let buf="";let cnt=0;for(let i=0;i<ln.length;i++){const ch=ln[i];buf+=ch;cnt++;if(cnt>=18&&i<ln.length-1){const next=ln[i+1];if(/[、。！？，．,.!?\s]/.test(ch)||/[「『（(]/.test(next)){out.push(buf);buf="";cnt=0;}else if(cnt>=24){out.push(buf);buf="";cnt=0;}}}if(buf)out.push(buf);}return out.join("\n");}function jn(e){if(!e)return"";const t=e.split(`
 `).length,s=e.replace(/\n/g,"").length;if(t>3||s<40)return e;const a=e.split(new RegExp("(?<=[。！？!?\\n])","g")).filter(r=>r.trim());if(a.length<=1)return e;let n="",i=0;for(let r=0;r<a.length;r++){const o=a[r].trim();if(o){if(/^https?:\/\//.test(o)||/^#/.test(o)||/^@/.test(o)){n&&!n.endsWith(`
 `)&&(n+=`
 `),n+=o,i=0;continue}n+=o,i++,i>=2&&r<a.length-1?(n+=`
@@ -3653,10 +3737,10 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
       ORDER BY COALESCE(aj.generate_at, aj.publish_at, aj.created_at) DESC LIMIT 100`).bind(t.id).all(),{results:a}=await e.env.DB.prepare("SELECT id, account_name FROM x_accounts WHERE user_id = ? AND is_active = 1").bind(t.id).all();return e.json({jobs:s||[],accounts:a||[]})});ve.get("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).first();return s?e.json(s):e.json({error:"not found"})});ve.post("/api/admin/autopilot/jobs",m,async e=>{const t=e.get("user"),s=await e.req.json(),a=g(),n=(s.publish_at||s.generate_at||a).slice(0,10),i=await e.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM autopilot_jobs
        WHERE user_id=? AND account_id=?
          AND SUBSTR(COALESCE(publish_at, generate_at, created_at), 1, 10)=?
-         AND status NOT IN ('cancelled')`).bind(t.id,s.account_id||0,n).first();if(((i==null?void 0:i.cnt)??0)>=10)return e.json({success:!1,error:"この日は既に10件の予約があります"});const r=await e.env.DB.prepare("SELECT MAX(CAST(reservation_no AS INTEGER)) AS mx FROM autopilot_jobs").first(),o=String(((r==null?void 0:r.mx)??0)+1).padStart(4,"0");let d=s.generate_at??null;if(s.publish_at&&!s.generate_at)try{const p=new Date(s.publish_at.replace(" ","T"));p.setMinutes(p.getMinutes()-2),d=p.toISOString().replace("T"," ").slice(0,19)}catch{}const l=d||s.publish_at?"configured":"draft";let optsJson=s.options_json||"{}";try{const o2=typeof optsJson==="string"?JSON.parse(optsJson):optsJson;if(Array.isArray(s.media_ids)&&s.media_ids.length>0)o2.media_ids=s.media_ids.slice(0,4);optsJson=JSON.stringify(o2)}catch{if(Array.isArray(s.media_ids)&&s.media_ids.length>0)optsJson=JSON.stringify({media_ids:s.media_ids.slice(0,4)})}const c=await e.env.DB.prepare(`INSERT INTO autopilot_jobs
+         AND status NOT IN ('cancelled')`).bind(t.id,s.account_id||0,n).first();if(((i==null?void 0:i.cnt)??0)>=10)return e.json({success:!1,error:"この日は既に10件の予約があります"});const r=await e.env.DB.prepare("SELECT MAX(CAST(reservation_no AS INTEGER)) AS mx FROM autopilot_jobs").first(),o=String(((r==null?void 0:r.mx)??0)+1).padStart(4,"0");let d=s.generate_at??null;if(s.publish_at&&!s.generate_at)try{const p=new Date(s.publish_at.replace(" ","T")+"+09:00");p.setMinutes(p.getMinutes()-2);const pad=n=>String(n).padStart(2,"0");d=p.getFullYear()+"-"+pad(p.getMonth()+1)+"-"+pad(p.getDate())+" "+pad(p.getHours())+":"+pad(p.getMinutes())+":"+pad(p.getSeconds())}catch{}const l=d||s.publish_at?"configured":"draft";let optsJson=s.options_json||"{}";try{const o2=typeof optsJson==="string"?JSON.parse(optsJson):optsJson;if(Array.isArray(s.media_ids)&&s.media_ids.length>0)o2.media_ids=s.media_ids.slice(0,4);optsJson=JSON.stringify(o2)}catch{if(Array.isArray(s.media_ids)&&s.media_ids.length>0)optsJson=JSON.stringify({media_ids:s.media_ids.slice(0,4)})}const c=await e.env.DB.prepare(`INSERT INTO autopilot_jobs
        (reservation_no, user_id, account_id, channel_type, content_mode, theme, keywords,
         prompt_text, options_json, title_memo, link_url, generate_at, publish_at, status, created_at, updated_at)
-     VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",optsJson,s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T"));o.setMinutes(o.getMinutes()-2),i=o.toISOString().replace("T"," ").slice(0,19)}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
+     VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",optsJson,s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T")+"+09:00");o.setMinutes(o.getMinutes()-2);const pad=n=>String(n).padStart(2,"0");i=o.getFullYear()+"-"+pad(o.getMonth()+1)+"-"+pad(o.getDate())+" "+pad(o.getHours())+":"+pad(o.getMinutes())+":"+pad(o.getSeconds())}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
        content_mode=?, theme=?, keywords=?, prompt_text=?, options_json=?, title_memo=?,
        link_url=?, generate_at=?, publish_at=?, status=?, updated_at=?
      WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
