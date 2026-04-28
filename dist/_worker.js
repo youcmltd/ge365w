@@ -1497,20 +1497,53 @@ window.filterPosts = function(btn, st) {
     tr.style.display = (!allow || allow.includes(s)) ? '' : 'none';
   });
 };
-window.openSchedRowModal = async function(postId) {
-  const dt = prompt('この投稿の予約日時を入力してください\\n形式: YYYY-MM-DD HH:MM\\n例: 2026-04-28 09:30');
-  if (!dt) return;
-  const trimmed = dt.trim();
-  if (!/^\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}/.test(trimmed)) { toast('日時の形式が正しくありません','err'); return; }
-  const scheduledAt = trimmed.replace('T',' ') + (trimmed.length===16?':00':'');
+window.openSchedRowModal = function(postId) {
+  // 既存モーダルを削除
+  const old = document.getElementById('row-sched-modal');
+  if (old) old.remove();
+
+  // 1時間後をデフォルト値に
+  const d = new Date(Date.now() + 60*60*1000);
+  const pad = n => String(n).padStart(2,'0');
+  const def = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+
+  const modal = document.createElement('div');
+  modal.id = 'row-sched-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:.75rem;max-width:28rem;width:100%;padding:1.5rem;margin:5rem auto;position:relative">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">' +
+        '<h3 style="font-size:1.05rem;font-weight:700"><i class="fas fa-calendar-plus"></i> 予約日時を設定</h3>' +
+        '<button onclick="document.getElementById(\\'row-sched-modal\\').remove()" type="button" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:1.25rem"><i class="fas fa-xmark"></i></button>' +
+      '</div>' +
+      '<div style="font-size:.82rem;color:#6B7280;margin-bottom:.75rem">投稿ID: <code style="background:#F3F4F6;padding:.1rem .35rem;border-radius:.25rem">' + postId + '</code></div>' +
+      '<div style="margin-bottom:1rem">' +
+        '<label class="field-label">予約日時 <span style="color:#dc2626">*</span></label>' +
+        '<input type="datetime-local" id="row-sched-when" class="inp" value="' + def + '">' +
+      '</div>' +
+      '<div style="display:flex;gap:.5rem;justify-content:flex-end">' +
+        '<button type="button" class="btn btn-ghost" onclick="document.getElementById(\\'row-sched-modal\\').remove()">キャンセル</button>' +
+        '<button type="button" class="btn btn-primary" onclick="submitRowSched(' + postId + ')"><i class="fas fa-check"></i>予約登録</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+};
+
+window.submitRowSched = async function(postId) {
+  const dt = document.getElementById('row-sched-when').value;
+  if (!dt) { toast('予約日時を選択してください','err'); return; }
+  const scheduledAt = dt.replace('T',' ') + ':00';
   try {
     const r = await fetch('/api/admin/posts/'+postId+'/schedule', {
       method:'POST', headers:{'content-type':'application/json'},
       body: JSON.stringify({scheduled_at: scheduledAt})
     });
     const j = await r.json();
-    if (j.success) { toast('予約しました ('+(j.effective_scheduled_at||scheduledAt)+')','ok'); setTimeout(()=>location.reload(),900); }
-    else toast('予約失敗: '+(j.error||''),'err');
+    if (j.success) {
+      toast('予約しました ('+(j.effective_scheduled_at||scheduledAt)+')','ok');
+      document.getElementById('row-sched-modal').remove();
+      setTimeout(()=>location.reload(),900);
+    } else toast('予約失敗: '+(j.error||''),'err');
   } catch(e) { toast('エラー: '+e.message,'err'); }
 };
 window.openSchedModal = function() {
@@ -1754,8 +1787,8 @@ function renumber() {
 function loadRecent() {
   const sel = document.getElementById('th-target-pick');
   if (sel) sel.innerHTML = '<option value="">読込中...</option>';
-  fetch('/api/admin/logs/posts?status=posted').then(r => r.json()).then(j => {
-    const items = (j.logs || []).filter(x => x.external_post_id || x.tweet_id).slice(0, 30);
+  fetch('/api/admin/thread/recent-posts').then(r => r.json()).then(j => {
+    const items = (j.posts || []).filter(x => x.external_post_id).slice(0, 30);
     if (!sel) return;
     if (!items.length) {
       sel.innerHTML = '<option value="">— 投稿済みの記事が見つかりません —</option>';
@@ -1765,8 +1798,8 @@ function loadRecent() {
     }
     sel.innerHTML = '<option value="">— 直近の投稿から選択 ('+items.length+'件) —</option>' +
       items.map(it => {
-        const id = it.external_post_id || it.tweet_id;
-        const acct = it.joined_account_name || it.x_username || '';
+        const id = it.external_post_id;
+        const acct = it.x_username || it.joined_account_name || '';
         const txt = (it.content || '').slice(0, 40).replace(/\\n/g,' ').replace(/</g,'&lt;');
         const dt = (it.posted_at || it.created_at || '').slice(5, 16);
         return '<option value="' + id + '">[' + dt + '] @' + acct + ': ' + txt + '...</option>';
@@ -2270,7 +2303,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
               <td class="text-xs">@${w(t.x_username||"-")}</td>
               <td><span class="pill pill-soft">${w(t.content_mode||"-")}</span></td>
               <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}</td>
-              <td><span class="pill ${t.status==="error"?"pill-err":t.status==="posted"?"pill-ok":"pill-blue"}">${w(t.status)}</span></td>
+              <td>${(()=>{const st=t.status||"";if(st==="posted"||st==="generated")return'<span class="pill pill-ok">投稿済</span>';if(st==="error"||st==="failed")return'<span class="pill pill-err">失敗</span>';if(st==="draft")return'<span class="pill pill-soft">下書保存</span>';return'<span class="pill pill-blue">未投稿</span>'})()}</td>
               <td class="text-right">
                 <button class="btn btn-danger btn-sm" onclick="delApJob(${t.id})"><i class="fas fa-trash"></i></button>
               </td>
@@ -3564,29 +3597,34 @@ const ge=new A;ge.get("/api/admin/accounts",m,async e=>{const t=e.get("user"),{r
            health_status = CASE WHEN account_health_score >= 80 THEN 'healthy' ELSE health_status END,
            updated_at=? WHERE id=?`).bind(i.id,i.username||null,g(),s).run(),e.json({success:!0,me:i})}catch(n){const i=n instanceof $?n.statusCode:0;return e.json({success:!1,error:n.message,status_code:i,error_type:n==null?void 0:n.errorType})}});ge.post("/api/admin/accounts/:id/current",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);return await e.env.DB.batch([e.env.DB.prepare("UPDATE x_accounts SET is_current=0 WHERE user_id=?").bind(t.id),e.env.DB.prepare("UPDATE x_accounts SET is_current=1, updated_at=? WHERE id=? AND user_id=?").bind(g(),s,t.id)]),e.json({success:!0})});ge.post("/api/admin/accounts/:id/toggle",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE x_accounts SET is_active = 1 - is_active, updated_at = ? WHERE id=? AND user_id=?").bind(g(),s,t.id).run(),e.json({success:!0})});ge.put("/api/admin/accounts/:id",m,async e=>{var r,o;const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=[],i=[];if(a.account_name&&(n.push("account_name=?"),i.push(a.account_name)),a.daily_post_limit!==void 0&&(n.push("daily_post_limit=?"),i.push(a.daily_post_limit)),(r=a.access_token)!=null&&r.trim()){const d=await _e(a.access_token.trim(),e.env.ENCRYPTION_KEY);n.push("access_token=?"),i.push(d)}if((o=a.access_token_secret)!=null&&o.trim()){const d=await _e(a.access_token_secret.trim(),e.env.ENCRYPTION_KEY);n.push("access_token_secret=?"),i.push(d)}return n.length===0?e.json({success:!1,error:"no_fields"}):(n.push("updated_at=?"),i.push(g(),s,t.id),await e.env.DB.prepare(`UPDATE x_accounts SET ${n.join(", ")} WHERE id=? AND user_id=?`).bind(...i).run(),e.json({success:!0}))});ge.delete("/api/admin/accounts/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM x_accounts WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});const Sn=["20代","30代","40代","50代"],Tn=["男性","女性"],Dn=["美容","健康","副業","投資","AI活用","ダイエット","お金"],An={美容:"老化・肌荒れ・見た目の変化",健康:"疲れやすい・体力低下・不調",副業:"時間がない・何から始めるか不明",投資:"勝てない・資産が増えない",AI活用:"手作業が多い・効率が悪い",ダイエット:"リバウンド・続かない",お金:"貯まらない・将来不安"},Rn={美容:"若々しくなりたい",健康:"元気に過ごしたい",副業:"収益化したい",投資:"安定して利益を出したい",AI活用:"業務を自動化したい",ダイエット:"理想の体型になりたい",お金:"経済的自由を得たい"},Fs=[];for(const e of Sn)for(const t of Tn)for(const s of Dn)Fs.push({key:`${e}_${t}_${s}`,label:`${e}${t}/${s}`,gender:t,age_range:e,genre:s,problem:An[s]||`${s}に悩んでいる`,goal:Rn[s]||`${s}で成果を出したい`,knowledge:"一般"});const On=[{key:"authority",label:"権威型",instruction:"専門家として断定的に、簡潔に、根拠を示して書く。"},{key:"empathy",label:"共感型",instruction:"読者の悩みに寄り添い、共感を起点に語りかけるように書く。"},{key:"provocative",label:"煽り型",instruction:"問題を鋭く突き、危機感を持たせる書き方にする。"},{key:"story",label:"ストーリー型",instruction:"体験談や変化の流れを感じさせる構成で書く。"},{key:"problem_raise",label:"問題提起型",instruction:"最初に課題を提示し、その原因と解決策を示す。"}],Rt={problem:{name:"問題提起型",instruction:`【問題提起型】
 1.冒頭で読者の痛みを突く質問
-2.具体的な3つの「あるある」
+2.具体的な状況を一つの自然な文として描写（箇条書きにせず、流れる日本語で）
 3.「実はそれ○○が原因」と核心
 4.解決の方向性
 5.CTAで次のステップへ
-※最後まで書き切ること`},before_after:{name:"ビフォーアフター型",instruction:`【変化が伝わる構成】
+※最後まで書き切ること
+※箇条書き(・,●,▪,•)は一切使わず、自然な日本語の文章のみで書く`},before_after:{name:"ビフォーアフター型",instruction:`【変化が伝わる構成】
 冒頭で過去の悩みや状態を自然に描写し、きっかけや行動を示し、現在の変化や成果を伝え、最後に学びや提案を入れてください。
 「Before:」「After:」のラベルを使わず、自然な語り口で変化のストーリーを伝えること。
-毎回異なる言い回し・展開にし、同じテンプレート構文を繰り返さないこと。`},contrarian:{name:"逆張り型",instruction:`【逆張り型】
+毎回異なる言い回し・展開にし、同じテンプレート構文を繰り返さないこと。
+※箇条書き(・,●,▪,•)は一切使わず、自然な日本語の文章のみで書く`},contrarian:{name:"逆張り型",instruction:`【逆張り型】
 1.「○○すべき」の常識提示
 2.「実は逆」とひっくり返す
 3.根拠
 4.代替案
-5.CTA`},howto:{name:"HowTo実演型",instruction:`【HowTo実演型】
+5.CTA
+※箇条書き(・,●,▪,•)は一切使わず、自然な日本語の文章のみで書く`},howto:{name:"HowTo実演型",instruction:`【HowTo実演型】
 1.「○○する方法」宣言
-2.Step1→2→3
+2.Step1→2→3を自然な文章で繋げて説明
 3.各ステップ具体例
 4.ワンポイント
-5.CTA`},numbers:{name:"数字インパクト型",instruction:`【数字インパクト型】
+5.CTA
+※箇条書き(・,●,▪,•)は一切使わず、自然な日本語の文章のみで書く`},numbers:{name:"数字インパクト型",instruction:`【数字インパクト型】
 1.冒頭にインパクト数字
 2.背景
 3.なぜその数字か
 4.読者が同じ結果を得る条件
-5.CTA`}};async function qs(e,t){var r,o,d;const s=t.model||"gpt-4o-mini",a=t.maxTokens||4e3,n=t.temperature??.7,i=t.baseUrl||"https://api.openai.com/v1";for(let l=1;l<=3;l++)try{const c=await fetch(`${i}/chat/completions`,{method:"POST",headers:{authorization:`Bearer ${t.apiKey}`,"content-type":"application/json"},body:JSON.stringify({model:s,messages:e,max_tokens:a,temperature:n}),signal:AbortSignal.timeout(12e4)});if(!c.ok){const _=await c.text();if(c.status>=500&&l<3){await new Promise(b=>setTimeout(b,2e3*l));continue}throw new Error(`OpenAI API error: ${c.status} ${_.slice(0,500)}`)}const p=await c.json();return((d=(o=(r=p==null?void 0:p.choices)==null?void 0:r[0])==null?void 0:o.message)==null?void 0:d.content)||""}catch(c){if(((c==null?void 0:c.name)==="TimeoutError"||(c==null?void 0:c.name)==="AbortError")&&l<3){await new Promise(_=>setTimeout(_,2e3*l));continue}throw c}return""}function Ps(e){let t=`以下のルールを厳守してX(Twitter)投稿文を生成してください。
+5.CTA
+※箇条書き(・,●,▪,•)は一切使わず、自然な日本語の文章のみで書く`}};async function qs(e,t){var r,o,d;const s=t.model||"gpt-4o-mini",a=t.maxTokens||4e3,n=t.temperature??.7,i=t.baseUrl||"https://api.openai.com/v1";for(let l=1;l<=3;l++)try{const c=await fetch(`${i}/chat/completions`,{method:"POST",headers:{authorization:`Bearer ${t.apiKey}`,"content-type":"application/json"},body:JSON.stringify({model:s,messages:e,max_tokens:a,temperature:n}),signal:AbortSignal.timeout(12e4)});if(!c.ok){const _=await c.text();if(c.status>=500&&l<3){await new Promise(b=>setTimeout(b,2e3*l));continue}throw new Error(`OpenAI API error: ${c.status} ${_.slice(0,500)}`)}const p=await c.json();return((d=(o=(r=p==null?void 0:p.choices)==null?void 0:r[0])==null?void 0:o.message)==null?void 0:d.content)||""}catch(c){if(((c==null?void 0:c.name)==="TimeoutError"||(c==null?void 0:c.name)==="AbortError")&&l<3){await new Promise(_=>setTimeout(_,2e3*l));continue}throw c}return""}function Ps(e){let t=`以下のルールを厳守してX(Twitter)投稿文を生成してください。
 `;if(e.brandVoice&&typeof e.brandVoice=="object"?(t+=`
 【ブランドボイス】
 `,e.brandVoice.tone&&(t+=`口調: ${e.brandVoice.tone}
@@ -3605,14 +3643,14 @@ const ge=new A;ge.get("/api/admin/accounts",m,async e=>{const t=e.get("user"),{r
 `),r.purchase_triggers&&(t+=`行動トリガー: ${r.purchase_triggers.replace(/\n/g," / ")}
 `),t+=`この読者が自然に反応する語彙・例えを使うこと。
 `}const s=`
-Markdown記号(#,##)禁止。見出しは「■」。番号リスト禁止。自然な文章で。箇条書きは「・」のみ。`;let a="";e.patternType&&Rt[e.patternType]&&(a=`
+Markdown記号(#,##)禁止。見出しは「■」。番号リスト禁止。箇条書き(・,●,▪,•など)は使わず、自然な日本語の文章のみで書く。AI生成っぽい定型文や羅列を避け、人間が書いたような流れる文章にする。`;let a="";e.patternType&&Rt[e.patternType]&&(a=`
 【投稿パターン（構造のみ）】
 ${Rt[e.patternType].instruction}`);let n=`テーマ: ${e.theme||""}${e.keywords?`
 キーワード: ${e.keywords}`:""}`;e.postMode==="140"?n+=`
 140文字以内のX投稿を作成。簡潔かつインパクト重視。ハッシュタグは含めない。`:n+=`
 X投稿用のフル文章を作成。読みやすく改行を入れる。ハッシュタグは含めない。`,e.cta&&(n+=`
 CTA: ${e.cta}`),e.userInput&&(n+=`
-追加指示: ${e.userInput}`);const i=t+a+s;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}async function Hs(e,t,s,a,n,i="body"){const{messages:r}=Ps({theme:t,keywords:s,brandVoice:n,targetDna:a,postMode:i||"body"}),o=await qs(r,{apiKey:e,temperature:.8});return bt(o,i)}async function Us(e,t,s,a,n,i,r="body"){if(!Rt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Ps({theme:s,keywords:a,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await qs(o,{apiKey:e,temperature:.8});return bt(d,r)}function bt(e,t){if(!e)return"";let s=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
+追加指示: ${e.userInput}`);const i=t+a+s;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}async function Hs(e,t,s,a,n,i="body"){const{messages:r}=Ps({theme:t,keywords:s,brandVoice:n,targetDna:a,postMode:i||"body"}),o=await qs(r,{apiKey:e,temperature:.8});return bt(o,i)}async function Us(e,t,s,a,n,i,r="body"){if(!Rt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Ps({theme:s,keywords:a,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await qs(o,{apiKey:e,temperature:.8});return bt(d,r)}function bt(e,t){if(!e)return"";let s=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•・\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
 
 `).trim();return s=insertBreaks20(s),s=jn(s),t==="140"&&s.length>140&&(s=s.slice(0,137)+"..."),s}function insertBreaks20(text){if(!text)return"";const lines=text.split("\n");const out=[];for(const ln of lines){if(!ln.trim()){out.push(ln);continue;}if(/^https?:\/\//.test(ln.trim())||/^#/.test(ln.trim())){out.push(ln);continue;}let buf="";let cnt=0;for(let i=0;i<ln.length;i++){const ch=ln[i];buf+=ch;cnt++;if(cnt>=18&&i<ln.length-1){const next=ln[i+1];if(/[、。！？，．,.!?\s]/.test(ch)||/[「『（(]/.test(next)){out.push(buf);buf="";cnt=0;}else if(cnt>=24){out.push(buf);buf="";cnt=0;}}}if(buf)out.push(buf);}return out.join("\n");}function jn(e){if(!e)return"";const t=e.split(`
 `).length,s=e.replace(/\n/g,"").length;if(t>3||s<40)return e;const a=e.split(new RegExp("(?<=[。！？!?\\n])","g")).filter(r=>r.trim());if(a.length<=1)return e;let n="",i=0;for(let r=0;r<a.length;r++){const o=a[r].trim();if(o){if(/^https?:\/\//.test(o)||/^#/.test(o)||/^@/.test(o)){n&&!n.endsWith(`
@@ -3826,6 +3864,38 @@ at.post("/api/admin/posts/:id/attach-media",m,async e=>{
   await e.env.DB.prepare("UPDATE post_queue SET media_json=?, media_type=?, updated_at=? WHERE id=? AND user_id=?").bind(JSON.stringify(mids.slice(0,4)),mediaType,g(),pid,t.id).run();
   return e.json({success:!0});
 });
+at.get("/api/admin/thread/recent-posts",m,async e=>{
+  const t=e.get("user");
+  const acctId=e.req.query("account_id");
+  const params=[t.id];
+  let acctCond="";
+  if(acctId){acctCond=" AND pq.account_id=?";params.push(Number(acctId))}
+  // post_queue から status='posted' AND external_post_id IS NOT NULL の最新30件
+  const{results:rq}=await e.env.DB.prepare(`SELECT pq.id, pq.body AS content, pq.external_post_id, pq.posted_at, pq.account_id,
+       xa.account_name AS joined_account_name, xa.x_username
+     FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id=xa.id
+    WHERE pq.user_id=? AND pq.status='posted' AND pq.external_post_id IS NOT NULL AND pq.external_post_id <> ''${acctCond}
+    ORDER BY COALESCE(pq.posted_at, pq.updated_at, pq.created_at) DESC LIMIT 30`).bind(...params).all();
+  // post_logs からも取得（重複は external_post_id で除外）
+  const params2=[t.id];
+  let acctCond2="";
+  if(acctId){acctCond2=" AND pl.account_id=?";params2.push(Number(acctId))}
+  const{results:rl}=await e.env.DB.prepare(`SELECT pl.id, pl.content, pl.external_post_id, pl.posted_at, pl.account_id,
+       xa.account_name AS joined_account_name, xa.x_username
+     FROM post_logs pl LEFT JOIN x_accounts xa ON pl.account_id=xa.id
+    WHERE pl.user_id=? AND pl.status='posted' AND pl.external_post_id IS NOT NULL AND pl.external_post_id <> ''${acctCond2}
+    ORDER BY COALESCE(pl.posted_at, pl.created_at) DESC LIMIT 30`).bind(...params2).all();
+  const seen=new Set();
+  const merged=[];
+  for(const r of[...(rq||[]),...(rl||[])]){
+    const eid=r.external_post_id;
+    if(!eid||seen.has(eid))continue;
+    seen.add(eid);
+    merged.push(r);
+  }
+  merged.sort((a,b)=>(b.posted_at||"").localeCompare(a.posted_at||""));
+  return e.json({posts:merged.slice(0,30)});
+});
 at.post("/api/admin/thread/post-now",m,async e=>{
   const t=e.get("user");
   const{target_tweet_id:tid,tweets:arr}=await e.req.json().catch(()=>({}));
@@ -3907,7 +3977,10 @@ at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e
        FROM kpi_metrics km LEFT JOIN x_accounts xa ON xa.id = km.account_id
        ${i} ORDER BY km.metric_date DESC, km.account_id ASC`).bind(...n).all();return e.json({metrics:r||[]})});Pt.get("/api/admin/kpi/summary",m,async e=>{const t=e.get("user"),s=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
        FROM kpi_metrics WHERE user_id = ? AND metric_date = date('now','+9 hours')`).bind(t.id).first(),a=await e.env.DB.prepare(`SELECT SUM(posts_sent) AS sent, SUM(posts_failed) AS failed
-       FROM kpi_metrics WHERE user_id = ? AND metric_date >= date('now','+9 hours','-7 days')`).bind(t.id).first();return e.json({today:{sent:(s==null?void 0:s.sent)??0,failed:(s==null?void 0:s.failed)??0},week:{sent:(a==null?void 0:a.sent)??0,failed:(a==null?void 0:a.failed)??0}})});const gt=new A;gt.get("/api/admin/logs/posts",m,async e=>{const t=e.get("user"),s=e.req.query("status"),a=e.req.query("account_id"),n=[t.id];let i="WHERE pl.user_id = ?";s&&s!=="all"&&(i+=" AND pl.status = ?",n.push(s)),a&&(i+=" AND pl.account_id = ?",n.push(Number(a)));const{results:r}=await e.env.DB.prepare(`SELECT pl.*, xa.account_name AS joined_account_name
+       FROM kpi_metrics WHERE user_id = ? AND metric_date >= date('now','+9 hours','-7 days')`).bind(t.id).first();return e.json({today:{sent:(s==null?void 0:s.sent)??0,failed:(s==null?void 0:s.failed)??0},week:{sent:(a==null?void 0:a.sent)??0,failed:(a==null?void 0:a.failed)??0}})});const gt=new A;gt.get("/api/admin/posts/recent-posted",m,async e=>{const t=e.get("user");const{results:r}=await e.env.DB.prepare(`SELECT pq.id, pq.body AS content, pq.external_post_id, pq.posted_at, pq.created_at, xa.x_username, xa.account_name AS joined_account_name
+       FROM post_queue pq LEFT JOIN x_accounts xa ON xa.id = pq.account_id
+       WHERE pq.user_id = ? AND pq.status='posted' AND pq.external_post_id IS NOT NULL AND pq.external_post_id != ''
+       ORDER BY COALESCE(pq.posted_at, pq.created_at) DESC LIMIT 30`).bind(t.id).all();return e.json({logs:r||[]})});gt.get("/api/admin/logs/posts",m,async e=>{const t=e.get("user"),s=e.req.query("status"),a=e.req.query("account_id"),n=[t.id];let i="WHERE pl.user_id = ?";s&&s!=="all"&&(i+=" AND pl.status = ?",n.push(s)),a&&(i+=" AND pl.account_id = ?",n.push(Number(a)));const{results:r}=await e.env.DB.prepare(`SELECT pl.*, xa.account_name AS joined_account_name
        FROM post_logs pl LEFT JOIN x_accounts xa ON pl.account_id = xa.id
        ${i} ORDER BY pl.id DESC LIMIT 300`).bind(...n).all();return e.json({logs:r||[]})});gt.get("/api/admin/logs/generations",m,async e=>{const t=e.get("user"),{results:s}=await e.env.DB.prepare(`SELECT gl.*, xa.account_name
        FROM generation_logs gl LEFT JOIN x_accounts xa ON gl.account_id = xa.id
