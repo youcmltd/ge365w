@@ -1413,7 +1413,6 @@ async function doGen2() {
     <button type="button" class="btn btn-sm xst-tab xst-active" data-st="all" onclick="filterPosts(this,'all')"><i class="fas fa-list"></i>すべて</button>
     <button type="button" class="btn btn-sm xst-tab" data-st="pending" onclick="filterPosts(this,'pending')"><i class="fas fa-clock"></i>未投稿</button>
     <button type="button" class="btn btn-sm xst-tab" data-st="posted" onclick="filterPosts(this,'posted')"><i class="fas fa-check"></i>投稿済</button>
-    <button type="button" class="btn btn-sm xst-tab" data-st="draft" onclick="filterPosts(this,'draft')"><i class="fas fa-file-pen"></i>下書き</button>
     <button type="button" class="btn btn-sm xst-tab" data-st="failed" onclick="filterPosts(this,'failed')"><i class="fas fa-triangle-exclamation"></i>失敗</button>
     <style>.xst-tab{background:#fff;border:1px solid var(--line);color:var(--ink-muted)}.xst-tab.xst-active{background:var(--accent);color:#fff;border-color:var(--accent)}</style>
   </div>
@@ -1486,10 +1485,9 @@ window.filterPosts = function(btn, st) {
   btn.classList.add('xst-active');
   const map = {
     all: null,
-    pending: ['pending','approved','publishing'],
+    pending: ['pending','approved','publishing','draft'],
     posted: ['posted'],
-    draft: ['draft'],
-    failed: ['failed','rejected'],
+    failed: ['failed','rejected','error'],
   };
   const allow = map[st];
   document.querySelectorAll('tr.post-row').forEach(tr => {
@@ -2173,22 +2171,24 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         const textColor = col===0?'#ef4444':col===6?'#2563EB':'var(--ink)';
         const cursor = isCurrentMonth ? 'cursor:pointer;' : '';
         const click = isCurrentMonth ? ' onclick="scOpenDay(\\''+dateStr+'\\')"' : '';
-        html += '<div'+click+' style="position:relative;min-height:9rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
+        html += '<div'+click+' style="position:relative;min-height:11rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
         if (isCurrentMonth) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">';
           html += '<span style="font-size:.8rem;font-weight:'+(isToday?'700':'400')+';color:'+textColor+'">' + day + '</span>';
           html += '<button type="button" onclick="event.stopPropagation();scNewAP(\\''+dateStr+'\\')" title="この日にオートパイロット新規作成" style="background:#F3F4F6;border:1px solid var(--line);border-radius:.25rem;padding:0 .35rem;font-size:.7rem;color:#6B7280;cursor:pointer;line-height:1.2"><i class="fas fa-plus"></i></button>';
           html += '</div>';
           if (posts.length > 0) html += '<div style="margin-bottom:2px"><span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'件</span></div>';
-          posts.slice(0,10).forEach(p => {
+          // 縦5×横4=20件まで表示。グリッド2列で密度を高める
+          html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px">';
+          posts.slice(0,20).forEach(p => {
             const color = p.status==='posted'?'#065F46':p.status==='failed'?'#991B1B':'#1D4ED8';
             const bg = p.status==='posted'?'#ECFDF5':p.status==='failed'?'#FEF2F2':p.source_type==='autopilot'?'#FEF3C7':'#EFF6FF';
-            const label = p.source_type==='autopilot' ? '[AP] ' : '';
-            // 時刻 HH:MM (4桁) を抽出
+            const label = p.source_type==='autopilot' ? '[AP]' : '';
             const timeStr = (p.scheduled_at||'').slice(11,16) || '--:--';
-            html += '<div style="background:'+bg+';color:'+color+';font-size:.65rem;padding:1px 3px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.25" title="'+timeStr+' '+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + '<span style="font-weight:700;font-family:monospace">' + timeStr + '</span> ' + label + '</div>';
+            html += '<div style="background:'+bg+';color:'+color+';font-size:.6rem;padding:1px 3px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2" title="'+timeStr+' '+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + '<span style="font-weight:700;font-family:monospace">' + timeStr + '</span> ' + label + '</div>';
           });
-          if (posts.length > 10) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-10) + '件</div>';
+          html += '</div>';
+          if (posts.length > 20) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-20) + '件</div>';
         }
         html += '</div>';
         day++;
@@ -3742,10 +3742,10 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
 `)}}return n.replace(/\n{3,}/g,`
 
 `).trim()}const In=new TextEncoder;async function Ae(e){const t=await crypto.subtle.digest("SHA-256",In.encode(e||""));return[...new Uint8Array(t)].slice(0,8).map(a=>a.toString(16).padStart(2,"0")).join("")}function Ot(e){const t=(e||"").replace(/\s+/g,"").slice(0,2e3),s=new Set;for(let a=0;a<t.length-1;a++)s.add(t.slice(a,a+2));return s}function Ws(e,t){const s=Ot(e),a=Ot(t);if(s.size===0&&a.size===0)return 0;let n=0;for(const r of s)a.has(r)&&n++;const i=s.size+a.size-n;return i===0?0:n/i}const Cn=120*1e3;async function Ys(e,t){const s=new Date().toISOString(),a=new Date(Date.now()-Cn).toISOString(),n=await e.DB.prepare("SELECT account_id, locked_at FROM post_locks WHERE account_id = ?").bind(t).first();return n&&n.locked_at>a?!1:(await e.DB.prepare(`INSERT INTO post_locks (account_id, locked_at) VALUES (?, ?)
-     ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,s).run(),!0)}async function Js(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function Ks(e,t,s,a,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),r.last_posted_at){const c=Date.parse(r.last_posted_at.replace(" ","T")+"+09:00");if(!Number.isNaN(c)){const p=(Date.now()-c)/6e4;p<15&&i.errors.push({code:"too_frequent",message:`前回投稿から ${Math.floor(p)} 分しか経過していません（最低 15 分）`,overridable:!0})}}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
-       WHERE account_id = ? AND status IN ('posted','approved','publishing')
+     ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,s).run(),!0)}async function Js(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function Ks(e,t,s,a,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),0){}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
+       WHERE account_id = ? AND status = 'posted'
        ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC
-       LIMIT 5`).bind(t).all();for(const c of l||[]){const p=Ws(s,c.body||"");if(p>=.7){i.errors.push({code:"too_similar",message:`過去投稿 (ID: ${c.id}) と類似度 ${p.toFixed(2)} で重複`});break}}if(a){const c=await e.DB.prepare(`SELECT COUNT(*) AS n FROM post_queue
+       LIMIT 5`).bind(t).all();for(const c of l||[]){const p=Ws(s,c.body||"");if(p>=.98){i.errors.push({code:"too_similar",message:`過去投稿 (ID: ${c.id}) と完全に同一の文章です`});break}}if(a){const c=await e.DB.prepare(`SELECT COUNT(*) AS n FROM post_queue
         WHERE account_id = ? AND link_url = ? AND status IN ('posted','approved','publishing')
           AND DATE(COALESCE(posted_at, scheduled_at, created_at)) >= DATE('now','+9 hours','-7 days')`).bind(t,a).first();((c==null?void 0:c.n)??0)>=3&&i.errors.push({code:"link_spam",message:`同一リンクを過去7日で${c==null?void 0:c.n}回使用しています`})}if(n){const c=es(n);if(c.size>0){const{results:p}=await e.DB.prepare(`SELECT hashtags FROM post_queue
            WHERE account_id = ? AND status IN ('posted','approved','publishing') AND hashtags IS NOT NULL AND hashtags != ''
@@ -3757,7 +3757,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
          AND status NOT IN ('cancelled','rejected','failed')
          AND COALESCE(effective_scheduled_at, scheduled_at) IS NOT NULL
          AND datetime(COALESCE(effective_scheduled_at, scheduled_at)) >= datetime(?, '-1 hours')
-         AND datetime(COALESCE(effective_scheduled_at, scheduled_at)) <= datetime(?, '+1 hours')`;s.exclude_id&&(v+=" AND id != ?",b.push(s.exclude_id)),v+=" ORDER BY sat ASC";const{results:T}=await e.DB.prepare(v).bind(...b).all();let E=!0,D=0;for(;E&&D<30;){E=!1;for(const k of T||[]){const N=ts(k.sat),P=Math.abs(o-N)/1e3;if(P<r){const L=(r-P+1)*1e3*(o>=N?1:-1);o+=L,l+=Math.floor(L/1e3),E=!0}}D++}}const c=ss(o);return{effective_at:c,audit:{base_at:t,effective_at:c,jitter_applied_seconds:d,collision_adjusted_seconds:l,ruleset:{jitter_enabled:a,jitter_minutes:n,collision_avoidance_enabled:i,min_spacing_seconds:r}}}}async function Nn(e,t,s,a){await e.DB.prepare("INSERT INTO schedule_audits (post_id, account_id, audit_json) VALUES (?, ?, ?)").bind(t,s??null,JSON.stringify(a)).run()}const Ln=.7;async function Mn(e){const t=[...Ot(e)].slice(0,200),s=await Ae(e);return JSON.stringify({bigrams:t,content_hash:s})}async function $n(e,t,s,a){await e.DB.prepare("INSERT INTO post_fingerprints (post_id, account_id, fingerprint) VALUES (?, ?, ?)").bind(t,s??null,a).run()}async function Fn(e,t,s,a={}){const n={pass:!0,blocked_reason:null,scores:[]};if(!t||!s)return n;const i=[s];let r=`SELECT id, body FROM post_queue
+         AND datetime(COALESCE(effective_scheduled_at, scheduled_at)) <= datetime(?, '+1 hours')`;s.exclude_id&&(v+=" AND id != ?",b.push(s.exclude_id)),v+=" ORDER BY sat ASC";const{results:T}=await e.DB.prepare(v).bind(...b).all();let E=!0,D=0;for(;E&&D<30;){E=!1;for(const k of T||[]){const N=ts(k.sat),P=Math.abs(o-N)/1e3;if(P<r){const L=(r-P+1)*1e3*(o>=N?1:-1);o+=L,l+=Math.floor(L/1e3),E=!0}}D++}}const c=ss(o);return{effective_at:c,audit:{base_at:t,effective_at:c,jitter_applied_seconds:d,collision_adjusted_seconds:l,ruleset:{jitter_enabled:a,jitter_minutes:n,collision_avoidance_enabled:i,min_spacing_seconds:r}}}}async function Nn(e,t,s,a){await e.DB.prepare("INSERT INTO schedule_audits (post_id, account_id, audit_json) VALUES (?, ?, ?)").bind(t,s??null,JSON.stringify(a)).run()}const Ln=.98;async function Mn(e){const t=[...Ot(e)].slice(0,200),s=await Ae(e);return JSON.stringify({bigrams:t,content_hash:s})}async function $n(e,t,s,a){await e.DB.prepare("INSERT INTO post_fingerprints (post_id, account_id, fingerprint) VALUES (?, ?, ?)").bind(t,s??null,a).run()}async function Fn(e,t,s,a={}){const n={pass:!0,blocked_reason:null,scores:[]};if(!t||!s)return n;const i=[s];let r=`SELECT id, body FROM post_queue
               WHERE account_id = ? AND body IS NOT NULL AND body != ''
                 AND status IN ('posted','approved','publishing')`;a.post_id&&(r+=" AND id != ?",i.push(a.post_id)),r+=" ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC LIMIT 5";const{results:o}=await e.DB.prepare(r).bind(...i).all();for(const d of o||[]){const l=Ws(t,d.body||"");if(n.scores.push({post_id:d.id,similarity:l}),l>=Ln){n.pass=!1,n.blocked_reason=`過去投稿(ID:${d.id})と類似度 ${l.toFixed(2)} で重複`;break}}return n}const U=new A;async function qn(e,t,s){const a=String(s??"default");let n=await e.DB.prepare("SELECT * FROM target_templates WHERE account_id = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1").bind(a,t).first();n||(n=await e.DB.prepare("SELECT * FROM target_templates WHERE user_id = ? OR user_id IS NULL ORDER BY is_default DESC, id ASC LIMIT 1").bind(t).first());let i=await e.DB.prepare("SELECT * FROM brand_voice WHERE account_id = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1").bind(a,t).first();return i||(i=await e.DB.prepare("SELECT * FROM brand_voice WHERE user_id = ? OR user_id IS NULL ORDER BY is_default DESC, id ASC LIMIT 1").bind(t).first()),{target:n,voice:i}}async function as(e,t){if(!(!e.TELEGRAM_BOT_TOKEN||!e.TELEGRAM_CHAT_ID))try{await fetch(`https://api.telegram.org/bot${e.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:e.TELEGRAM_CHAT_ID,text:t,parse_mode:"HTML"})})}catch{}}async function ns(e,t){try{await e.DB.prepare(`INSERT INTO post_logs
          (record_id, account_id, user_id, account_name, platform,
