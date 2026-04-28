@@ -1974,17 +1974,53 @@ window.submitNow = submitNow;
 
 async function submitSchedule() {
   const d = collect(); if (!d) return;
-  const dt = prompt('予約日時を YYYY-MM-DD HH:MM 形式で入力してください', '');
-  if (!dt) return;
-  d.scheduled_at = dt + (dt.length===16?':00':'');
+  // 既存のモーダルを削除
+  const old = document.getElementById('th-sched-modal');
+  if (old) old.remove();
+  // 1時間後をデフォルト値に
+  const dd = new Date(Date.now() + 60*60*1000);
+  const pad = n => String(n).padStart(2,'0');
+  const def = dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())+'T'+pad(dd.getHours())+':'+pad(dd.getMinutes());
+  const modal = document.createElement('div');
+  modal.id = 'th-sched-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:.75rem;max-width:28rem;width:100%;padding:1.5rem;margin:5rem auto;position:relative">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">' +
+        '<h3 style="font-size:1.05rem;font-weight:700"><i class="fas fa-calendar-plus"></i> ツリー投稿の予約日時</h3>' +
+        '<button onclick="document.getElementById(\\'th-sched-modal\\').remove()" type="button" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:1.25rem"><i class="fas fa-xmark"></i></button>' +
+      '</div>' +
+      '<div style="font-size:.82rem;color:#6B7280;margin-bottom:.75rem">' + d.tweets.length + '件の返信を予約します</div>' +
+      '<div style="margin-bottom:1rem">' +
+        '<label class="field-label">予約日時 <span style="color:#dc2626">*</span></label>' +
+        '<input type="datetime-local" id="th-sched-when" class="inp" value="' + def + '">' +
+      '</div>' +
+      '<div style="display:flex;gap:.5rem;justify-content:flex-end">' +
+        '<button type="button" class="btn btn-ghost" onclick="document.getElementById(\\'th-sched-modal\\').remove()">キャンセル</button>' +
+        '<button type="button" class="btn btn-primary" onclick="confirmThSchedule()"><i class="fas fa-check"></i>予約登録</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+  // 予約データを一時保存
+  window.__pendingThSchedData = d;
+}
+window.submitSchedule = submitSchedule;
+window.confirmThSchedule = async function() {
+  const dt = document.getElementById('th-sched-when').value;
+  if (!dt) { toast('予約日時を選択してください','err'); return; }
+  const d = window.__pendingThSchedData;
+  if (!d) { toast('予約データが見つかりません','err'); return; }
+  d.scheduled_at = dt.replace('T',' ') + ':00';
   try {
     const r = await fetch('/api/admin/thread/schedule',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(d)});
     const j = await r.json();
-    if (j.success) { toast('予約しました','ok'); setTimeout(()=>location.reload(),1200); }
-    else toast('予約失敗: '+(j.error||''),'err');
+    if (j.success) {
+      toast('予約しました ('+d.scheduled_at+')','ok');
+      const m = document.getElementById('th-sched-modal'); if (m) m.remove();
+      setTimeout(()=>location.reload(),1200);
+    } else toast('予約失敗: '+(j.error||''),'err');
   } catch(e) { toast('エラー: '+e.message,'err'); }
-}
-window.submitSchedule = submitSchedule;
+};
 
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 <\/script>`}function pn(e){return`
@@ -2302,7 +2338,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
               <td class="text-xs">${t.publish_at||"—"}</td>
               <td class="text-xs">@${w(t.x_username||"-")}</td>
               <td><span class="pill pill-soft">${w(t.content_mode||"-")}</span></td>
-              <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}</td>
+              <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}${t.error_message?`<div style="font-size:.7rem;color:#dc2626;margin-top:.2rem">⚠ ${w((t.error_message||"").slice(0,80))}</div>`:""}</td>
               <td>${(()=>{const st=t.status||"";if(st==="posted"||st==="generated")return'<span class="pill pill-ok">投稿済</span>';if(st==="error"||st==="failed")return'<span class="pill pill-err">失敗</span>';if(st==="draft")return'<span class="pill pill-soft">下書保存</span>';return'<span class="pill pill-blue">未投稿</span>'})()}</td>
               <td class="text-right">
                 ${(t.status==="error"||t.status==="failed"||t.status==="configured")?`<button class="btn btn-primary btn-sm" onclick="retryApJob(${t.id})" title="再投稿"><i class="fas fa-rotate-right"></i>再投稿</button>`:""}
@@ -2530,15 +2566,54 @@ async function delApJob(id) {
 }
 window.delApJob = delApJob;
 async function retryApJob(id) {
-  if (!confirm('このジョブを再投稿しますか？\\n（status を configured に戻し、generate_at を直近1分後に再設定します）')) return;
-  try {
-    const r = await fetch('/api/admin/autopilot/jobs/' + id + '/retry', { method:'POST' });
-    const j = await r.json();
-    if (j.success) { toast('再投稿待機にしました ('+(j.next_at||'')+')','ok'); setTimeout(()=>location.reload(),900); }
-    else toast('失敗: ' + (j.error||''),'err');
-  } catch(e) { toast('エラー: '+e.message,'err'); }
+  // 既存のモーダルを削除
+  const old = document.getElementById('ap-retry-modal');
+  if (old) old.remove();
+  // 5分後をデフォルト値に
+  const dd = new Date(Date.now() + 5*60*1000);
+  const pad = n => String(n).padStart(2,'0');
+  const def = dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())+'T'+pad(dd.getHours())+':'+pad(dd.getMinutes());
+  const modal = document.createElement('div');
+  modal.id = 'ap-retry-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:.75rem;max-width:28rem;width:100%;padding:1.5rem;margin:5rem auto;position:relative">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">' +
+        '<h3 style="font-size:1.05rem;font-weight:700"><i class="fas fa-rotate-right"></i> 再投稿 — 投稿日時</h3>' +
+        '<button onclick="document.getElementById(\\'ap-retry-modal\\').remove()" type="button" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:1.25rem"><i class="fas fa-xmark"></i></button>' +
+      '</div>' +
+      '<div style="font-size:.82rem;color:#6B7280;margin-bottom:.75rem">ジョブID: <code style="background:#F3F4F6;padding:.1rem .35rem;border-radius:.25rem">' + id + '</code></div>' +
+      '<div style="margin-bottom:1rem">' +
+        '<label class="field-label">新しい投稿日時 <span style="color:#dc2626">*</span></label>' +
+        '<input type="datetime-local" id="ap-retry-when" class="inp" value="' + def + '">' +
+        '<div style="font-size:.7rem;color:#6B7280;margin-top:.3rem">指定時刻の2分前にAI生成が走り、その後Xに投稿されます</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:.5rem;justify-content:flex-end">' +
+        '<button type="button" class="btn btn-ghost" onclick="document.getElementById(\\'ap-retry-modal\\').remove()">キャンセル</button>' +
+        '<button type="button" class="btn btn-primary" onclick="confirmApRetry(' + id + ')"><i class="fas fa-check"></i>再投稿</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
 }
 window.retryApJob = retryApJob;
+window.confirmApRetry = async function(id) {
+  const dt = document.getElementById('ap-retry-when').value;
+  if (!dt) { toast('投稿日時を選択してください','err'); return; }
+  const publishAt = dt.replace('T',' ') + ':00';
+  try {
+    const r = await fetch('/api/admin/autopilot/jobs/' + id + '/retry', {
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body: JSON.stringify({ publish_at: publishAt })
+    });
+    const j = await r.json();
+    if (j.success) {
+      toast('再投稿予約しました ('+(j.publish_at||publishAt)+')','ok');
+      const m = document.getElementById('ap-retry-modal'); if (m) m.remove();
+      setTimeout(()=>location.reload(),900);
+    } else toast('失敗: ' + (j.error||''),'err');
+  } catch(e) { toast('エラー: '+e.message,'err'); }
+};
 
 // URL ?new=1 で自動的にモーダルを開き、?date=YYYY-MM-DD を投稿日時に反映
 (function autoOpenAP(){
@@ -3792,9 +3867,30 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
      VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",optsJson,s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T")+"+09:00");o.setMinutes(o.getMinutes()-2);const pad=n=>String(n).padStart(2,"0");i=o.getFullYear()+"-"+pad(o.getMonth()+1)+"-"+pad(o.getDate())+" "+pad(o.getHours())+":"+pad(o.getMinutes())+":"+pad(o.getSeconds())}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
        content_mode=?, theme=?, keywords=?, prompt_text=?, options_json=?, title_memo=?,
        link_url=?, generate_at=?, publish_at=?, status=?, updated_at=?
-     WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/retry",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);const job=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(s,t.id).first();if(!job)return e.json({success:!1,error:"not_found"},404);// 1分後をJST形式で生成
-const d=new Date(Date.now()+60*1000);const pad=n=>String(n).padStart(2,"0");const offsetJst=9*60*60*1000;const j=new Date(d.getTime()+offsetJst);const nextAt=j.getUTCFullYear()+"-"+pad(j.getUTCMonth()+1)+"-"+pad(j.getUTCDate())+" "+pad(j.getUTCHours())+":"+pad(j.getUTCMinutes())+":"+pad(j.getUTCSeconds());// publish_at が過去なら 5分後にリセット
-let newPublishAt=job.publish_at;if(newPublishAt){try{const pubD=new Date(newPublishAt.replace(" ","T")+"+09:00");if(pubD.getTime()<=Date.now()){const np=new Date(Date.now()+5*60*1000+offsetJst);newPublishAt=np.getUTCFullYear()+"-"+pad(np.getUTCMonth()+1)+"-"+pad(np.getUTCDate())+" "+pad(np.getUTCHours())+":"+pad(np.getUTCMinutes())+":"+pad(np.getUTCSeconds())}}catch{}}await e.env.DB.prepare("UPDATE autopilot_jobs SET status='configured', generate_at=?, publish_at=?, error_message=NULL, generated_post_id=NULL, updated_at=? WHERE id=? AND user_id=?").bind(nextAt,newPublishAt,g(),s,t.id).run();return e.json({success:!0,next_at:nextAt,publish_at:newPublishAt})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
+     WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/retry",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);const job=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(s,t.id).first();if(!job)return e.json({success:!1,error:"not_found"},404);
+// リクエストボディからpublish_atを取得（無ければ5分後）
+const reqBody=await e.req.json().catch(()=>({}));
+const pad=n=>String(n).padStart(2,"0");
+const offsetJst=9*60*60*1000;
+let newPublishAt=reqBody.publish_at||null;
+if(!newPublishAt){
+  const np=new Date(Date.now()+5*60*1000+offsetJst);
+  newPublishAt=np.getUTCFullYear()+"-"+pad(np.getUTCMonth()+1)+"-"+pad(np.getUTCDate())+" "+pad(np.getUTCHours())+":"+pad(np.getUTCMinutes())+":"+pad(np.getUTCSeconds());
+}
+// generate_atをpublish_atの2分前に設定
+let newGenAt;
+try{
+  const pubD=new Date(newPublishAt.replace(" ","T")+"+09:00");
+  pubD.setMinutes(pubD.getMinutes()-2);
+  // pubD は UTC基準のDateオブジェクト → これをJST文字列に
+  const j=new Date(pubD.getTime()+offsetJst);
+  newGenAt=j.getUTCFullYear()+"-"+pad(j.getUTCMonth()+1)+"-"+pad(j.getUTCDate())+" "+pad(j.getUTCHours())+":"+pad(j.getUTCMinutes())+":"+pad(j.getUTCSeconds());
+}catch{
+  // フォールバック: 1分後
+  const d=new Date(Date.now()+60*1000+offsetJst);
+  newGenAt=d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes())+":"+pad(d.getUTCSeconds());
+}
+await e.env.DB.prepare("UPDATE autopilot_jobs SET status='configured', generate_at=?, publish_at=?, error_message=NULL, generated_post_id=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newGenAt,newPublishAt,g(),s,t.id).run();return e.json({success:!0,next_at:newGenAt,publish_at:newPublishAt})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
        WHERE status = 'configured'
          AND (
               (generate_at IS NOT NULL AND generate_at <= datetime('now','+9 hours'))
@@ -3947,20 +4043,13 @@ at.post("/api/admin/thread/post-now",m,async e=>{
         if(!v)continue;
         if(v.x_media_id){xMids.push(v.x_media_id);continue;}
         try{
-          let bytes,mime;
-          if(v.storage_path&&v.storage_path.startsWith("/media/")&&e.env.MEDIA_BUCKET){
-            const obj=await e.env.MEDIA_BUCKET.get(v.storage_path.slice(7));
-            if(obj){bytes=await obj.arrayBuffer();mime=v.mime_type||(obj.httpMetadata&&obj.httpMetadata.contentType)||"image/jpeg"}
-          }else if(v.storage_path&&/^https?:/i.test(v.storage_path)){
-            const rr=await fetch(v.storage_path,{signal:AbortSignal.timeout(3e4)});
-            if(rr.ok){bytes=await rr.arrayBuffer();mime=v.mime_type||rr.headers.get("content-type")||"image/jpeg"}
-          }
+          const{bytes,mime}=await readMediaBytes(e.env,v);
           if(bytes){
             const xid=await xMU_upload(creds,bytes,mime);
             await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),v.id).run();
             xMids.push(xid);
-          }
-        }catch(uErr){console.error("[thread-mediaUp]",uErr&&uErr.message)}
+          }else{console.error("[thread-mediaUp] no bytes for media id="+mid+" path="+v.storage_path)}
+        }catch(uErr){console.error("[thread-mediaUp]",uErr&&uErr.message,"media id="+mid)}
       }
     }
     try{
