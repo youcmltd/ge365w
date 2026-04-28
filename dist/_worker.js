@@ -2305,6 +2305,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
               <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}</td>
               <td>${(()=>{const st=t.status||"";if(st==="posted"||st==="generated")return'<span class="pill pill-ok">投稿済</span>';if(st==="error"||st==="failed")return'<span class="pill pill-err">失敗</span>';if(st==="draft")return'<span class="pill pill-soft">下書保存</span>';return'<span class="pill pill-blue">未投稿</span>'})()}</td>
               <td class="text-right">
+                ${(t.status==="error"||t.status==="failed"||t.status==="configured")?`<button class="btn btn-primary btn-sm" onclick="retryApJob(${t.id})" title="再投稿"><i class="fas fa-rotate-right"></i>再投稿</button>`:""}
                 <button class="btn btn-danger btn-sm" onclick="delApJob(${t.id})"><i class="fas fa-trash"></i></button>
               </td>
             </tr>
@@ -2528,6 +2529,16 @@ async function delApJob(id) {
   } catch(e) { toast('エラー: '+e.message,'err'); }
 }
 window.delApJob = delApJob;
+async function retryApJob(id) {
+  if (!confirm('このジョブを再投稿しますか？\\n（status を configured に戻し、generate_at を直近1分後に再設定します）')) return;
+  try {
+    const r = await fetch('/api/admin/autopilot/jobs/' + id + '/retry', { method:'POST' });
+    const j = await r.json();
+    if (j.success) { toast('再投稿待機にしました ('+(j.next_at||'')+')','ok'); setTimeout(()=>location.reload(),900); }
+    else toast('失敗: ' + (j.error||''),'err');
+  } catch(e) { toast('エラー: '+e.message,'err'); }
+}
+window.retryApJob = retryApJob;
 
 // URL ?new=1 で自動的にモーダルを開き、?date=YYYY-MM-DD を投稿日時に反映
 (function autoOpenAP(){
@@ -3781,11 +3792,15 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
      VALUES (?, ?, ?, 'x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(o,t.id,s.account_id??null,s.content_mode||"problem",s.theme||"",s.keywords||"",s.prompt_text||"",optsJson,s.title_memo||"",s.link_url||"",d,s.publish_at||null,l,a,a).run();return e.json({success:!0,id:c.meta.last_row_id,reservation_no:o})});ve.put("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.req.json(),n=g();let i=a.generate_at??null;if(a.publish_at&&!a.generate_at)try{const o=new Date(a.publish_at.replace(" ","T")+"+09:00");o.setMinutes(o.getMinutes()-2);const pad=n=>String(n).padStart(2,"0");i=o.getFullYear()+"-"+pad(o.getMonth()+1)+"-"+pad(o.getDate())+" "+pad(o.getHours())+":"+pad(o.getMinutes())+":"+pad(o.getSeconds())}catch{}const r=i||a.publish_at?"configured":"draft";return await e.env.DB.prepare(`UPDATE autopilot_jobs SET
        content_mode=?, theme=?, keywords=?, prompt_text=?, options_json=?, title_memo=?,
        link_url=?, generate_at=?, publish_at=?, status=?, updated_at=?
-     WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
+     WHERE id=? AND user_id=?`).bind(a.content_mode||"problem",a.theme||"",a.keywords||"",a.prompt_text||"",a.options_json||"{}",a.title_memo||"",a.link_url||"",i,a.publish_at||null,r,n,s,t.id).run(),e.json({success:!0})});ve.delete("/api/admin/autopilot/jobs/:id",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("DELETE FROM autopilot_jobs WHERE id=? AND user_id=?").bind(parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/cancel",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE autopilot_jobs SET status='cancelled', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});ve.post("/api/admin/autopilot/jobs/:id/retry",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10);const job=await e.env.DB.prepare("SELECT * FROM autopilot_jobs WHERE id=? AND user_id=?").bind(s,t.id).first();if(!job)return e.json({success:!1,error:"not_found"},404);// 1分後をJST形式で生成
+const d=new Date(Date.now()+60*1000);const pad=n=>String(n).padStart(2,"0");const offsetJst=9*60*60*1000;const j=new Date(d.getTime()+offsetJst);const nextAt=j.getUTCFullYear()+"-"+pad(j.getUTCMonth()+1)+"-"+pad(j.getUTCDate())+" "+pad(j.getUTCHours())+":"+pad(j.getUTCMinutes())+":"+pad(j.getUTCSeconds());// publish_at が過去なら 5分後にリセット
+let newPublishAt=job.publish_at;if(newPublishAt){try{const pubD=new Date(newPublishAt.replace(" ","T")+"+09:00");if(pubD.getTime()<=Date.now()){const np=new Date(Date.now()+5*60*1000+offsetJst);newPublishAt=np.getUTCFullYear()+"-"+pad(np.getUTCMonth()+1)+"-"+pad(np.getUTCDate())+" "+pad(np.getUTCHours())+":"+pad(np.getUTCMinutes())+":"+pad(np.getUTCSeconds())}}catch{}}await e.env.DB.prepare("UPDATE autopilot_jobs SET status='configured', generate_at=?, publish_at=?, error_message=NULL, generated_post_id=NULL, updated_at=? WHERE id=? AND user_id=?").bind(nextAt,newPublishAt,g(),s,t.id).run();return e.json({success:!0,next_at:nextAt,publish_at:newPublishAt})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
        WHERE status = 'configured'
-         AND generate_at IS NOT NULL
-         AND generate_at <= datetime('now','+9 hours')
-       ORDER BY generate_at ASC LIMIT 5`).all();let s=0;for(const a of t||[])try{const n=String(a.account_id??"default");let i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();i||(i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();r||(r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let o;a.content_mode&&a.content_mode!=="freetext"?o=await Us(openaiKey,a.content_mode,a.theme||"",a.keywords||"",i,r,"body"):o=await Hs(openaiKey,a.theme||"",a.keywords||"",i,r,"body");const d=await Ae(o),l=g();let mediaJsonStr=null,mediaTypeStr=null;try{const opts=a.options_json?JSON.parse(a.options_json):{};if(Array.isArray(opts.media_ids)&&opts.media_ids.length>0){mediaJsonStr=JSON.stringify(opts.media_ids.slice(0,4));const ft=await e.env.DB.prepare("SELECT file_type FROM media_assets WHERE id=? AND user_id=?").bind(opts.media_ids[0],a.user_id).first();mediaTypeStr=(ft==null?void 0:ft.file_type)||null}}catch{}const c=await e.env.DB.prepare(`INSERT INTO post_queue
+         AND (
+              (generate_at IS NOT NULL AND generate_at <= datetime('now','+9 hours'))
+           OR (publish_at IS NOT NULL AND publish_at <= datetime('now','+9 hours'))
+         )
+       ORDER BY COALESCE(generate_at, publish_at) ASC LIMIT 5`).all();let s=0;for(const a of t||[])try{const n=String(a.account_id??"default");let i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();i||(i=await e.env.DB.prepare("SELECT * FROM target_templates WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE account_id=? AND user_id=? LIMIT 1").bind(n,a.user_id).first();r||(r=await e.env.DB.prepare("SELECT * FROM brand_voice WHERE user_id=? ORDER BY is_default DESC LIMIT 1").bind(a.user_id).first());let o;a.content_mode&&a.content_mode!=="freetext"?o=await Us(openaiKey,a.content_mode,a.theme||"",a.keywords||"",i,r,"body"):o=await Hs(openaiKey,a.theme||"",a.keywords||"",i,r,"body");const d=await Ae(o),l=g();let mediaJsonStr=null,mediaTypeStr=null;try{const opts=a.options_json?JSON.parse(a.options_json):{};if(Array.isArray(opts.media_ids)&&opts.media_ids.length>0){mediaJsonStr=JSON.stringify(opts.media_ids.slice(0,4));const ft=await e.env.DB.prepare("SELECT file_type FROM media_assets WHERE id=? AND user_id=?").bind(opts.media_ids[0],a.user_id).first();mediaTypeStr=(ft==null?void 0:ft.file_type)||null}}catch{}const c=await e.env.DB.prepare(`INSERT INTO post_queue
            (platform, user_id, account_id, body, link_url, post_mode,
             scheduled_at, effective_scheduled_at, base_scheduled_at,
             content_hash, generation_type, source_type, status, media_json, media_type, created_at, updated_at)
@@ -3870,28 +3885,45 @@ at.get("/api/admin/thread/recent-posts",m,async e=>{
   const params=[t.id];
   let acctCond="";
   if(acctId){acctCond=" AND pq.account_id=?";params.push(Number(acctId))}
-  // post_queue から status='posted' AND external_post_id IS NOT NULL の最新30件
+  // post_queue から status='posted' AND external_post_id がある最新30件
   const{results:rq}=await e.env.DB.prepare(`SELECT pq.id, pq.body AS content, pq.external_post_id, pq.posted_at, pq.account_id,
        xa.account_name AS joined_account_name, xa.x_username
      FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id=xa.id
     WHERE pq.user_id=? AND pq.status='posted' AND pq.external_post_id IS NOT NULL AND pq.external_post_id <> ''${acctCond}
     ORDER BY COALESCE(pq.posted_at, pq.updated_at, pq.created_at) DESC LIMIT 30`).bind(...params).all();
-  // post_logs からも取得（重複は external_post_id で除外）
-  const params2=[t.id];
-  let acctCond2="";
-  if(acctId){acctCond2=" AND pl.account_id=?";params2.push(Number(acctId))}
-  const{results:rl}=await e.env.DB.prepare(`SELECT pl.id, pl.content, pl.external_post_id, pl.posted_at, pl.account_id,
-       xa.account_name AS joined_account_name, xa.x_username
-     FROM post_logs pl LEFT JOIN x_accounts xa ON pl.account_id=xa.id
-    WHERE pl.user_id=? AND pl.status='posted' AND pl.external_post_id IS NOT NULL AND pl.external_post_id <> ''${acctCond2}
-    ORDER BY COALESCE(pl.posted_at, pl.created_at) DESC LIMIT 30`).bind(...params2).all();
-  const seen=new Set();
-  const merged=[];
-  for(const r of[...(rq||[]),...(rl||[])]){
-    const eid=r.external_post_id;
-    if(!eid||seen.has(eid))continue;
-    seen.add(eid);
-    merged.push(r);
+  // post_logs にカラムがある場合は併合（無くても動作する保険付き try-catch）
+  let merged=[...(rq||[])];
+  try{
+    const params2=[t.id];
+    let acctCond2="";
+    if(acctId){acctCond2=" AND pl.account_id=?";params2.push(Number(acctId))}
+    const{results:rl}=await e.env.DB.prepare(`SELECT pl.id, pl.content, pl.external_post_id, pl.posted_at, pl.account_id,
+         xa.account_name AS joined_account_name, xa.x_username
+       FROM post_logs pl LEFT JOIN x_accounts xa ON pl.account_id=xa.id
+      WHERE pl.user_id=? AND pl.status='posted' AND pl.external_post_id IS NOT NULL AND pl.external_post_id <> ''${acctCond2}
+      ORDER BY COALESCE(pl.posted_at, pl.created_at) DESC LIMIT 30`).bind(...params2).all();
+    const seen=new Set(merged.map(r=>r.external_post_id));
+    for(const r of(rl||[])){
+      if(!seen.has(r.external_post_id)){seen.add(r.external_post_id);merged.push(r);}
+    }
+  }catch{}
+  // api_response_summary にtweet_idがある場合のフォールバック取得
+  if(merged.length===0){
+    try{
+      const{results:rl2}=await e.env.DB.prepare(`SELECT pl.id, pl.content, pl.api_response_summary, pl.posted_at, pl.account_id,
+           xa.account_name AS joined_account_name, xa.x_username
+         FROM post_logs pl LEFT JOIN x_accounts xa ON pl.account_id=xa.id
+        WHERE pl.user_id=? AND pl.status='posted' AND pl.api_response_summary IS NOT NULL
+        ORDER BY COALESCE(pl.posted_at, pl.created_at) DESC LIMIT 30`).bind(t.id).all();
+      for(const r of(rl2||[])){
+        try{
+          const j=JSON.parse(r.api_response_summary||"{}");
+          if(j.tweet_id){
+            merged.push({...r, external_post_id: j.tweet_id});
+          }
+        }catch{}
+      }
+    }catch{}
   }
   merged.sort((a,b)=>(b.posted_at||"").localeCompare(a.posted_at||""));
   return e.json({posts:merged.slice(0,30)});
