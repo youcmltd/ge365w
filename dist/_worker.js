@@ -721,7 +721,7 @@ window.aiChatSend = function() {
   <i class="fas fa-triangle-exclamation mt-0.5"></i>
   <div>アカウントが選択されていません。<a href="/dashboard/accounts" class="underline font-semibold">アカウント管理</a>で登録してください。</div>
 </div>
-`;function w(e){return(e||"").replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[t])}function Lt(e){return{pending:'<span class="pill pill-warn">未承認</span>',approved:'<span class="pill pill-blue">承認済</span>',publishing:'<span class="pill pill-blue">送信中</span>',posted:'<span class="pill pill-ok">投稿済</span>',failed:'<span class="pill pill-err">失敗</span>',cancelled:'<span class="pill pill-soft">キャンセル</span>'}[e||""]||`<span class="pill pill-soft">${e||"—"}</span>`}function nn(e){const{stats:t,health:s,recentLogs:a}=e;return`
+`;function w(e){return(e||"").replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[t])}function Lt(e,scheduled){const status=e||"";if(status==="approved"||status==="scheduled"||(status==="pending"&&scheduled))return'<span class="pill pill-blue">予約済</span>';return{pending:'<span class="pill pill-soft">下書き</span>',publishing:'<span class="pill pill-blue">送信中</span>',posted:'<span class="pill pill-ok">投稿済</span>',failed:'<span class="pill pill-err">失敗</span>',cancelled:'<span class="pill pill-soft">キャンセル</span>',draft:'<span class="pill pill-soft">下書き</span>'}[status]||`<span class="pill pill-soft">${status||"未投稿"}</span>`}function nn(e){const{stats:t,health:s,recentLogs:a}=e;return`
 <div class="space-y-4">
   <div>
     <h1 class="section-title"><i class="fas fa-gauge-high"></i>ダッシュボード</h1>
@@ -1405,14 +1405,18 @@ async function doGen2() {
   </div>
   <div class="flex items-center gap-6 text-sm">
     <div>合計: <span class="font-bold">${i.total}件</span></div>
-    <div>未投稿: <span class="font-bold text-amber-600">${i.pending}件</span></div>
     <div>投稿済: <span class="font-bold text-emerald-600">${i.posted}件</span></div>
+    <div>未投稿: <span class="font-bold text-amber-600">${i.pending}件</span></div>
+    <div>下書き: <span class="font-bold text-ink-muted">${i.draft||0}件</span></div>
+    <div>予約済: <span class="font-bold text-blue-600">${i.scheduled||0}件</span></div>
     <div>失敗: <span class="font-bold text-red-600">${i.failed}件</span></div>
   </div>
   <div style="display:flex;gap:.4rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:.5rem">
     <button type="button" class="btn btn-sm xst-tab xst-active" data-st="all" onclick="filterPosts(this,'all')"><i class="fas fa-list"></i>すべて</button>
-    <button type="button" class="btn btn-sm xst-tab" data-st="pending" onclick="filterPosts(this,'pending')"><i class="fas fa-clock"></i>未投稿</button>
     <button type="button" class="btn btn-sm xst-tab" data-st="posted" onclick="filterPosts(this,'posted')"><i class="fas fa-check"></i>投稿済</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="pending" onclick="filterPosts(this,'pending')"><i class="fas fa-clock"></i>未投稿</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="draft" onclick="filterPosts(this,'draft')"><i class="fas fa-file-pen"></i>下書き</button>
+    <button type="button" class="btn btn-sm xst-tab" data-st="scheduled" onclick="filterPosts(this,'scheduled')"><i class="fas fa-calendar-check"></i>予約済</button>
     <button type="button" class="btn btn-sm xst-tab" data-st="failed" onclick="filterPosts(this,'failed')"><i class="fas fa-triangle-exclamation"></i>失敗</button>
     <style>.xst-tab{background:#fff;border:1px solid var(--line);color:var(--ink-muted)}.xst-tab.xst-active{background:var(--accent);color:#fff;border-color:var(--accent)}</style>
   </div>
@@ -1424,13 +1428,13 @@ async function doGen2() {
       </tr></thead>
       <tbody>
         ${n.length===0?'<tr><td colspan="8" class="text-center text-ink-muted py-10">この月の投稿データがありません</td></tr>':n.map(r=>`
-            <tr data-status="${r.status||""}" class="post-row">
+            <tr data-status="${r.status||""}" data-scheduled="${r.scheduled_at?"1":"0"}" class="post-row">
               <td><input type="checkbox" class="post-chk" value="${r.id}" onchange="updateBulk()"></td>
               <td class="font-mono text-xs text-ink-faint">${r.id}</td>
               <td class="max-w-md"><div class="truncate">${w((r.body||"").slice(0,80))}</div></td>
               <td>${r.post_mode==="140"?"140文字":r.post_mode==="thread"?"スレッド":"フル文章"}</td>
               <td class="text-xs font-mono">${r.scheduled_at||"—"}</td>
-              <td>${Lt(r.status)}</td>
+              <td>${Lt(r.status, r.scheduled_at)}</td>
               <td class="text-xs">@${w(r.x_username||"-")}</td>
               <td class="text-right">
                 ${r.status!=="posted"?`<button class="btn btn-subtle btn-sm" onclick="postNow(${r.id})" title="今すぐ投稿"><i class="fa-brands fa-x-twitter"></i>今すぐ投稿</button>`:""}
@@ -1483,16 +1487,17 @@ async function doGen2() {
 window.filterPosts = function(btn, st) {
   document.querySelectorAll('.xst-tab').forEach(b => b.classList.remove('xst-active'));
   btn.classList.add('xst-active');
-  const map = {
-    all: null,
-    pending: ['pending','approved','publishing','draft'],
-    posted: ['posted'],
-    failed: ['failed','rejected','error'],
-  };
-  const allow = map[st];
   document.querySelectorAll('tr.post-row').forEach(tr => {
     const s = tr.getAttribute('data-status') || '';
-    tr.style.display = (!allow || allow.includes(s)) ? '' : 'none';
+    const sched = tr.getAttribute('data-scheduled') === '1';
+    let show = false;
+    if (st === 'all') show = true;
+    else if (st === 'posted') show = (s === 'posted');
+    else if (st === 'failed') show = (s === 'failed' || s === 'rejected' || s === 'error');
+    else if (st === 'draft') show = (s === 'draft');
+    else if (st === 'scheduled') show = ((s === 'approved' || s === 'pending' || s === 'publishing') && sched);
+    else if (st === 'pending') show = ((s === 'pending' || s === 'approved') && !sched);
+    tr.style.display = show ? '' : 'none';
   });
 };
 window.openSchedRowModal = function(postId) {
@@ -2995,7 +3000,7 @@ window.testApi = testApi;
          FROM post_queue pq LEFT JOIN x_accounts xa ON xa.id = pq.account_id
         WHERE pq.user_id = ?
           AND strftime('%Y-%m', COALESCE(pq.posted_at, pq.scheduled_at, pq.created_at)) = ?
-        ORDER BY pq.id DESC LIMIT 200`).bind(t.id,n).all(),d=(o||[]).length,l=(o||[]).filter(_=>_.status==="pending"||_.status==="approved").length,c=(o||[]).filter(_=>_.status==="posted").length,p=(o||[]).filter(_=>_.status==="failed").length;return cn({hasAccount:s,noAccountAlert:he,month:n,y:i,m:parseInt(r,10),posts:o||[],stats:{total:d,pending:l,posted:c,failed:p}})}));H.get("/dashboard/thread",m,async e=>K(e,"thread",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.status, pq.posted_at, pq.created_at, pq.thread_parent_id
+        ORDER BY pq.id DESC LIMIT 200`).bind(t.id,n).all(),d=(o||[]).length,c=(o||[]).filter(_=>_.status==="posted").length,p=(o||[]).filter(_=>_.status==="failed"||_.status==="rejected"||_.status==="error").length,sched=(o||[]).filter(_=>(_.status==="approved"||_.status==="pending"||_.status==="publishing")&&_.scheduled_at).length,drft=(o||[]).filter(_=>_.status==="draft").length,l=(o||[]).filter(_=>(_.status==="pending"||_.status==="approved")&&!_.scheduled_at).length;return cn({hasAccount:s,noAccountAlert:he,month:n,y:i,m:parseInt(r,10),posts:o||[],stats:{total:d,pending:l,posted:c,failed:p,scheduled:sched,draft:drft}})}));H.get("/dashboard/thread",m,async e=>K(e,"thread",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.status, pq.posted_at, pq.created_at, pq.thread_parent_id
          FROM post_queue pq
         WHERE pq.user_id = ? AND pq.post_mode = 'thread' AND pq.thread_parent_id IS NOT NULL
         ORDER BY pq.id DESC LIMIT 30`).bind(t.id).all();return un({hasAccount:s,noAccountAlert:he,history:a||[]})}));H.get("/dashboard/scheduled",m,async e=>K(e,"scheduled",async({user:t,hasAccount:s})=>{const{results:a}=await e.env.DB.prepare(`SELECT pq.id, pq.body, pq.scheduled_at, pq.status, xa.x_username
@@ -3770,20 +3775,30 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
        FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id = xa.id
        ${d} ORDER BY pq.created_at DESC LIMIT ? OFFSET ?`).bind(...l,r,o).all(),p=await e.env.DB.prepare(`SELECT COUNT(*) AS total FROM post_queue pq ${d}`).bind(...l).first();return e.json({posts:c||[],total:(p==null?void 0:p.total)??0,page:i})});U.get("/api/admin/posts/:id",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),a=await e.env.DB.prepare(`SELECT pq.*, xa.account_name
        FROM post_queue pq LEFT JOIN x_accounts xa ON pq.account_id = xa.id
-       WHERE pq.id = ? AND pq.user_id = ?`).bind(s,t.id).first();return a?e.json({post:a}):e.json({error:"Not found"},404)});U.post("/api/admin/posts",m,async e=>{const t=e.get("user"),s=await e.req.json();if(!s.body)return e.json({error:"body is required"},400);const a=g(),n=await Ae(s.body);if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepare(`SELECT id FROM post_queue WHERE platform='x' AND user_id=? AND account_id IS ?
+       WHERE pq.id = ? AND pq.user_id = ?`).bind(s,t.id).first();return a?e.json({post:a}):e.json({error:"Not found"},404)});U.post("/api/admin/posts",m,async e=>{const t=e.get("user"),s=await e.req.json();if(!s.body)return e.json({error:"body is required"},400);const a=g(),n=await Ae(s.body);
+// account_id が無い場合は is_current=1 を優先取得
+let acctId=s.account_id??null;
+if(!acctId){
+  let r=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_current=1 AND is_active=1 LIMIT 1").bind(t.id).first();
+  if(!r)r=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();
+  acctId=(r==null?void 0:r.id)??null;
+}
+// effective_scheduled_at は scheduled_at で初期化（cron tickがCOALESCEで使うため）
+const effSched=s.scheduled_at??null;
+if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepare(`SELECT id FROM post_queue WHERE platform='x' AND user_id=? AND account_id IS ?
          AND body=? AND COALESCE(link_url,'')=COALESCE(?,'') AND scheduled_at=? AND post_mode='scheduled_once'
          AND status NOT IN ('cancelled','failed')`).bind(t.id,s.account_id||null,s.body,s.link_url||"",s.scheduled_at).first();if(r)return e.json({success:!1,error:`Same content/time already exists (ID:${r.id})`})}const i=await e.env.DB.prepare(`INSERT INTO post_queue
        (platform, user_id, account_id, body, link_url, hashtags,
-        post_mode, status, scheduled_at, content_hash, generation_type, source_type,
+        post_mode, status, scheduled_at, effective_scheduled_at, content_hash, generation_type, source_type,
         recurrence_type, recurrence_rule, recurrence_end_at, next_run_at,
         recycle_rule, source_post_id, min_engagement_score, rewrite_mode,
         thread_parent_id, thread_order, thread_count, media_type, media_file_path,
         created_at, updated_at)
-     VALUES ('x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+     VALUES ('x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
              ?, ?, ?, ?,
              ?, ?, ?, ?,
              ?, ?, ?, ?, ?,
-             ?, ?)`).bind(t.id,s.account_id??null,s.body,s.link_url??null,s.hashtags??null,s.post_mode??"body",s.status??"pending",s.scheduled_at??null,n,s.generation_type??null,s.source_type??"manual_post",s.recurrence_type??null,s.recurrence_rule??null,s.recurrence_end_at??null,s.next_run_at??null,s.recycle_rule??null,s.source_post_id??null,s.min_engagement_score??0,s.rewrite_mode??null,s.thread_parent_id??null,s.thread_order??0,s.thread_count??0,s.media_type??null,s.media_file_path??null,a,a).run();return e.json({success:!0,id:i.meta.last_row_id})});U.post("/api/admin/posts/generate",m,async e=>{const t=e.get("user");let s=e.env.OPENAI_API_KEY;if(!s){try{const enc=await Tt(e,"openai_api_key");if(enc){s=await lt(enc,e.env.ENCRYPTION_KEY)}}catch{}}const{theme:a,keywords:n,count:i,pattern_type:r,post_mode:o,link_url:d,hashtags:l,footer_text:c,account_id:p,generation_type:_}=await e.req.json();if(!a)return e.json({error:"theme required"},400);if(!s)return e.json({error:"OpenAI API Key 未設定（API設定画面で保存してください）"},500);let b=p??null;if(!b){let k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_current=1 AND is_active=1 LIMIT 1").bind(t.id).first();if(!k)k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();b=(k==null?void 0:k.id)??null}const{target:v,voice:T}=await qn(e.env,t.id,b),E=g(),D=[];try{const k=Math.min(i||1,10);for(let N=0;N<k;N++){const P=o||"body";let L;r?L=await Us(s,r,a,n||"",v,T,P):L=await Hs(s,a,n||"",v,T,P),c&&(L=L.trimEnd()+`
+             ?, ?)`).bind(t.id,acctId,s.body,s.link_url??null,s.hashtags??null,s.post_mode??"body",s.status??"pending",s.scheduled_at??null,effSched,n,s.generation_type??null,s.source_type??"manual_post",s.recurrence_type??null,s.recurrence_rule??null,s.recurrence_end_at??null,s.next_run_at??null,s.recycle_rule??null,s.source_post_id??null,s.min_engagement_score??0,s.rewrite_mode??null,s.thread_parent_id??null,s.thread_order??0,s.thread_count??0,s.media_type??null,s.media_file_path??null,a,a).run();return e.json({success:!0,id:i.meta.last_row_id})});U.post("/api/admin/posts/generate",m,async e=>{const t=e.get("user");let s=e.env.OPENAI_API_KEY;if(!s){try{const enc=await Tt(e,"openai_api_key");if(enc){s=await lt(enc,e.env.ENCRYPTION_KEY)}}catch{}}const{theme:a,keywords:n,count:i,pattern_type:r,post_mode:o,link_url:d,hashtags:l,footer_text:c,account_id:p,generation_type:_}=await e.req.json();if(!a)return e.json({error:"theme required"},400);if(!s)return e.json({error:"OpenAI API Key 未設定（API設定画面で保存してください）"},500);let b=p??null;if(!b){let k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_current=1 AND is_active=1 LIMIT 1").bind(t.id).first();if(!k)k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();b=(k==null?void 0:k.id)??null}const{target:v,voice:T}=await qn(e.env,t.id,b),E=g(),D=[];try{const k=Math.min(i||1,10);for(let N=0;N<k;N++){const P=o||"body";let L;r?L=await Us(s,r,a,n||"",v,T,P):L=await Hs(s,a,n||"",v,T,P),c&&(L=L.trimEnd()+`
 
 `+c.trim());const nt=await Ae(L),Q=await e.env.DB.prepare(`INSERT INTO post_queue
            (platform, user_id, account_id, theme, keywords, body, link_url, hashtags, post_mode, pattern_type,
@@ -3825,7 +3840,25 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
            OR COALESCE(effective_scheduled_at, scheduled_at) <= datetime('now','+9 hours')
         )
       ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC
-      LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{if(!r.account_id)throw new Error("account_id is null");const d=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=?").bind(r.account_id).first();if(!d)throw new Error("account_not_found");const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id))throw new Error("account_busy");try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
+      LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{
+// account_id NULLの場合: is_current=1 → 任意のアクティブアカウント の順で fallback
+let acctRow=null;
+if(r.account_id){
+  acctRow=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE id=?").bind(r.account_id).first();
+}
+if(!acctRow&&r.user_id){
+  acctRow=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_current=1 AND is_active=1 LIMIT 1").bind(r.user_id).first();
+}
+if(!acctRow&&r.user_id){
+  acctRow=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(r.user_id).first();
+}
+if(!acctRow)throw new Error("account_not_found (user has no active X account)");
+// account_id が補完された場合は post_queue にも書き戻す
+if(!r.account_id&&acctRow.id){
+  await e.env.DB.prepare("UPDATE post_queue SET account_id=? WHERE id=?").bind(acctRow.id,r.id).run();
+  r.account_id=acctRow.id;
+}
+const d=acctRow;const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id))throw new Error("account_busy");try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
 `+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}// thread_parent_id を解決
 let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){replyToId=tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),await e.env.DB.prepare(`UPDATE x_accounts SET
