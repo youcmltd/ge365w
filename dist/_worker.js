@@ -3012,7 +3012,27 @@ window.testApi = testApi;
         WHERE aj.user_id = ?
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
               daily_post_count, daily_post_limit, last_posted_at, is_active
-         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();let xKeyDec="",xSecDec="";if(s){try{xKeyDec=s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):""}catch{}try{xSecDec=s.api_secret?await lt(s.api_secret,e.env.ENCRYPTION_KEY):""}catch{}}const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:{api_key:xKeyDec,api_secret:xSecDec,api_key_set:!!xKeyDec,api_secret_set:!!xSecDec,openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||""}})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;F.get("/admin",m,R,e=>{const t=`
+         FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();let xKeyDec="",xSecDec="";if(s){try{xKeyDec=s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):""}catch{}try{xSecDec=s.api_secret?await lt(s.api_secret,e.env.ENCRYPTION_KEY):""}catch{}}const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:{api_key:xKeyDec,api_secret:xSecDec,api_key_set:!!xKeyDec,api_secret_set:!!xSecDec,openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||""}})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;
+// 手動cron起動: ブラウザから /api/admin/cron/run-tick を叩くと即時実行（cron triggers が動かない時の救済）
+F.post("/api/admin/cron/run-tick",m,R,async e=>{
+  try {
+    const r = await S.fetch(new Request("https://internal/cron/tick",{method:"POST"}), e.env, e.executionCtx);
+    const j = await r.json().catch(()=>({}));
+    return e.json({success:true, kind:'tick', result: j});
+  } catch(err) {
+    return e.json({success:false, error: err.message}, 500);
+  }
+});
+F.post("/api/admin/cron/run-autopilot",m,R,async e=>{
+  try {
+    const r = await S.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}), e.env, e.executionCtx);
+    const j = await r.json().catch(()=>({}));
+    return e.json({success:true, kind:'autopilot', result: j});
+  } catch(err) {
+    return e.json({success:false, error: err.message}, 500);
+  }
+});
+F.get("/admin",m,R,e=>{const t=`
 <div class="min-h-screen flex flex-col">
   <!-- ヘッダ -->
   <header class="border-b border-brand-800/40 bg-surface-raised/80 backdrop-blur">
@@ -4242,4 +4262,12 @@ at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e
               content, status, posted_at, error_message, created_at
          FROM post_logs ORDER BY id DESC LIMIT 10000`).all(),e.env.DB.prepare(`SELECT id, user_id, account_name, x_username, account_health_score,
               health_status, is_active, created_at
-         FROM x_accounts ORDER BY id DESC LIMIT 10000`).all()]),d={exported_at:new Date().toISOString(),users:t.results||[],user_subscriptions:s.results||[],licenses:a.results||[],auth_logs:n.results||[],post_queue:i.results||[],post_logs:r.results||[],x_accounts:o.results||[]};return Vs(d,`ge365x_admin_all_${q()}.json`)});const S=new A;S.use("/static/*",Ua({root:"./",manifest:{}}));S.get("/healthz",e=>e.json({ok:!0,service:"ge365x-web",time:new Date().toISOString()}));S.route("/",js);S.route("/",H);S.route("/",F);S.route("/",fe);S.route("/",be);S.route("/",ge);S.route("/",U);S.route("/",zs);S.route("/",ve);S.route("/",tt);S.route("/",st);S.route("/",at);S.route("/",Pt);S.route("/",gt);S.route("/",vt);S.route("/",yt);S.route("/",He);S.route("/",B);S.notFound(e=>e.json({error:"not_found",path:e.req.path},404));S.onError((e,t)=>(console.error("[ge365x-web] error:",e),t.json({error:"internal_error",message:e.message},500)));const Hn={fetch:S.fetch,async scheduled(e,t,s){const a=e.cron;(!a||a==="*/1 * * * *")&&s.waitUntil(S.fetch(new Request("https://internal/cron/tick",{method:"POST"}),t,s).catch(n=>console.error("[tick]",n))),a==="*/5 * * * *"&&s.waitUntil(S.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}),t,s).catch(n=>console.error("[autopilot-tick]",n)))}},os=new A,Un=Object.assign({"/src/index.tsx":Hn});let Xs=!1;for(const[,e]of Object.entries(Un))e&&(os.all("*",t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),os.notFound(t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),Xs=!0);if(!Xs)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{os as default};
+         FROM x_accounts ORDER BY id DESC LIMIT 10000`).all()]),d={exported_at:new Date().toISOString(),users:t.results||[],user_subscriptions:s.results||[],licenses:a.results||[],auth_logs:n.results||[],post_queue:i.results||[],post_logs:r.results||[],x_accounts:o.results||[]};return Vs(d,`ge365x_admin_all_${q()}.json`)});const S=new A;S.use("/static/*",Ua({root:"./",manifest:{}}));S.get("/healthz",e=>e.json({ok:!0,service:"ge365x-web",time:new Date().toISOString()}));S.route("/",js);S.route("/",H);S.route("/",F);S.route("/",fe);S.route("/",be);S.route("/",ge);S.route("/",U);S.route("/",zs);S.route("/",ve);S.route("/",tt);S.route("/",st);S.route("/",at);S.route("/",Pt);S.route("/",gt);S.route("/",vt);S.route("/",yt);S.route("/",He);S.route("/",B);S.notFound(e=>e.json({error:"not_found",path:e.req.path},404));S.onError((e,t)=>(console.error("[ge365x-web] error:",e),t.json({error:"internal_error",message:e.message},500)));const Hn={fetch:S.fetch,async scheduled(e,t,s){const a=e.cron;(!a||a==="*/1 * * * *")&&s.waitUntil(S.fetch(new Request("https://internal/cron/tick",{method:"POST"}),t,s).catch(n=>console.error("[tick]",n))),a==="*/5 * * * *"&&s.waitUntil(S.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}),t,s).catch(n=>console.error("[autopilot-tick]",n)))}},os=new A,Un=Object.assign({"/src/index.tsx":Hn});let Xs=!1;for(const[,e]of Object.entries(Un))e&&(os.all("*",t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),os.notFound(t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),Xs=!0);if(!Xs)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");
+// ★重大バグ修正: 元のコードは os だけを export しており、Hn.scheduled (cron handler) が
+//   Cloudflare Workers のスケジューラに到達せず、予約投稿が一切実行されなかった。
+//   ここで fetch / scheduled の両方を export してスケジューラを有効化する。
+const __wrappedDefault = {
+  fetch(req, env, ctx) { return os.fetch(req, env, ctx); },
+  scheduled(controller, env, ctx) { return Hn.scheduled(controller, env, ctx); }
+};
+export { __wrappedDefault as default };
