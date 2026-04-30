@@ -353,6 +353,64 @@ window.switchAccount = window.switchAccount || function(id) {
   if (!id) return;
   fetch('/api/admin/accounts/' + id + '/current', { method: 'POST' }).then(function(){ location.reload(); });
 };
+// JST固定で datetime-local 用の値 (YYYY-MM-DDTHH:MM) を生成
+// addMinutes: 何分後の時刻にするか (デフォルト0=現在のJST時刻)
+window.jstNowDatetimeLocal = window.jstNowDatetimeLocal || function(addMinutes) {
+  var ms = Date.now() + (9 * 60 * 60 * 1000) + ((addMinutes||0) * 60 * 1000);
+  // サーバー時刻オフセットがあれば補正（serverTimeOffsetMs はサーバから取得した値）
+  if (typeof window.serverTimeOffsetMs === 'number') ms += window.serverTimeOffsetMs;
+  var d = new Date(ms);
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+':'+pad(d.getUTCMinutes());
+};
+
+// ★ 自動 cron キッカー: ユーザーがダッシュボードを開くたびに、裏で /cron/tick を呼ぶ
+//    Cloudflare cron triggers が未設定/未稼働でも、ユーザーが画面を開けば予約投稿が実行される。
+//    多数のユーザーが利用するシステムでは誰かしらがダッシュボードを開いているため、
+//    実質的に常時動作する。実行頻度は1ページにつき初回(2秒後)+5分毎の間隔。
+//    認証必須エンドポイントなのでログイン中のユーザーしか起動できず、安全。
+window.__autoCronStart = window.__autoCronStart || function() {
+  if (window.__autoCronStarted) return;
+  window.__autoCronStarted = true;
+  // ログイン画面・管理画面は除外
+  var path = location.pathname;
+  if (path === '/login' || path.indexOf('/admin') === 0 || path === '/') return;
+  // サーバー時刻同期（ブラウザとサーバーのズレ取得）
+  fetch('/api/server-time').then(function(r){ return r.json(); }).then(function(j){
+    if (j && j.now_ms) {
+      window.serverTimeOffsetMs = j.now_ms - Date.now();
+    }
+  }).catch(function(){});
+  // tick 起動関数（バックグラウンド実行、結果は無視）
+  var runTick = function() {
+    fetch('/api/admin/cron/run-tick', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (j && j.success && j.result) {
+          var processed = j.result.processed || 0;
+          var success = j.result.success || 0;
+          if (processed > 0 && success > 0 && typeof toast === 'function') {
+            toast('予約投稿 ' + success + ' 件を実行しました', 'ok');
+          }
+        }
+      })
+      .catch(function(){});
+    fetch('/api/admin/cron/run-autopilot', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' })
+      .then(function(){}).catch(function(){});
+  };
+  // 初回: ページロード2秒後（描画優先）
+  setTimeout(runTick, 2000);
+  // 以降: 5分毎
+  setInterval(runTick, 5 * 60 * 1000);
+};
+// 自動起動
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ window.__autoCronStart(); });
+  } else {
+    window.__autoCronStart();
+  }
+}
 // グローバル名前空間の var として再宣言（各ページ <script> から直接 toast() を呼べるよう var 宣言）
 var toast = window.toast;
 var doLogout = window.doLogout;
@@ -606,10 +664,21 @@ async function doLicenseActivate(e) {
   (function() {
     function updateClock() {
       const el = document.getElementById('jst-clock');
-      if (el) el.textContent = 'JST ' + new Date().toLocaleString('ja-JP');
+      if (!el) return;
+      // ブラウザタイムゾーン非依存のJST固定表示
+      const ms = Date.now() + (9 * 60 * 60 * 1000);
+      const d = new Date(ms);
+      const pad = function(n){ return String(n).padStart(2,'0'); };
+      const y = d.getUTCFullYear();
+      const mo = pad(d.getUTCMonth()+1);
+      const da = pad(d.getUTCDate());
+      const h = pad(d.getUTCHours());
+      const mi = pad(d.getUTCMinutes());
+      const se = pad(d.getUTCSeconds());
+      el.textContent = 'JST ' + y + '/' + mo + '/' + da + ' ' + h + ':' + mi + ':' + se;
     }
     updateClock();
-    setInterval(updateClock, 30000);
+    setInterval(updateClock, 1000);
   })();
 <\/script>`}const sn=`
 <div id="toast-host"></div>
@@ -734,6 +803,66 @@ window.aiChatSend = function() {
     <div class="card card-sm"><div class="text-xs text-ink-muted">予約中</div><div class="text-2xl font-bold text-ink mt-1">${t.pending}</div></div>
     <div class="card card-sm"><div class="text-xs text-ink-muted">本日失敗</div><div class="text-2xl font-bold text-red-600 mt-1">${t.failed}</div></div>
   </div>
+
+  <!-- 予約投稿の即時チェックボタン（誰でもワンクリックで予約処理を強制実行） -->
+  <div class="card" style="background:#EFF6FF;border:1px solid #BFDBFE">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <h3 class="font-bold text-ink" style="margin:0 0 .35rem 0"><i class="fas fa-bolt text-accent"></i> 予約投稿を今すぐチェック</h3>
+        <p class="text-xs text-ink-muted" style="margin:0">予約時刻を過ぎた投稿が反映されない時にクリックしてください。サーバーは1分毎に自動チェックしますが、即時確認したい時に使えます。</p>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="runCronTickNow(this)"><i class="fas fa-play"></i>X投稿を今すぐチェック</button>
+        <button class="btn btn-ghost" onclick="runCronAutopilotNow(this)"><i class="fas fa-plane"></i>オートパイロットを今すぐチェック</button>
+      </div>
+    </div>
+    <div id="cron-result" style="margin-top:.6rem;font-size:.85rem"></div>
+  </div>
+
+  <script>
+  window.runCronTickNow = async function(btn) {
+    const out = document.getElementById('cron-result');
+    if (btn) btn.disabled = true;
+    out.innerHTML = '<span style="color:#6B7280"><i class="fas fa-spinner fa-spin"></i> 実行中...</span>';
+    try {
+      const r = await fetch('/api/admin/cron/run-tick', {method:'POST'});
+      const j = await r.json();
+      if (j.success) {
+        const res = j.result || {};
+        out.innerHTML = '<span style="color:#059669"><i class="fas fa-check"></i> 完了: 処理 ' + (res.processed||0) + ' 件 / 成功 ' + (res.success||0) + ' 件 / 失敗 ' + (res.failed||0) + ' 件</span>';
+        toast('予約投稿チェック完了 (成功 ' + (res.success||0) + ' 件)','ok');
+        if ((res.success||0) > 0) setTimeout(()=>location.reload(), 1500);
+      } else {
+        out.innerHTML = '<span style="color:#dc2626"><i class="fas fa-xmark"></i> 失敗: ' + (j.error||'unknown') + '</span>';
+        toast('チェック失敗','err');
+      }
+    } catch(e) {
+      out.innerHTML = '<span style="color:#dc2626">エラー: ' + e.message + '</span>';
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
+  window.runCronAutopilotNow = async function(btn) {
+    const out = document.getElementById('cron-result');
+    if (btn) btn.disabled = true;
+    out.innerHTML = '<span style="color:#6B7280"><i class="fas fa-spinner fa-spin"></i> 実行中...</span>';
+    try {
+      const r = await fetch('/api/admin/cron/run-autopilot', {method:'POST'});
+      const j = await r.json();
+      if (j.success) {
+        const res = j.result || {};
+        out.innerHTML = '<span style="color:#059669"><i class="fas fa-check"></i> オートパイロット完了: 処理 ' + (res.processed||0) + ' 件 / 成功 ' + (res.success||0) + ' 件 / 失敗 ' + (res.failed||0) + ' 件</span>';
+        toast('オートパイロットチェック完了','ok');
+      } else {
+        out.innerHTML = '<span style="color:#dc2626"><i class="fas fa-xmark"></i> 失敗: ' + (j.error||'unknown') + '</span>';
+      }
+    } catch(e) {
+      out.innerHTML = '<span style="color:#dc2626">エラー: ' + e.message + '</span>';
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
+  </script>
 
   <div class="grid grid-cols-1 gap-4">
     <div class="card">
@@ -1505,10 +1634,8 @@ window.openSchedRowModal = function(postId) {
   const old = document.getElementById('row-sched-modal');
   if (old) old.remove();
 
-  // 1時間後をデフォルト値に
-  const d = new Date(Date.now() + 60*60*1000);
-  const pad = n => String(n).padStart(2,'0');
-  const def = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  // 1時間後をJST固定でデフォルト値に
+  const def = jstNowDatetimeLocal(60);
 
   const modal = document.createElement('div');
   modal.id = 'row-sched-modal';
@@ -1854,28 +1981,22 @@ window.thAttachAny = async function(btn, kind){
   const item = btn.closest('.reply-item');
   item._media = item._media || [];
   if (item._media.length >= 4) { toast('1返信あたり最大4件','err'); return; }
-  const choice = confirm(kind==='image'?'OK=画像をアップロード / キャンセル=URL入力':'OK=動画をアップロード / キャンセル=URL入力');
-  if (choice) {
-    const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
-    inp.onchange = async () => {
-      const f = inp.files && inp.files[0]; if(!f) return;
-      const fd = new FormData(); fd.append('file', f);
-      toast('アップロード中...','info');
+  // フォルダを直接開く（ファイルピッカー）
+  const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fd = new FormData(); fd.append('file', f);
+    toast('アップロード中...','info');
+    try {
       const r = await fetch('/api/admin/media',{method:'POST', body: fd});
       const j = await r.json();
       if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
       item._media.push({id:j.id, type:kind, name:f.name});
       thRenderItemMedia(item);
-    };
-    inp.click();
-  } else {
-    const u = prompt(kind==='image'?'画像のURLを入力':'動画のURLを入力'); if (!u) return;
-    const r = await fetch('/api/admin/media/url',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:u, file_type:kind})});
-    const j = await r.json();
-    if(!j.success){ toast('登録失敗: '+(j.error||''),'err'); return; }
-    item._media.push({id:j.id, type:kind, name:u.split('/').pop()||'remote'});
-    thRenderItemMedia(item);
-  }
+      toast(kind==='image'?'画像を添付しました':'動画を添付しました','ok');
+    } catch(e) { toast('エラー: '+e.message,'err'); }
+  };
+  inp.click();
 };
 window.thAttachFile = async function(btn, kind){
   const item = btn.closest('.reply-item');
@@ -1980,10 +2101,8 @@ async function submitSchedule() {
   // 既存のモーダルを削除
   const old = document.getElementById('th-sched-modal');
   if (old) old.remove();
-  // 1時間後をデフォルト値に
-  const dd = new Date(Date.now() + 60*60*1000);
-  const pad = n => String(n).padStart(2,'0');
-  const def = dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())+'T'+pad(dd.getHours())+':'+pad(dd.getMinutes());
+  // 1時間後をJST固定でデフォルト値に
+  const def = jstNowDatetimeLocal(60);
   const modal = document.createElement('div');
   modal.id = 'th-sched-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
@@ -2574,10 +2693,8 @@ async function retryApJob(id) {
   // 既存のモーダルを削除
   const old = document.getElementById('ap-retry-modal');
   if (old) old.remove();
-  // 5分後をデフォルト値に
-  const dd = new Date(Date.now() + 5*60*1000);
-  const pad = n => String(n).padStart(2,'0');
-  const def = dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())+'T'+pad(dd.getHours())+':'+pad(dd.getMinutes());
+  // 5分後をJST固定でデフォルト値に
+  const def = jstNowDatetimeLocal(5);
   const modal = document.createElement('div');
   modal.id = 'ap-retry-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
@@ -3855,10 +3972,8 @@ if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepar
        VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[c].body,s[c].link_url??null,d,c,p,i,i).run();l.push(_.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const zs=new A,Pn=5;zs.post("/cron/tick",async e=>{const t=g(),{results:s}=await e.env.DB.prepare(`SELECT * FROM post_queue
       WHERE platform='x'
         AND status IN ('pending','approved')
-        AND (
-              COALESCE(effective_scheduled_at, scheduled_at) IS NULL
-           OR COALESCE(effective_scheduled_at, scheduled_at) <= datetime('now','+9 hours')
-        )
+        AND COALESCE(effective_scheduled_at, scheduled_at) IS NOT NULL
+        AND COALESCE(effective_scheduled_at, scheduled_at) <= datetime('now','+9 hours')
       ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC
       LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{
 // account_id NULLの場合: is_current=1 → 任意のアクティブアカウント の順で fallback
