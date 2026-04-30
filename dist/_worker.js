@@ -2295,7 +2295,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         const textColor = col===0?'#ef4444':col===6?'#2563EB':'var(--ink)';
         const cursor = isCurrentMonth ? 'cursor:pointer;' : '';
         const click = isCurrentMonth ? ' onclick="scOpenDay(\\''+dateStr+'\\')"' : '';
-        html += '<div'+click+' style="position:relative;min-height:11rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
+        html += '<div'+click+' style="position:relative;min-height:5.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
         if (isCurrentMonth) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">';
           html += '<span style="font-size:.8rem;font-weight:'+(isToday?'700':'400')+';color:'+textColor+'">' + day + '</span>';
@@ -2304,7 +2304,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
           if (posts.length > 0) html += '<div style="margin-bottom:2px"><span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'件</span></div>';
           // 縦5×横4=20件まで表示。グリッド2列で密度を高める
           html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px">';
-          posts.slice(0,20).forEach(p => {
+          posts.slice(0,8).forEach(p => {
             const color = p.status==='posted'?'#065F46':p.status==='failed'?'#991B1B':'#1D4ED8';
             const bg = p.status==='posted'?'#ECFDF5':p.status==='failed'?'#FEF2F2':p.source_type==='autopilot'?'#FEF3C7':'#EFF6FF';
             const label = p.source_type==='autopilot' ? '[AP]' : '';
@@ -2312,7 +2312,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
             html += '<div style="background:'+bg+';color:'+color+';font-size:.6rem;padding:1px 3px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2" title="'+timeStr+' '+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + '<span style="font-weight:700;font-family:monospace">' + timeStr + '</span> ' + label + '</div>';
           });
           html += '</div>';
-          if (posts.length > 20) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-20) + '件</div>';
+          if (posts.length > 8) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-8) + '件</div>';
         }
         html += '</div>';
         day++;
@@ -2465,7 +2465,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
               <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}${t.error_message?`<div style="font-size:.7rem;color:#dc2626;margin-top:.2rem">⚠ ${w((t.error_message||"").slice(0,80))}</div>`:""}</td>
               <td>${(()=>{const st=t.status||"";if(st==="posted")return'<span class="pill pill-ok">投稿済</span>';if(st==="generated")return'<span class="pill pill-blue">予約中</span>';if(st==="error"||st==="failed")return'<span class="pill pill-err">失敗</span>';if(st==="draft")return'<span class="pill pill-soft">下書保存</span>';return'<span class="pill pill-blue">未投稿</span>'})()}</td>
               <td class="text-right">
-                ${(t.status==="error"||t.status==="failed"||t.status==="configured")?`<button class="btn btn-primary btn-sm" onclick="retryApJob(${t.id})" title="再投稿"><i class="fas fa-rotate-right"></i>再投稿</button>`:""}
+                ${(t.status!=="posted")?`<button class="btn btn-primary btn-sm" onclick="retryApJob(${t.id})" title="再投稿（投稿日時を再設定して即時実行）"><i class="fas fa-rotate-right"></i>再投稿</button>`:""}
                 <button class="btn btn-danger btn-sm" onclick="delApJob(${t.id})"><i class="fas fa-trash"></i></button>
               </td>
             </tr>
@@ -4041,15 +4041,21 @@ let newGenAt;
 try{
   const pubD=new Date(newPublishAt.replace(" ","T")+"+09:00");
   pubD.setMinutes(pubD.getMinutes()-2);
-  // pubD は UTC基準のDateオブジェクト → これをJST文字列に
   const j=new Date(pubD.getTime()+offsetJst);
   newGenAt=j.getUTCFullYear()+"-"+pad(j.getUTCMonth()+1)+"-"+pad(j.getUTCDate())+" "+pad(j.getUTCHours())+":"+pad(j.getUTCMinutes())+":"+pad(j.getUTCSeconds());
 }catch{
-  // フォールバック: 1分後
   const d=new Date(Date.now()+60*1000+offsetJst);
   newGenAt=d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes())+":"+pad(d.getUTCSeconds());
 }
-await e.env.DB.prepare("UPDATE autopilot_jobs SET status='configured', generate_at=?, publish_at=?, error_message=NULL, generated_post_id=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newGenAt,newPublishAt,g(),s,t.id).run();return e.json({success:!0,next_at:newGenAt,publish_at:newPublishAt})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
+// status='generated' なら post_queue (生成済み記事) を直接 approved + 新しい予約時刻でreset
+if(job.status==="generated"&&job.generated_post_id){
+  await e.env.DB.prepare("UPDATE post_queue SET status='approved', scheduled_at=?, effective_scheduled_at=?, base_scheduled_at=?, error_message=NULL, posted_at=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newPublishAt,newPublishAt,newPublishAt,g(),job.generated_post_id,t.id).run();
+  // autopilot_jobs も予約状態に戻す
+  await e.env.DB.prepare("UPDATE autopilot_jobs SET status='generated', publish_at=?, error_message=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newPublishAt,g(),s,t.id).run();
+  return e.json({success:!0,mode:"post_queue_reset",publish_at:newPublishAt,post_queue_id:job.generated_post_id});
+}
+// それ以外（configured/error）: autopilot_jobs を再生成待ちに戻す
+await e.env.DB.prepare("UPDATE autopilot_jobs SET status='configured', generate_at=?, publish_at=?, error_message=NULL, generated_post_id=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newGenAt,newPublishAt,g(),s,t.id).run();return e.json({success:!0,mode:"regenerate",next_at:newGenAt,publish_at:newPublishAt})});ve.post("/cron/autopilot-tick",async e=>{let openaiKey=e.env.OPENAI_API_KEY;if(!openaiKey){try{const enc=await Tt(e,"openai_api_key");if(enc)openaiKey=await lt(enc,e.env.ENCRYPTION_KEY)}catch{}}if(!openaiKey)return e.json({ok:!0,skipped:"no_openai_key"});const{results:t}=await e.env.DB.prepare(`SELECT * FROM autopilot_jobs
        WHERE status = 'configured'
          AND (
               (generate_at IS NOT NULL AND generate_at <= datetime('now','+9 hours'))
