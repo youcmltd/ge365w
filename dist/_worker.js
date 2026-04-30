@@ -355,13 +355,35 @@ window.switchAccount = window.switchAccount || function(id) {
 };
 // JST固定で datetime-local 用の値 (YYYY-MM-DDTHH:MM) を生成
 // addMinutes: 何分後の時刻にするか (デフォルト0=現在のJST時刻)
+// 注意: <input type="datetime-local"> はブラウザTZでvalueを解釈するため、
+//       ブラウザTZがJSTでない場合は表示がズレる。本関数はブラウザTZ補正済の値を返す。
 window.jstNowDatetimeLocal = window.jstNowDatetimeLocal || function(addMinutes) {
-  var ms = Date.now() + (9 * 60 * 60 * 1000) + ((addMinutes||0) * 60 * 1000);
-  // サーバー時刻オフセットがあれば補正（serverTimeOffsetMs はサーバから取得した値）
-  if (typeof window.serverTimeOffsetMs === 'number') ms += window.serverTimeOffsetMs;
-  var d = new Date(ms);
+  // 現在のJSTを表す時刻 (UTC基準のms)
+  var nowMs = Date.now() + ((addMinutes||0) * 60 * 1000);
+  // サーバー時刻オフセットがあれば補正
+  if (typeof window.serverTimeOffsetMs === 'number') nowMs += window.serverTimeOffsetMs;
+  // ブラウザのローカルTZ表示で「JSTと同じ時刻文字列」が表示されるように、
+  // ローカルTZ-JST の差分を加算する（JSTブラウザでは差分=0で何も変わらない）
+  var localOffsetMin = new Date(nowMs).getTimezoneOffset(); // ローカル→UTCの分（JSTなら-540）
+  var jstOffsetMin = -540; // JST = UTC+9 = -540分
+  var diffMin = jstOffsetMin - localOffsetMin;
+  var displayMs = nowMs + (diffMin * 60 * 1000);
+  var dd = new Date(displayMs);
   var pad = function(n){ return String(n).padStart(2,'0'); };
-  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+':'+pad(d.getUTCMinutes());
+  return dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())+'T'+pad(dd.getHours())+':'+pad(dd.getMinutes());
+};
+// datetime-local の値 (ローカルTZで解釈される) を JST文字列に変換するヘルパー
+window.datetimeLocalToJst = window.datetimeLocalToJst || function(dtValue) {
+  if (!dtValue) return '';
+  // dtValue は YYYY-MM-DDTHH:MM 形式。ブラウザはこれをローカルTZ時刻として解釈する。
+  // jstNowDatetimeLocal で補正済の値が入っていれば、これは「JST時刻 をローカルTZ表示に変換した値」になる。
+  // つまり new Date(dtValue) すると ローカルTZ → UTC変換が行われ、JSTから9時間引かれる。
+  // それを JST に戻すには再度 +9時間 する。
+  var d = new Date(dtValue);
+  var jstMs = d.getTime() + (9 * 60 * 60 * 1000);
+  var jst = new Date(jstMs);
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return jst.getUTCFullYear()+'-'+pad(jst.getUTCMonth()+1)+'-'+pad(jst.getUTCDate())+' '+pad(jst.getUTCHours())+':'+pad(jst.getUTCMinutes())+':'+pad(jst.getUTCSeconds());
 };
 
 // ★ 自動 cron キッカー: ユーザーがダッシュボードを開くたびに、裏で /cron/tick を呼ぶ
@@ -1177,14 +1199,9 @@ window.paAttachAny = async function(pid, kind) {
   window.paAttachedMedia = window.paAttachedMedia || {};
   window.paAttachedMedia[pid] = window.paAttachedMedia[pid] || [];
   if (window.paAttachedMedia[pid].length >= 4) { toast('添付は最大4件まで','err'); return; }
-  const choice = confirm(kind==='image'?'OK=画像をアップロード / キャンセル=URL入力':'OK=動画をアップロード / キャンセル=URL入力');
-  if (choice) {
-    if (kind === 'image') paAttachImageFile(pid);
-    else paAttachVideoFile(pid);
-  } else {
-    if (kind === 'image') paAttachImageUrl(pid);
-    else paAttachVideoUrl(pid);
-  }
+  // フォルダを直接開く（ファイルピッカー）
+  if (kind === 'image') paAttachImageFile(pid);
+  else paAttachVideoFile(pid);
 };
 async function paAddRemoteMedia(pid, url, ftype) {
   try {
@@ -1241,7 +1258,7 @@ window.paSchedule = async function(pid) {
   const stEl = document.getElementById('pa-status-'+pid);
   stEl.textContent = '予約中...'; stEl.style.color='#6B7280';
   await paSyncMediaToPost(pid);
-  const scheduledAt = dt.replace('T',' ') + ':00';
+  const scheduledAt = datetimeLocalToJst(dt);
   const r = await fetch('/api/admin/posts/'+pid+'/schedule', {
     method:'POST', headers:{'content-type':'application/json'},
     body: JSON.stringify({scheduled_at: scheduledAt})
@@ -1437,37 +1454,28 @@ async function paSyncMediaToPost(pid) {
 window.paAttachAny = async function(pid, kind) {
   window.paAttachedMedia[pid] = window.paAttachedMedia[pid] || [];
   if (window.paAttachedMedia[pid].length >= 4) { toast('添付は最大4件まで','err'); return; }
-  const choice = confirm(kind==='image'?'OK=画像をアップロード / キャンセル=URL入力':'OK=動画をアップロード / キャンセル=URL入力');
-  if (choice) {
-    const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
-    inp.onchange = async () => {
-      const f = inp.files && inp.files[0]; if(!f) return;
-      const fd = new FormData(); fd.append('file', f);
-      toast('アップロード中...','info');
-      const r = await fetch('/api/admin/media',{method:'POST', body: fd});
-      const j = await r.json();
-      if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
-      window.paAttachedMedia[pid].push({id: j.id, type: kind, name: f.name});
-      paRenderMedia(pid);
-      await paSyncMediaToPost(pid);
-    };
-    inp.click();
-  } else {
-    const u = prompt(kind==='image'?'画像のURLを入力':'動画のURLを入力'); if(!u) return;
-    const r = await fetch('/api/admin/media/url',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:u, file_type:kind})});
+  // フォルダを直接開く（ファイルピッカー）
+  const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fd = new FormData(); fd.append('file', f);
+    toast('アップロード中...','info');
+    const r = await fetch('/api/admin/media',{method:'POST', body: fd});
     const j = await r.json();
-    if(!j.success){ toast('登録失敗: '+(j.error||''),'err'); return; }
-    window.paAttachedMedia[pid].push({id:j.id, type:kind, name: u.split('/').pop()||'remote'});
+    if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
+    window.paAttachedMedia[pid].push({id: j.id, type: kind, name: f.name});
     paRenderMedia(pid);
     await paSyncMediaToPost(pid);
-  }
+    toast(kind==='image'?'画像を添付しました':'動画を添付しました','ok');
+  };
+  inp.click();
 };
 window.paSchedule = async function(pid) {
   const dt = document.getElementById('pa-sched-'+pid).value;
   if (!dt) { toast('予約日時を入力してください','err'); return; }
   const stEl = document.getElementById('pa-status-'+pid);
   stEl.textContent = '予約中...'; stEl.style.color='#6B7280';
-  const scheduledAt = dt.replace('T',' ') + ':00';
+  const scheduledAt = datetimeLocalToJst(dt);
   const r = await fetch('/api/admin/posts/'+pid+'/schedule', {
     method:'POST', headers:{'content-type':'application/json'},
     body: JSON.stringify({scheduled_at: scheduledAt})
@@ -1662,7 +1670,7 @@ window.openSchedRowModal = function(postId) {
 window.submitRowSched = async function(postId) {
   const dt = document.getElementById('row-sched-when').value;
   if (!dt) { toast('予約日時を選択してください','err'); return; }
-  const scheduledAt = dt.replace('T',' ') + ':00';
+  const scheduledAt = datetimeLocalToJst(dt);
   try {
     const r = await fetch('/api/admin/posts/'+postId+'/schedule', {
       method:'POST', headers:{'content-type':'application/json'},
@@ -1700,28 +1708,20 @@ function psRenderMedia() {
 window.psRemoveMedia = function(mid) { window.psMedia = (window.psMedia||[]).filter(m => m.id !== mid); psRenderMedia(); };
 window.psAttachAny = async function(kind) {
   if ((window.psMedia||[]).length >= 4) { toast('添付は最大4件まで','err'); return; }
-  const choice = confirm(kind==='image'?'OK=画像をアップロード / キャンセル=URL入力':'OK=動画をアップロード / キャンセル=URL入力');
-  if (choice) {
-    const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
-    inp.onchange = async () => {
-      const f = inp.files && inp.files[0]; if(!f) return;
-      const fd = new FormData(); fd.append('file', f);
-      toast('アップロード中...','info');
-      const r = await fetch('/api/admin/media',{method:'POST', body: fd});
-      const j = await r.json();
-      if(!j.success){ toast('アップロード失敗','err'); return; }
-      window.psMedia.push({id:j.id, type:kind, name:f.name});
-      psRenderMedia();
-    };
-    inp.click();
-  } else {
-    const u = prompt(kind==='image'?'画像のURLを入力':'動画のURLを入力'); if(!u) return;
-    const r = await fetch('/api/admin/media/url',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:u, file_type:kind})});
+  // フォルダを直接開く（ファイルピッカー）
+  const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fd = new FormData(); fd.append('file', f);
+    toast('アップロード中...','info');
+    const r = await fetch('/api/admin/media',{method:'POST', body: fd});
     const j = await r.json();
-    if(!j.success){ toast('登録失敗','err'); return; }
-    window.psMedia.push({id:j.id, type:kind, name: u.split('/').pop()||'remote'});
+    if(!j.success){ toast('アップロード失敗','err'); return; }
+    window.psMedia.push({id:j.id, type:kind, name:f.name});
     psRenderMedia();
-  }
+    toast(kind==='image'?'画像を添付しました':'動画を添付しました','ok');
+  };
+  inp.click();
 };
 window.submitScheduledPost = async function() {
   const body = document.getElementById('ps-body').value.trim();
@@ -2132,7 +2132,7 @@ window.confirmThSchedule = async function() {
   if (!dt) { toast('予約日時を選択してください','err'); return; }
   const d = window.__pendingThSchedData;
   if (!d) { toast('予約データが見つかりません','err'); return; }
-  d.scheduled_at = dt.replace('T',' ') + ':00';
+  d.scheduled_at = datetimeLocalToJst(dt);
   try {
     const r = await fetch('/api/admin/thread/schedule',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(d)});
     const j = await r.json();
@@ -2463,7 +2463,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
               <td class="text-xs">@${w(t.x_username||"-")}</td>
               <td><span class="pill pill-soft">${w(t.content_mode||"-")}</span></td>
               <td class="text-xs max-w-xs truncate">${w(t.theme||"—")}${t.error_message?`<div style="font-size:.7rem;color:#dc2626;margin-top:.2rem">⚠ ${w((t.error_message||"").slice(0,80))}</div>`:""}</td>
-              <td>${(()=>{const st=t.status||"";if(st==="posted"||st==="generated")return'<span class="pill pill-ok">投稿済</span>';if(st==="error"||st==="failed")return'<span class="pill pill-err">失敗</span>';if(st==="draft")return'<span class="pill pill-soft">下書保存</span>';return'<span class="pill pill-blue">未投稿</span>'})()}</td>
+              <td>${(()=>{const st=t.status||"";if(st==="posted")return'<span class="pill pill-ok">投稿済</span>';if(st==="generated")return'<span class="pill pill-blue">予約中</span>';if(st==="error"||st==="failed")return'<span class="pill pill-err">失敗</span>';if(st==="draft")return'<span class="pill pill-soft">下書保存</span>';return'<span class="pill pill-blue">未投稿</span>'})()}</td>
               <td class="text-right">
                 ${(t.status==="error"||t.status==="failed"||t.status==="configured")?`<button class="btn btn-primary btn-sm" onclick="retryApJob(${t.id})" title="再投稿"><i class="fas fa-rotate-right"></i>再投稿</button>`:""}
                 <button class="btn btn-danger btn-sm" onclick="delApJob(${t.id})"><i class="fas fa-trash"></i></button>
@@ -2592,33 +2592,23 @@ function apRenderMedia(){
 }
 window.apRemoveMedia = function(mid){ window.apMedia = (window.apMedia||[]).filter(m=>m.id!==mid); apRenderMedia(); };
 
-// 画像/動画 ボタン: URL or アップを選択
+// 画像/動画 ボタン: 直接ファイルピッカーを開く
 window.apAttachAny = async function(kind){
   if((window.apMedia||[]).length>=4){ toast('添付は最大4件まで','err'); return; }
-  const choice = confirm(kind==='image'?'OK=画像をアップロード / キャンセル=URL入力':'OK=動画をアップロード / キャンセル=URL入力');
-  if (choice) {
-    const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
-    inp.onchange = async () => {
-      const f = inp.files && inp.files[0]; if(!f) return;
-      const fd = new FormData(); fd.append('file', f);
-      toast('アップロード中...','info');
-      const r = await fetch('/api/admin/media',{method:'POST', body: fd});
-      const j = await r.json();
-      if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
-      window.apMedia = window.apMedia || [];
-      window.apMedia.push({id:j.id, type:kind, name:f.name});
-      apRenderMedia();
-    };
-    inp.click();
-  } else {
-    const u = prompt(kind==='image'?'画像のURLを入力':'動画のURLを入力'); if (!u) return;
-    const r = await fetch('/api/admin/media/url',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:u, file_type:kind})});
+  const inp = document.createElement('input'); inp.type='file'; inp.accept = kind==='image'?'image/*':'video/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fd = new FormData(); fd.append('file', f);
+    toast('アップロード中...','info');
+    const r = await fetch('/api/admin/media',{method:'POST', body: fd});
     const j = await r.json();
-    if(!j.success){ toast('登録失敗: '+(j.error||''),'err'); return; }
+    if(!j.success){ toast('アップロード失敗: '+(j.error||''),'err'); return; }
     window.apMedia = window.apMedia || [];
-    window.apMedia.push({id:j.id, type:kind, name:u.split('/').pop()||'remote'});
+    window.apMedia.push({id:j.id, type:kind, name:f.name});
     apRenderMedia();
-  }
+    toast(kind==='image'?'画像を添付しました':'動画を添付しました','ok');
+  };
+  inp.click();
 };
 
 window.apSaveDraft = function(){
@@ -2721,7 +2711,7 @@ window.retryApJob = retryApJob;
 window.confirmApRetry = async function(id) {
   const dt = document.getElementById('ap-retry-when').value;
   if (!dt) { toast('投稿日時を選択してください','err'); return; }
-  const publishAt = dt.replace('T',' ') + ':00';
+  const publishAt = datetimeLocalToJst(dt);
   try {
     const r = await fetch('/api/admin/autopilot/jobs/' + id + '/retry', {
       method:'POST',
@@ -3887,7 +3877,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
      ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,s).run(),!0)}async function Js(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function Ks(e,t,s,a,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),0){}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
        WHERE account_id = ? AND status = 'posted'
        ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC
-       LIMIT 5`).bind(t).all();for(const c of l||[]){const p=Ws(s,c.body||"");if(p>=.98){i.errors.push({code:"too_similar",message:`過去投稿 (ID: ${c.id}) と完全に同一の文章です`});break}}if(a){const c=await e.DB.prepare(`SELECT COUNT(*) AS n FROM post_queue
+       LIMIT 5`).bind(t).all();if((s||"").length>20)for(const c of l||[]){if((c.body||"").length<=20)continue;const p=Ws(s,c.body||"");if(p>=.98){i.errors.push({code:"too_similar",message:`過去投稿 (ID: ${c.id}) と完全に同一の文章です`});break}}if(a){const c=await e.DB.prepare(`SELECT COUNT(*) AS n FROM post_queue
         WHERE account_id = ? AND link_url = ? AND status IN ('posted','approved','publishing')
           AND DATE(COALESCE(posted_at, scheduled_at, created_at)) >= DATE('now','+9 hours','-7 days')`).bind(t,a).first();((c==null?void 0:c.n)??0)>=3&&i.errors.push({code:"link_spam",message:`同一リンクを過去7日で${c==null?void 0:c.n}回使用しています`})}if(n){const c=es(n);if(c.size>0){const{results:p}=await e.DB.prepare(`SELECT hashtags FROM post_queue
            WHERE account_id = ? AND status IN ('posted','approved','publishing') AND hashtags IS NOT NULL AND hashtags != ''
@@ -3996,7 +3986,10 @@ if(!r.account_id&&acctRow.id){
 const d=acctRow;const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id))throw new Error("account_busy");try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
 `+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}// thread_parent_id を解決
-let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){replyToId=tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),await e.env.DB.prepare(`UPDATE x_accounts SET
+let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){replyToId=tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),
+// autopilot_jobs に紐づく投稿の場合は autopilot_jobs.status='posted' にも同期
+await e.env.DB.prepare("UPDATE autopilot_jobs SET status='posted', updated_at=? WHERE generated_post_id=? AND user_id=?").bind(g(),r.id,r.user_id).run(),
+await e.env.DB.prepare(`UPDATE x_accounts SET
              last_posted_at = ?,
              daily_post_count = CASE
                WHEN last_daily_reset_date != DATE('now','+9 hours') THEN 1
@@ -4011,7 +4004,10 @@ let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if
            VALUES (?, ?, date('now','+9 hours'), 1)
            ON CONFLICT(account_id, metric_date) DO UPDATE SET
              posts_sent = posts_sent + 1,
-             updated_at = datetime('now','+9 hours')`).bind(d.id,r.user_id).run(),n++}finally{await Js(e.env,d.id)}}catch(d){const l=(d==null?void 0:d.message)||"unknown_error";await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(l,g(),r.id).run(),await e.env.DB.prepare(`INSERT INTO post_logs
+             updated_at = datetime('now','+9 hours')`).bind(d.id,r.user_id).run(),n++}finally{await Js(e.env,d.id)}}catch(d){const l=(d==null?void 0:d.message)||"unknown_error";await e.env.DB.prepare("UPDATE post_queue SET status='failed', error_message=?, updated_at=? WHERE id=?").bind(l,g(),r.id).run(),
+// autopilot_jobs に紐づく投稿の場合は autopilot_jobs.status='error' にも同期
+await e.env.DB.prepare("UPDATE autopilot_jobs SET status='error', error_message=?, updated_at=? WHERE generated_post_id=? AND user_id=?").bind(l,g(),r.id,r.user_id).run(),
+await e.env.DB.prepare(`INSERT INTO post_logs
            (record_id, account_id, user_id, platform, source_type, post_mode, content, content_hash,
             status, error_message, executed_at)
          VALUES (?, ?, ?, 'x', ?, ?, ?, ?, 'failed', ?, ?)`).bind(r.id,r.account_id,r.user_id,r.source_type,r.post_mode,r.body||"",r.content_hash||"",l,g()).run(),r.account_id&&(d instanceof Mt?await mt(e.env,r.account_id,"rate_limit",-15):await mt(e.env,r.account_id,"error",-5,{message:l})),r.account_id&&await e.env.DB.prepare(`INSERT INTO kpi_metrics (account_id, user_id, metric_date, posts_failed)
