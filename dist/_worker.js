@@ -323,32 +323,29 @@ window.switchAccount = window.switchAccount || function(id) {
 // 注意: <input type="datetime-local"> はブラウザTZでvalueを解釈するため、
 //       ブラウザTZがJSTでない場合は表示がズレる。本関数はブラウザTZ補正済の値を返す。
 window.jstNowDatetimeLocal = window.jstNowDatetimeLocal || function(addMinutes) {
-  // 現在のJSTを表す時刻 (UTC基準のms)
   var nowMs = Date.now() + ((addMinutes||0) * 60 * 1000);
   // サーバー時刻オフセットがあれば補正
   if (typeof window.serverTimeOffsetMs === 'number') nowMs += window.serverTimeOffsetMs;
-  // ブラウザのローカルTZ表示で「JSTと同じ時刻文字列」が表示されるように、
-  // ローカルTZ-JST の差分を加算する（JSTブラウザでは差分=0で何も変わらない）
-  var localOffsetMin = new Date(nowMs).getTimezoneOffset(); // ローカル→UTCの分（JSTなら-540）
-  var jstOffsetMin = -540; // JST = UTC+9 = -540分
-  var diffMin = jstOffsetMin - localOffsetMin;
-  var displayMs = nowMs + (diffMin * 60 * 1000);
-  var dd = new Date(displayMs);
-  var pad = function(n){ return String(n).padStart(2,'0'); };
-  return dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())+'T'+pad(dd.getHours())+':'+pad(dd.getMinutes());
+  var parts = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).formatToParts(new Date(nowMs)).reduce(function(acc, p){
+    acc[p.type] = p.value;
+    return acc;
+  }, {});
+  return parts.year+'-'+parts.month+'-'+parts.day+'T'+parts.hour+':'+parts.minute;
 };
 // datetime-local の値 (ローカルTZで解釈される) を JST文字列に変換するヘルパー
 window.datetimeLocalToJst = window.datetimeLocalToJst || function(dtValue) {
   if (!dtValue) return '';
-  // dtValue は YYYY-MM-DDTHH:MM 形式。ブラウザはこれをローカルTZ時刻として解釈する。
-  // jstNowDatetimeLocal で補正済の値が入っていれば、これは「JST時刻 をローカルTZ表示に変換した値」になる。
-  // つまり new Date(dtValue) すると ローカルTZ → UTC変換が行われ、JSTから9時間引かれる。
-  // それを JST に戻すには再度 +9時間 する。
-  var d = new Date(dtValue);
-  var jstMs = d.getTime() + (9 * 60 * 60 * 1000);
-  var jst = new Date(jstMs);
-  var pad = function(n){ return String(n).padStart(2,'0'); };
-  return jst.getUTCFullYear()+'-'+pad(jst.getUTCMonth()+1)+'-'+pad(jst.getUTCDate())+' '+pad(jst.getUTCHours())+':'+pad(jst.getUTCMinutes())+':'+pad(jst.getUTCSeconds());
+  var m = String(dtValue).trim().match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (m) return m[1]+'-'+m[2]+'-'+m[3]+' '+m[4]+':'+m[5]+':'+(m[6]||'00');
+  return String(dtValue).replace('T',' ');
 };
 // ★ 自動 cron キッカー: ユーザーがダッシュボードを開くたびに、裏で /cron/tick を呼ぶ
 //    Cloudflare cron triggers が未設定/未稼働でも、ユーザーが画面を開けば予約投稿が実行される。
@@ -369,7 +366,11 @@ window.__autoCronStart = window.__autoCronStart || function() {
   }).catch(function(){});
   // tick 起動関数（バックグラウンド実行、結果は無視）
   var runTick = function() {
-    fetch('/api/admin/cron/run-tick', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' })
+    fetch('/api/admin/cron/run-autopilot', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' })
+      .catch(function(){})
+      .then(function(){
+        return fetch('/api/admin/cron/run-tick', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' });
+      })
       .then(function(r){ return r.json(); })
       .then(function(j){
         if (j && j.success && j.result) {
@@ -381,8 +382,6 @@ window.__autoCronStart = window.__autoCronStart || function() {
         }
       })
       .catch(function(){});
-    fetch('/api/admin/cron/run-autopilot', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' })
-      .then(function(){}).catch(function(){});
   };
   // 初回: ページロード2秒後（描画優先）
   setTimeout(runTick, 2000);
@@ -2986,8 +2985,9 @@ window.testApi = testApi;
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
               daily_post_count, daily_post_limit, last_posted_at, is_active
          FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();let xKeyDec="",xSecDec="";if(s){try{xKeyDec=s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):""}catch{}try{xSecDec=s.api_secret?await lt(s.api_secret,e.env.ENCRYPTION_KEY):""}catch{}}const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:{api_key:xKeyDec,api_secret:xSecDec,api_key_set:!!xKeyDec,api_secret_set:!!xSecDec,openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||""}})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;
+F.get("/api/server-time",e=>e.json({now:g(),now_ms:Date.now()}));
 // 手動cron起動: ブラウザから /api/admin/cron/run-tick を叩くと即時実行（cron triggers が動かない時の救済）
-F.post("/api/admin/cron/run-tick",m,R,async e=>{
+F.post("/api/admin/cron/run-tick",m,async e=>{
   try {
     const r = await S.fetch(new Request("https://internal/cron/tick",{method:"POST"}), e.env, e.executionCtx);
     const j = await r.json().catch(()=>({}));
@@ -2996,11 +2996,13 @@ F.post("/api/admin/cron/run-tick",m,R,async e=>{
     return e.json({success:false, error: err.message}, 500);
   }
 });
-F.post("/api/admin/cron/run-autopilot",m,R,async e=>{
+F.post("/api/admin/cron/run-autopilot",m,async e=>{
   try {
     const r = await S.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}), e.env, e.executionCtx);
     const j = await r.json().catch(()=>({}));
-    return e.json({success:true, kind:'autopilot', result: j});
+    const tick = await S.fetch(new Request("https://internal/cron/tick",{method:"POST"}), e.env, e.executionCtx);
+    const tickJson = await tick.json().catch(()=>({}));
+    return e.json({success:true, kind:'autopilot', result: j, post_result: tickJson});
   } catch(err) {
     return e.json({success:false, error: err.message}, 500);
   }
@@ -3803,7 +3805,7 @@ if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepar
         AND status IN ('pending','approved')
         AND COALESCE(effective_scheduled_at, scheduled_at) IS NOT NULL
         AND COALESCE(effective_scheduled_at, scheduled_at) <= datetime('now','+9 hours')
-      ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC
+      ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC, COALESCE(thread_order, 0) ASC
       LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{
 // account_id NULLの場合: is_current=1 → 任意のアクティブアカウント の順で fallback
 let acctRow=null;
@@ -3828,7 +3830,7 @@ const d=acctRow;const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if
   continue;
 }try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
-`+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}// thread_parent_id を解決
+`+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(T,r.user_id).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}// thread_parent_id を解決
 let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){replyToId=tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),
 // autopilot_jobs に紐づく投稿の場合は autopilot_jobs.status='posted' にも同期
 await e.env.DB.prepare("UPDATE autopilot_jobs SET status='posted', updated_at=? WHERE generated_post_id=? AND user_id=?").bind(g(),r.id,r.user_id).run(),
@@ -3890,9 +3892,9 @@ try{
   const d=new Date(Date.now()+60*1000+offsetJst);
   newGenAt=d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes())+":"+pad(d.getUTCSeconds());
 }
-// status='generated' なら post_queue (生成済み記事) を直接 approved + 新しい予約時刻でreset
-if(job.status==="generated"&&job.generated_post_id){
-  await e.env.DB.prepare("UPDATE post_queue SET status='approved', scheduled_at=?, effective_scheduled_at=?, base_scheduled_at=?, error_message=NULL, posted_at=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newPublishAt,newPublishAt,newPublishAt,g(),job.generated_post_id,t.id).run();
+// 生成済み記事がある場合は post_queue を直接 approved + 新しい予約時刻でreset
+if(job.generated_post_id){
+  await e.env.DB.prepare("UPDATE post_queue SET status='approved', scheduled_at=?, effective_scheduled_at=?, base_scheduled_at=?, error_message=NULL, external_post_id=NULL, posted_at=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newPublishAt,newPublishAt,newPublishAt,g(),job.generated_post_id,t.id).run();
   // autopilot_jobs も予約状態に戻す
   await e.env.DB.prepare("UPDATE autopilot_jobs SET status='generated', publish_at=?, error_message=NULL, updated_at=? WHERE id=? AND user_id=?").bind(newPublishAt,g(),s,t.id).run();
   return e.json({success:!0,mode:"post_queue_reset",publish_at:newPublishAt,post_queue_id:job.generated_post_id});
@@ -4093,9 +4095,9 @@ at.post("/api/admin/thread/schedule",m,async e=>{
     const mediaJson=Array.isArray(it.media_ids)&&it.media_ids.length>0?JSON.stringify(it.media_ids.slice(0,4)):null;
     const r=await e.env.DB.prepare(`INSERT INTO post_queue
        (platform, user_id, account_id, body, post_mode, scheduled_at, effective_scheduled_at,
-        status, source_type, thread_parent_id, media_json, media_type, created_at, updated_at)
-       VALUES ('x', ?, ?, ?, 'body', ?, ?, 'approved', 'thread', ?, ?, ?, ?, ?)`).bind(
-        t.id, acct.id, it.body, sched, sched, i===0?tid:"prev:"+(ids[i-1]||""),
+        status, source_type, thread_parent_id, thread_order, thread_count, media_json, media_type, created_at, updated_at)
+       VALUES ('x', ?, ?, ?, 'body', ?, ?, 'approved', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
+        t.id, acct.id, it.body, sched, sched, i===0?tid:"prev:"+(ids[i-1]||""), i, arr.length,
         mediaJson, mediaJson?"image":null, tt, tt
       ).run();
     ids.push(r.meta.last_row_id);
@@ -4228,6 +4230,16 @@ at.get("/media/*",async e=>{if(!e.env.MEDIA_BUCKET)return e.notFound();const t=e
 //   ここで fetch / scheduled の両方を export してスケジューラを有効化する。
 const __wrappedDefault = {
   fetch(req, env, ctx) { return os.fetch(req, env, ctx); },
-  scheduled(controller, env, ctx) { return Hn.scheduled(controller, env, ctx); }
+  scheduled(controller, env, ctx) {
+    const cron = controller && controller.cron;
+    const run = async () => {
+      if (!cron || cron === "*/5 * * * *") {
+        await S.fetch(new Request("https://internal/cron/autopilot-tick", { method: "POST" }), env, ctx);
+      }
+      await S.fetch(new Request("https://internal/cron/tick", { method: "POST" }), env, ctx);
+    };
+    if (ctx && ctx.waitUntil) return ctx.waitUntil(run().catch(err => console.error("[scheduled]", err)));
+    return run();
+  }
 };
 export { __wrappedDefault as default };
