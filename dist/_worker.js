@@ -322,7 +322,7 @@ window.switchAccount = window.switchAccount || function(id) {
 // addMinutes: 何分後の時刻にするか (デフォルト0=現在のJST時刻)
 // 注意: <input type="datetime-local"> はブラウザTZでvalueを解釈するため、
 //       ブラウザTZがJSTでない場合は表示がズレる。本関数はブラウザTZ補正済の値を返す。
-window.jstNowDatetimeLocal = window.jstNowDatetimeLocal || function(addMinutes) {
+window.jstNowDatetimeLocal = function(addMinutes) {
   var nowMs = Date.now() + ((addMinutes||0) * 60 * 1000);
   // サーバー時刻オフセットがあれば補正
   if (typeof window.serverTimeOffsetMs === 'number') nowMs += window.serverTimeOffsetMs;
@@ -341,7 +341,7 @@ window.jstNowDatetimeLocal = window.jstNowDatetimeLocal || function(addMinutes) 
   return parts.year+'-'+parts.month+'-'+parts.day+'T'+parts.hour+':'+parts.minute;
 };
 // datetime-local の値 (ローカルTZで解釈される) を JST文字列に変換するヘルパー
-window.datetimeLocalToJst = window.datetimeLocalToJst || function(dtValue) {
+window.datetimeLocalToJst = function(dtValue) {
   if (!dtValue) return '';
   var m = String(dtValue).trim().match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
   if (m) return m[1]+'-'+m[2]+'-'+m[3]+' '+m[4]+':'+m[5]+':'+(m[6]||'00');
@@ -352,7 +352,7 @@ window.datetimeLocalToJst = window.datetimeLocalToJst || function(dtValue) {
 //    多数のユーザーが利用するシステムでは誰かしらがダッシュボードを開いているため、
 //    実質的に常時動作する。実行頻度は1ページにつき初回(2秒後)+5分毎の間隔。
 //    認証必須エンドポイントなのでログイン中のユーザーしか起動できず、安全。
-window.__autoCronStart = window.__autoCronStart || function() {
+window.__autoCronStart = function() {
   if (window.__autoCronStarted) return;
   window.__autoCronStarted = true;
   // ログイン画面・管理画面は除外
