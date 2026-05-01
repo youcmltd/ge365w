@@ -14,7 +14,6 @@ var Zs=Object.defineProperty;var Ut=e=>{throw TypeError(e)};var Qs=(e,t,s)=>t in
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans JP',Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
-
 /* ===== レイアウト ===== */
 .min-h-screen{min-height:100vh}
 .flex{display:flex}.flex-col{flex-direction:column}.flex-1{flex:1 1 0%}
@@ -29,13 +28,11 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .fixed{position:fixed}.relative{position:relative}.absolute{position:absolute}
 .inset-0{top:0;right:0;bottom:0;left:0}
 .z-50{z-index:50}.z-40{z-index:40}
-
 /* ===== サイズ ===== */
 .w-full{width:100%}.h-full{height:100%}
 .w-56{width:14rem}.w-8{width:2rem}.h-8{height:2rem}
 .w-13{width:3.25rem}.h-13{height:3.25rem}
 .max-w-md{max-width:28rem}.max-w-xs{max-width:20rem}
-
 /* ===== スペーシング ===== */
 .p-2{padding:.5rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}
 .px-1{padding-left:.25rem;padding-right:.25rem}
@@ -51,7 +48,6 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .mt-0.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
 .ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.mr-2{margin-right:.5rem}.ml-auto{margin-left:auto}
 .gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
-
 /* ===== テキスト ===== */
 .text-xs{font-size:.75rem;line-height:1rem}
 .text-sm{font-size:.875rem;line-height:1.25rem}
@@ -68,7 +64,6 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .uppercase{text-transform:uppercase}.tracking-wider{letter-spacing:.05em}
 .whitespace-pre-wrap{white-space:pre-wrap}
 .font-mono{font-family:'JetBrains Mono',monospace}
-
 /* ===== カラー ===== */
 .text-white{color:#fff}
 .text-ink{color:var(--ink)}.text-ink-muted{color:var(--ink-muted)}.text-ink-faint{color:var(--ink-faint)}
@@ -83,7 +78,6 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .bg-[#2F4A7A]{background:#2F4A7A}
 .bg-sidebar{background:var(--sidebar)}
 .bg-black/50{background:rgba(0,0,0,.5)}
-
 /* ===== ボーダー ===== */
 .border{border:1px solid var(--line)}.border-b{border-bottom:1px solid var(--line)}.border-t{border-top:1px solid var(--line)}.border-r{border-right:1px solid var(--line)}
 .border-line{border-color:var(--line)}
@@ -92,7 +86,6 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .rounded-xl{border-radius:.75rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}
 .shadow-sm{box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .shadow-xl{box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04)}
-
 /* ===== ユーティリティ ===== */
 .cursor-pointer{cursor:pointer}
 .hidden{display:none!important}.hide{display:none!important}.block{display:block}.inline-block{display:inline-block}.inline-flex{display:inline-flex}
@@ -100,7 +93,6 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .divider{height:1px;background:var(--line);margin:1rem 0}
 .last:border-0:last-child{border-bottom:none!important}
 .hover:text-white:hover{color:#fff}
-
 /* ===== 入力 ===== */
 .inp{
   display:block;width:100%;padding:.625rem .875rem;border-radius:.5rem;
@@ -113,7 +105,6 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 textarea.inp{min-height:6rem;resize:vertical;line-height:1.6}
 select.inp{cursor:pointer}
 .input-mono{font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
-
 /* ===== ボタン ===== */
 .btn{
   display:inline-flex;align-items:center;gap:.4rem;
@@ -131,11 +122,9 @@ select.inp{cursor:pointer}
 .btn-danger{background:#fff;color:#B91C1C;border-color:#FECACA}
 .btn-danger:hover{background:#FEF2F2}
 .btn-sm{padding:.4rem .7rem;font-size:.8rem}
-
 /* ===== カード ===== */
 .card{background:#fff;border:1px solid var(--line);border-radius:.75rem;padding:1.5rem;box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .card-sm{padding:1rem}
-
 /* ===== サイドバー ===== */
 aside.w-56{
   width:14rem;background:var(--sidebar);
@@ -151,12 +140,10 @@ aside.w-56{
 .nav-item:hover{background:var(--sidebar-hover);color:#fff}
 .nav-item.active{background:var(--sidebar-active);color:#fff;box-shadow:inset 3px 0 0 #60A5FA}
 .nav-item i{width:1.2rem;text-align:center;font-size:1rem;opacity:.9;flex-shrink:0}
-
 /* ===== ラベル ===== */
 .field-label{display:flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;color:var(--ink);margin-bottom:.4rem}
 .field-label i.icon-red{color:#EF4444}.field-label i.icon-blue{color:#3B82F6}
 .field-label i.icon-yellow{color:#F59E0B}.field-label i.icon-purple{color:#8B5CF6}.field-label i.icon-green{color:#10B981}
-
 /* ===== バッジ ===== */
 .pill{display:inline-flex;align-items:center;gap:.25rem;padding:.125rem .5rem;border-radius:9999px;font-size:.75rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
 .pill-ok{background:#ECFDF5;color:#065F46;border-color:#A7F3D0}
@@ -164,66 +151,52 @@ aside.w-56{
 .pill-err{background:#FEF2F2;color:#991B1B;border-color:#FECACA}
 .pill-soft{background:var(--paper-soft);color:var(--ink-muted);border-color:var(--line)}
 .pill-blue{background:var(--accent-light);color:var(--accent-hover);border-color:rgba(239,246,255,.8)}
-
 /* ===== アラート ===== */
 .alert{display:flex;align-items:flex-start;gap:.5rem;padding:.75rem 1rem;border-radius:.375rem;font-size:.875rem;line-height:1.625;border:1px solid transparent}
 .alert-warn{background:#FFFBEB;border-color:#FCD34D;color:#78350F}
 .alert-ok{background:#ECFDF5;border-color:#6EE7B7;color:#064E3B}
 .alert-err{background:#FEF2F2;border-color:#FECACA;color:#7F1D1D}
 .alert-info{background:var(--accent-light);border-color:var(--accent-light);color:var(--accent-hover)}
-
 /* ===== テーブル ===== */
 table.data{width:100%;border-collapse:collapse;font-size:.875rem}
 table.data thead th{padding:.625rem .75rem;text-align:left;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-muted);background:var(--paper-soft);border-bottom:1px solid var(--line)}
 table.data tbody td{padding:.625rem .75rem;border-bottom:1px solid rgba(229,231,235,.6);color:var(--ink);vertical-align:middle}
 table.data tbody tr:hover{background:#F9FAFB}
-
 /* ===== FAB ===== */
 .fab{position:fixed;bottom:1.5rem;right:1.5rem;width:3.25rem;height:3.25rem;border-radius:9999px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 25px rgba(37,99,235,.35);cursor:pointer;border:none;transition:transform .15s,background .15s;z-index:40}
 .fab:hover{transform:scale(1.05);background:var(--accent-hover)}
-
 /* ===== 使用例ボタン ===== */
 .example-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .625rem;border-radius:.25rem;background:var(--accent-light);color:var(--accent-hover);border:1px solid rgba(239,246,255,.8);font-size:.75rem;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s}
 .example-btn:hover{background:rgba(37,99,235,.1)}
-
 /* ===== セクションタイトル ===== */
 .section-title{display:flex;align-items:center;gap:.6rem;font-size:1.4rem;font-weight:700;color:var(--ink);margin:0 0 .35rem}
 .section-title i{color:var(--accent)}
 .section-desc{font-size:.85rem;color:var(--ink-muted);margin:.25rem 0 0}
-
 /* ===== ログインカード ===== */
 .login-card{background:#fff;border:1px solid var(--line);border-radius:1rem;padding:2rem;box-shadow:0 20px 40px rgba(0,0,0,.1)}
-
 /* ===== タブ ===== */
 .tab-btn{display:inline-flex;align-items:center;gap:.375rem;padding:.5rem 1rem;font-size:.8rem;font-weight:500;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--ink-muted);transition:color .15s,border-color .15s}
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-btn:hover:not(.active){color:var(--ink)}
 .tab-pane{display:none}.tab-pane.active{display:block}
-
 /* ===== モーダル ===== */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50}
 .modal-box{background:#fff;border-radius:.75rem;padding:1.5rem;width:100%;max-width:32rem;box-shadow:0 25px 50px rgba(0,0,0,.25)}
-
 /* ===== スクロールバー ===== */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:#94A3B8}
-
 /* ===== 追加: レスポンシブ・サイズ修正 ===== */
 html, body { font-size: 14px; }
-
 /* Tailwindレスポンシブグリッド（CDNでカバーされるが念のため） */
 @media(min-width:768px){.md:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(min-width:1024px){.lg:col-span-2{grid-column:span 2/span 2}}
 @media(min-width:1024px){.lg:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}
-
 /* sr-only (アクセシビリティ) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
-
 /* p-3, gap-6 */
 .p-3{padding:.75rem}.gap-6{gap:1.5rem}
-
 /* ===== 管理画面 (/admin) 専用スタイル ===== */
 .bg-surface{background:#FFFFFF}
 .bg-surface-raised{background:#F8FAFC}
@@ -262,7 +235,6 @@ section .text-white{color:#1F2937}
 .pill-blue{background:#EFF6FF;color:#1D4ED8;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
 .pill-soft{background:#F3F4F6;color:#6B7280;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
 .pill-err{background:#FEF2F2;color:#991B1B;padding:.15rem .5rem;border-radius:.25rem;font-size:.72rem;font-weight:600}
-
 /* ===== モバイル レスポンシブ ===== */
 .mobile-menu-toggle{display:none;position:fixed;top:.6rem;left:.6rem;z-index:60;background:var(--sidebar);color:#fff;border:none;border-radius:.4rem;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:45}
@@ -288,34 +260,27 @@ section .text-white{color:#1F2937}
 @media(max-width:480px){
   #patt-grid,#voice-grid{grid-template-columns:1fr 1fr!important}
 }
-
 /* hover系 */
 .hover:bg-paper-soft:hover{background:var(--paper-soft)}
 .hover:bg-accent-light:hover{background:var(--accent-light)}
 .hover:border-accent:hover{border-color:var(--accent)}
 .hover:text-ink:hover{color:var(--ink)}
-
 /* bg-accent-light, border-accent, text-accent (単独クラス) */
 .bg-accent-light{background:var(--accent-light)}
 .border-accent{border-color:var(--accent)}
 .border-0{border:none}
-
 /* サイドバー幅確保 */
 aside.w-56{
   width:14rem !important;
   min-width:14rem !important;
   flex-shrink:0 !important;
 }
-
 /* ナビゲーション縦並び保証 */
 nav.flex-1 { display:flex !important; flex-direction:column; }
-
 /* カード内余白 */
 .card { padding:1.25rem; }
-
 /* テーブルセル余白 */
 table.data tbody td { padding:.5rem .75rem; }
-
 /* モバイル対応 */
 @media(max-width:640px){
   .flex-wrap{ flex-wrap:wrap }
@@ -385,7 +350,6 @@ window.datetimeLocalToJst = window.datetimeLocalToJst || function(dtValue) {
   var pad = function(n){ return String(n).padStart(2,'0'); };
   return jst.getUTCFullYear()+'-'+pad(jst.getUTCMonth()+1)+'-'+pad(jst.getUTCDate())+' '+pad(jst.getUTCHours())+':'+pad(jst.getUTCMinutes())+':'+pad(jst.getUTCSeconds());
 };
-
 // ★ 自動 cron キッカー: ユーザーがダッシュボードを開くたびに、裏で /cron/tick を呼ぶ
 //    Cloudflare cron triggers が未設定/未稼働でも、ユーザーが画面を開けば予約投稿が実行される。
 //    多数のユーザーが利用するシステムでは誰かしらがダッシュボードを開いているため、
@@ -457,7 +421,6 @@ ${t}
         </div>
       </div>
     </div>
-
     <!-- タブ付きカード -->
     <div class="login-card">
       <div class="flex gap-1 mb-6 p-1 bg-paper rounded-lg">
@@ -465,7 +428,6 @@ ${t}
         <button onclick="showTab('register')" id="tab-register" class="flex-1 py-2 text-sm rounded-md text-ink-muted hover:text-ink">新規登録</button>
         <button onclick="showTab('license')"  id="tab-license"  class="flex-1 py-2 text-sm rounded-md text-ink-muted hover:text-ink">ライセンス</button>
       </div>
-
       <!-- ログイン -->
       <form id="login-form" class="space-y-4" onsubmit="return doLogin(event)">
         <div>
@@ -481,7 +443,6 @@ ${t}
         </button>
         <div id="login-error" class="text-red-600 text-xs text-center hide"></div>
       </form>
-
       <!-- 新規登録 -->
       <form id="register-form" class="space-y-4 hide" onsubmit="return doRegister(event)">
         <div>
@@ -498,7 +459,6 @@ ${t}
         <div id="register-error" class="text-red-600 text-xs text-center hide"></div>
         <div id="register-success" class="text-emerald-700 text-xs text-center hide"></div>
       </form>
-
       <!-- ライセンスキー認証 -->
       <form id="license-form" class="space-y-4 hide" onsubmit="return doLicenseActivate(event)">
         <div class="alert alert-info">
@@ -521,13 +481,11 @@ ${t}
         <div id="license-success" class="text-emerald-700 text-xs text-center hide"></div>
       </form>
     </div>
-
     <p class="text-center text-ink-faint text-xs mt-6">
       © ${new Date().getFullYear()} ${G.name}
     </p>
   </div>
 </main>
-
 <script>
 function showTab(name) {
   ['login','register','license'].forEach(n => {
@@ -542,7 +500,6 @@ function showTab(name) {
   ['login-error','register-error','register-success','license-error','license-success']
     .forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hide'); });
 }
-
 function showError(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg;
@@ -553,7 +510,6 @@ function showSuccess(id, msg) {
   el.textContent = msg;
   el.classList.remove('hide');
 }
-
 async function doLogin(e) {
   e.preventDefault();
   const email = document.getElementById('login-email').value.trim();
@@ -579,7 +535,6 @@ async function doLogin(e) {
   }
   return false;
 }
-
 async function doRegister(e) {
   e.preventDefault();
   const email = document.getElementById('reg-email').value.trim();
@@ -605,7 +560,6 @@ async function doRegister(e) {
   }
   return false;
 }
-
 async function doLicenseActivate(e) {
   e.preventDefault();
   const license_key = document.getElementById('license-key').value.trim().toUpperCase();
@@ -649,7 +603,6 @@ async function doLicenseActivate(e) {
       </div>
     </div>
   </div>
-
   <nav class="flex-1 py-3 overflow-y-auto">
     ${Qa.map(s=>`
       <a href="${s.path}" class="nav-item ${s.key===e?"active":""}">
@@ -658,7 +611,6 @@ async function doLicenseActivate(e) {
       </a>
     `).join("")}
   </nav>
-
   <div class="px-3 py-3 border-t border-[#2A3B52]">
     <div class="text-[10px] text-[#A7B6CE] mb-2 px-1">現在のユーザー</div>
     <div class="bg-[#2A3B52] rounded-md p-2 text-xs">
@@ -737,7 +689,6 @@ ${sn}
 <div class="mobile-overlay" onclick="document.querySelector('aside.w-56').classList.remove('is-open');document.body.classList.remove('menu-open');"></div>
 <div class="min-h-screen flex bg-paper">
   ${en(e.active,e.user)}
-
   <main class="flex-1 min-w-0 flex flex-col">
     ${tn(e.accounts,e.currentAccountId)}
     <div class="flex-1 p-6 overflow-y-auto">
@@ -745,10 +696,8 @@ ${sn}
     </div>
   </main>
 </div>
-
 <!-- AIサポートチャットボタン -->
 <button id="ai-chat-btn" type="button" onclick="aiChatToggle()" style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:60;background:#2563EB;color:#fff;border:none;width:3.4rem;height:3.4rem;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.4);font-size:1.4rem" aria-label="AIサポート"><i class="fas fa-robot"></i></button>
-
 <!-- AIサポートチャット窓 -->
 <div id="ai-chat-modal" style="display:none;position:fixed;bottom:5.25rem;right:1.25rem;z-index:65;width:22rem;max-width:calc(100vw - 2rem);max-height:32rem;background:#fff;border:1px solid var(--line);border-radius:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden;flex-direction:column">
   <div style="background:linear-gradient(135deg,#2563EB,#1E40AF);color:#fff;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
@@ -764,7 +713,6 @@ ${sn}
     <button type="button" onclick="aiChatSend()" style="background:#2563EB;color:#fff;border:none;border-radius:.4rem;padding:0 .8rem;cursor:pointer"><i class="fas fa-paper-plane"></i></button>
   </div>
 </div>
-
 <script>
 window.aiChatToggle = function() {
   const m = document.getElementById('ai-chat-modal');
@@ -818,14 +766,12 @@ window.aiChatSend = function() {
     <h1 class="section-title"><i class="fas fa-gauge-high"></i>ダッシュボード</h1>
     <p class="section-desc">今日の投稿状況を一覧できます。</p>
   </div>
-
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
     <div class="card card-sm"><div class="text-xs text-ink-muted">Xアカウント</div><div class="text-2xl font-bold text-ink mt-1">${t.accounts}</div></div>
     <div class="card card-sm"><div class="text-xs text-ink-muted">本日の投稿</div><div class="text-2xl font-bold text-ink mt-1">${t.today}</div></div>
     <div class="card card-sm"><div class="text-xs text-ink-muted">予約中</div><div class="text-2xl font-bold text-ink mt-1">${t.pending}</div></div>
     <div class="card card-sm"><div class="text-xs text-ink-muted">本日失敗</div><div class="text-2xl font-bold text-red-600 mt-1">${t.failed}</div></div>
   </div>
-
   <!-- 予約投稿の即時チェックボタン（誰でもワンクリックで予約処理を強制実行） -->
   <div class="card" style="background:#EFF6FF;border:1px solid #BFDBFE">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
@@ -840,7 +786,6 @@ window.aiChatSend = function() {
     </div>
     <div id="cron-result" style="margin-top:.6rem;font-size:.85rem"></div>
   </div>
-
   <script>
   window.runCronTickNow = async function(btn) {
     const out = document.getElementById('cron-result');
@@ -885,7 +830,6 @@ window.aiChatSend = function() {
     }
   };
   </script>
-
   <div class="grid grid-cols-1 gap-4">
     <div class="card">
       <h3 class="font-bold text-ink mb-3"><i class="fas fa-clock-rotate-left text-accent"></i> 直近の投稿ログ</h3>
@@ -978,7 +922,6 @@ async function saveTarget() {
     <h1 class="section-title"><i class="fas fa-palette"></i>ブランドボイス</h1>
     <p class="section-desc">5つのボイススタイルから選んでください。AI生成時にトーンとして注入されます。</p>
   </div>
-
   <div class="card space-y-4">
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem" id="voice-grid">
       ${s.map(a=>`
@@ -991,7 +934,6 @@ async function saveTarget() {
       `).join("")}
     </div>
     <input type="hidden" id="vc-key" value="${cur}">
-
     <div>
       <label class="field-label">口調</label>
       <input type="text" id="vc-tone" class="inp" value="${w(t.tone)}" placeholder="例: 専門家として断定的に、簡潔に、根拠を示して書く">
@@ -1030,7 +972,6 @@ function selectVoice(el, key, tone) {
   }
 }
 window.selectVoice = selectVoice;
-
 async function saveVoice() {
   const body = {
     voice_key: document.getElementById('vc-key').value,
@@ -1052,7 +993,6 @@ window.saveVoice = saveVoice;
     <h1 class="section-title"><i class="fas fa-wand-magic-sparkles"></i>パターン別AI生成</h1>
     <p class="section-desc">5つの投稿パターンから選んでAI生成。生成後の各カードに画像・動画を個別設定して投稿。</p>
   </div>
-
   <div class="card space-y-4">
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem" id="patt-grid">
       ${t.map(([i,r,o,p],d)=>`
@@ -1065,7 +1005,6 @@ window.saveVoice = saveVoice;
       `).join("")}
     </div>
     <input type="hidden" id="patt-val" value="problem">
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="field-label">テーマ <span style="color:#dc2626">*</span></label>
@@ -1076,14 +1015,12 @@ window.saveVoice = saveVoice;
         <input type="text" id="pa-kw" class="inp" placeholder="例: AI, 自動化, 時短, 仕組み">
       </div>
     </div>
-
     <div style="display:flex;align-items:center;gap:.75rem">
       <label class="field-label" style="margin:0">生成数</label>
       <select id="pa-count" class="inp" style="width:6rem">
         <option value="1">1件</option><option value="2">2件</option><option value="3" selected>3件</option><option value="4">4件</option><option value="5">5件</option><option value="6">6件</option><option value="7">7件</option><option value="8">8件</option><option value="9">9件</option><option value="10">10件</option>
       </select>
     </div>
-
     <div style="border:1px solid var(--line);border-radius:.5rem;padding:1rem;background:var(--paper-soft)">
       <div style="font-weight:600;color:var(--accent);margin-bottom:.625rem"><i class="fas fa-sliders"></i> 投稿オプション</div>
       <div class="space-y-3">
@@ -1104,16 +1041,13 @@ window.saveVoice = saveVoice;
         </div>
       </div>
     </div>
-
     <input type="hidden" id="pa-tag" value="">
-
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" style="flex:1;justify-content:center;padding:.75rem" onclick="doPatternGenerate()"><i class="fas fa-wand-magic-sparkles"></i>選択パターンでAI生成</button>
       <button class="btn btn-ghost" onclick="paSaveDraft()"><i class="fas fa-floppy-disk"></i>下書き保存</button>
       <button class="btn btn-ghost" onclick="paLoadDraft()"><i class="fas fa-folder-open"></i>下書き再開</button>
     </div>
   </div>
-
   <div id="pa-results"></div>
 </div>
 <script>
@@ -1131,7 +1065,6 @@ function selectPatt(el, val) {
   document.getElementById('patt-val').value = val;
 }
 window.selectPatt = selectPatt;
-
 function paResultCardHtml(g) {
   const id = g.id;
   const body = (g.body || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1154,9 +1087,7 @@ function paResultCardHtml(g) {
   '</div>';
 }
 window.paResultCardHtml = paResultCardHtml;
-
 window.paAttachedMedia = window.paAttachedMedia || {};
-
 function paRenderMedia(pid) {
   const el = document.getElementById('pa-media-'+pid); if (!el) return;
   const arr = window.paAttachedMedia[pid] || [];
@@ -1169,14 +1100,12 @@ function paRenderMedia(pid) {
   ).join('');
 }
 window.paRenderMedia = paRenderMedia;
-
 window.paRemoveMedia = function(pid, mid) {
   const arr = window.paAttachedMedia[pid] || [];
   window.paAttachedMedia[pid] = arr.filter(m => m.id !== mid);
   paRenderMedia(pid);
   paSyncMediaToPost(pid);
 };
-
 async function paSyncMediaToPost(pid) {
   const arr = window.paAttachedMedia[pid] || [];
   const ids = arr.map(m => m.id);
@@ -1186,7 +1115,6 @@ async function paSyncMediaToPost(pid) {
   });
 }
 window.paSyncMediaToPost = paSyncMediaToPost;
-
 window.paAttachImageUrl = function(pid) {
   const u = prompt('画像のURLを入力してください'); if (!u) return;
   paAddRemoteMedia(pid, u, 'image');
@@ -1219,7 +1147,6 @@ async function paAddRemoteMedia(pid, url, ftype) {
     toast('添付しました','ok');
   } catch (e) { toast('エラー: '+e.message,'err'); }
 }
-
 function paPickFile(accept) {
   return new Promise(res => {
     const inp = document.createElement('input');
@@ -1251,7 +1178,6 @@ async function paUploadFile(pid, file, ftype) {
     toast('添付しました','ok');
   } catch (e) { toast('エラー: '+e.message,'err'); }
 }
-
 window.paSchedule = async function(pid) {
   const dt = document.getElementById('pa-sched-'+pid).value;
   if (!dt) { toast('予約日時を入力してください','err'); return; }
@@ -1267,7 +1193,6 @@ window.paSchedule = async function(pid) {
   if (j.success) { stEl.textContent='予約完了 ('+(j.effective_scheduled_at||scheduledAt)+')'; stEl.style.color='#059669'; toast('予約完了','ok'); }
   else { stEl.textContent='失敗: '+(j.error||''); stEl.style.color='#dc2626'; toast('予約失敗: '+(j.error||''),'err'); }
 };
-
 window.paPostNow = async function(pid) {
   if (!confirm('この投稿を今すぐXに投稿しますか？')) return;
   const stEl = document.getElementById('pa-status-'+pid);
@@ -1281,9 +1206,7 @@ window.paPostNow = async function(pid) {
   if (j.success) { stEl.textContent='投稿完了 (ID:'+(j.tweet_id||'-')+')'; stEl.style.color='#059669'; toast('投稿しました','ok'); }
   else { stEl.textContent='失敗: '+(j.error||''); stEl.style.color='#dc2626'; toast('投稿失敗: '+(j.error||''),'err'); }
 };
-
 async function doPatternGenerate_legacy_unused() { /* removed */ }
-
 function paSaveDraft() {
   const draft = {
     pattern: document.getElementById('patt-val').value,
@@ -1320,7 +1243,6 @@ function paLoadDraft() {
   } catch(e) { toast('読込失敗: '+e.message,'err'); }
 }
 window.paLoadDraft = paLoadDraft;
-
 async function doPatternGenerate() {
   const patt = document.getElementById('patt-val').value;
   const theme = document.getElementById('pa-theme').value.trim();
@@ -1495,7 +1417,6 @@ window.paPostNow = async function(pid) {
   if (j.success) { stEl.textContent='投稿完了'; stEl.style.color='#059669'; toast('投稿しました','ok'); }
   else { stEl.textContent='失敗: '+(j.error||''); stEl.style.color='#dc2626'; toast('投稿失敗: '+(j.error||''),'err'); }
 };
-
 async function doGen2() {
   const prompt = document.getElementById('ge-prompt').value.trim();
   if (!prompt) { toast('プロンプトを入力してください','err'); return; }
@@ -1583,7 +1504,6 @@ async function doGen2() {
       </tbody>
     </table>
   </div>
-
   <!-- 新規予約投稿モーダル -->
   <div id="post-sched-modal" style="display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);overflow-y:auto;padding:1rem;align-items:flex-start;justify-content:center">
     <div style="background:#fff;border-radius:.75rem;max-width:38rem;width:100%;padding:1.5rem;margin:2rem auto;position:relative">
@@ -1641,10 +1561,8 @@ window.openSchedRowModal = function(postId) {
   // 既存モーダルを削除
   const old = document.getElementById('row-sched-modal');
   if (old) old.remove();
-
   // 1時間後をJST固定でデフォルト値に
   const def = jstNowDatetimeLocal(60);
-
   const modal = document.createElement('div');
   modal.id = 'row-sched-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
@@ -1666,7 +1584,6 @@ window.openSchedRowModal = function(postId) {
     '</div>';
   document.body.appendChild(modal);
 };
-
 window.submitRowSched = async function(postId) {
   const dt = document.getElementById('row-sched-when').value;
   if (!dt) { toast('予約日時を選択してください','err'); return; }
@@ -1745,7 +1662,6 @@ window.submitScheduledPost = async function() {
     setTimeout(()=>location.reload(), 800);
   } catch(e) { toast('エラー: '+e.message,'err'); }
 };
-
 function dlExportPosts() {
   const url = '/api/admin/export/posts?month=${t}';
   fetch(url).then(r => {
@@ -1946,7 +1862,6 @@ window.onPickTarget = function(id) {
   document.getElementById('th-target-id').value = id || '';
   updateTarget();
 };
-
 // 返信アイテムごとの添付メディア
 function thRenderItemMedia(item){
   const arr = item._media || [];
@@ -2015,21 +1930,17 @@ window.thAttachFile = async function(btn, kind){
   };
   inp.click();
 };
-
 function saveDraft() { toast('下書きを保存しました（簡易）','info'); }
 window.saveDraft = saveDraft;
 function previewThread() {
   const d = collect(); if (!d) return;
   const total = d.tweets.reduce((a,t)=>a+(t.media_ids||[]).length,0);
-
   // 既存のプレビュー要素を削除
   const old = document.getElementById('th-preview-modal');
   if (old) old.remove();
-
   const modal = document.createElement('div');
   modal.id = 'th-preview-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
-
   const safeId = (d.target_tweet_id || '').replace(/[^0-9a-zA-Z]/g, '');
   let html = '<div style="background:#fff;border-radius:.75rem;max-width:42rem;width:100%;padding:1.5rem;margin:2rem auto;position:relative">';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">';
@@ -2037,7 +1948,6 @@ function previewThread() {
   html += '<button onclick="document.getElementById(\\'th-preview-modal\\').remove()" type="button" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:1.25rem"><i class="fas fa-xmark"></i></button>';
   html += '</div>';
   html += '<div style="font-size:.8rem;color:#6B7280;margin-bottom:.75rem">コメント先 ID: <code style="background:#F3F4F6;padding:.1rem .35rem;border-radius:.25rem">' + safeId + '</code> / 返信 ' + d.tweets.length + ' 件 / 添付 ' + total + ' 件</div>';
-
   d.tweets.forEach((t, i) => {
     html += '<div style="position:relative;padding:.85rem 1rem;border:1px solid #E5E7EB;border-radius:.5rem;margin-bottom:.6rem;background:#F9FAFB">';
     html += '<div style="font-size:.7rem;color:#2563EB;font-weight:700;margin-bottom:.35rem">返信 ' + (i+1) + '</div>';
@@ -2049,17 +1959,14 @@ function previewThread() {
       html += '<div style="text-align:center;color:#9CA3AF;margin:-.2rem 0 .2rem"><i class="fas fa-arrow-down"></i></div>';
     }
   });
-
   html += '<div style="display:flex;justify-content:flex-end;margin-top:1rem;padding-top:.75rem;border-top:1px solid #E5E7EB">';
   html += '<button type="button" onclick="document.getElementById(\\'th-preview-modal\\').remove()" class="btn btn-primary">閉じる</button>';
   html += '</div>';
   html += '</div>';
-
   modal.innerHTML = html;
   document.body.appendChild(modal);
 }
 window.previewThread = previewThread;
-
 function updateTarget() {
   const v = document.getElementById('th-target-id').value.trim();
   const el = document.getElementById('th-target-info');
@@ -2067,7 +1974,6 @@ function updateTarget() {
   else el.innerHTML = '<div class="text-xs text-emerald-700"><i class="fas fa-check"></i> コメント先: <span class="font-mono">' + escapeHtml(v) + '</span></div>';
 }
 window.updateTarget = updateTarget;
-
 function collect() {
   const tid = document.getElementById('th-target-id').value.trim();
   if (!tid) { toast('コメント先を選択してください','err'); return null; }
@@ -2082,7 +1988,6 @@ function collect() {
   if (tweets.length > 20) { toast('返信は最大20件までです','err'); return null; }
   return { target_tweet_id: tid, tweets };
 }
-
 async function submitNow() {
   const d = collect(); if (!d) return;
   if (!confirm(d.tweets.length+'件のツリー投稿を実行しますか？')) return;
@@ -2095,7 +2000,6 @@ async function submitNow() {
   } catch(e) { toast('エラー: '+e.message,'err'); }
 }
 window.submitNow = submitNow;
-
 async function submitSchedule() {
   const d = collect(); if (!d) return;
   // 既存のモーダルを削除
@@ -2143,7 +2047,6 @@ window.confirmThSchedule = async function() {
     } else toast('予約失敗: '+(j.error||''),'err');
   } catch(e) { toast('エラー: '+e.message,'err'); }
 };
-
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 <\/script>`}function pn(e){return`
     <div class="reply-item" data-idx="${e}">
@@ -2170,7 +2073,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     </div>
   </div>
   
-
   <div id="sc-cal-view">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
@@ -2189,7 +2091,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     </div>
     <div id="sc-empty-cal" style="display:none;padding:1rem;text-align:center;color:var(--ink-muted);font-size:.85rem">予約投稿はありません</div>
   </div>
-
   <div id="sc-list-view" style="display:none">
     <div class="card" style="padding:0">
       <table class="data" style="width:100%">
@@ -2201,7 +2102,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     </div>
   </div>
 </div>
-
 <!-- 日付クリックモーダル -->
 <div id="sc-modal" style="display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.4);align-items:center;justify-content:center;padding:1rem">
   <div style="background:#fff;border-radius:.75rem;max-width:42rem;width:100%;max-height:90vh;overflow:auto;padding:1.25rem;position:relative">
@@ -2210,7 +2110,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     <div id="sc-modal-body"></div>
   </div>
 </div>
-
 <script>
 (function(){
   let SCHEDULED = [];
@@ -2218,7 +2117,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   const now = new Date();
   curYear = now.getFullYear();
   curMonth = now.getMonth();
-
   function setView(v) {
     document.getElementById('sc-cal-view').style.display = v==='cal'?'block':'none';
     document.getElementById('sc-list-view').style.display = v==='list'?'block':'none';
@@ -2226,7 +2124,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     document.getElementById('btn-list').className = v==='list'?'btn btn-primary btn-sm':'btn btn-ghost btn-sm';
   }
   window.setView = setView;
-
   async function loadSchedule() {
     const stEl = document.getElementById('sc-status');
     if (stEl) stEl.textContent = '読み込み中...';
@@ -2248,19 +2145,16 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     }
   }
   window.reloadSchedule = loadSchedule;
-
   function statusBadge(s) {
     const map = {posted:['投稿済','#065F46','#ECFDF5'],failed:['失敗','#991B1B','#FEF2F2'],pending:['下書き','#6B7280','#F3F4F6'],approved:['予約済','#1D4ED8','#EFF6FF'],scheduled:['予約済','#1D4ED8','#EFF6FF'],draft:['下書き','#6B7280','#F3F4F6'],cancelled:['取消','#6B7280','#F3F4F6'],canceled:['取消','#6B7280','#F3F4F6'],publishing:['投稿中','#92400E','#FFFBEB'],configured:['予約済','#1D4ED8','#EFF6FF']};
     const m = map[s] || [s||'-','#6B7280','#F3F4F6'];
     return '<span style="display:inline-block;padding:.1rem .5rem;font-size:.7rem;border-radius:.25rem;color:'+m[1]+';background:'+m[2]+';font-weight:600">'+m[0]+'</span>';
   }
-
   function srcLabel(s) {
     if (s==='autopilot') return '<span style="font-size:.65rem;background:#FEF3C7;color:#92400E;padding:.1rem .35rem;border-radius:.25rem;font-weight:600">AP</span>';
     if (s==='pattern_generated_post'||s==='pattern_ai') return '<span style="font-size:.65rem;background:#EDE9FE;color:#6D28D9;padding:.1rem .35rem;border-radius:.25rem;font-weight:600">パターン</span>';
     return '';
   }
-
   function buildCalendar() {
     const lbl = document.getElementById('sc-month-label');
     if (lbl) lbl.textContent = curYear + '年 ' + (curMonth+1) + '月';
@@ -2271,7 +2165,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     const startDow = first.getDay();
     const today = new Date();
     const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
-
     const byDate = {};
     SCHEDULED.forEach(p => {
       const d = (p.scheduled_at||'').slice(0,10);
@@ -2279,11 +2172,9 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       if (!byDate[d]) byDate[d] = [];
       byDate[d].push(p);
     });
-
     const monthHasAny = Object.keys(byDate).some(k => k.startsWith(curYear+'-'+String(curMonth+1).padStart(2,'0')));
     const emptyEl = document.getElementById('sc-empty-cal');
     if (emptyEl) emptyEl.style.display = (scLoaded && !monthHasAny) ? 'block':'none';
-
     let html = '';
     let day = 1 - startDow;
     for (let row = 0; row < 6; row++) {
@@ -2321,7 +2212,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     }
     grid.innerHTML = html;
   }
-
   function buildList() {
     const tb = document.getElementById('sc-list-body');
     if (!tb) return;
@@ -2344,11 +2234,9 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       '</tr>';
     }).join('');
   }
-
   window.prevMonth = function() { curMonth--; if(curMonth<0){curMonth=11;curYear--;} buildCalendar(); };
   window.nextMonth = function() { curMonth++; if(curMonth>11){curMonth=0;curYear++;} buildCalendar(); };
   window.goToday = function() { const n=new Date(); curYear=n.getFullYear(); curMonth=n.getMonth(); buildCalendar(); };
-
   window.scOpenDay = function(dateStr) {
     const posts = SCHEDULED.filter(p => (p.scheduled_at||'').slice(0,10) === dateStr);
     document.getElementById('sc-modal-title').textContent = dateStr + ' の予約 ('+posts.length+'件)';
@@ -2376,12 +2264,10 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     m.style.display = 'flex';
   };
   window.scCloseModal = function() { document.getElementById('sc-modal').style.display = 'none'; };
-
   window.scNewAP = function(dateStr) {
     // オートパイロット画面に日付クエリ付きで遷移
     location.href = '/dashboard/autopilot?date=' + encodeURIComponent(dateStr) + '&new=1';
   };
-
   window.scEditPost = function(pid) {
     const p = SCHEDULED.find(x => String(x.id) === String(pid));
     if (!p) return;
@@ -2400,7 +2286,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     document.getElementById('sc-modal-title').textContent = '予約 #'+p.id+' の編集';
     document.getElementById('sc-modal').style.display = 'flex';
   };
-
   window.scSaveEdit = async function(pid) {
     const newBody = document.getElementById('sc-edit-body').value;
     const newAt = document.getElementById('sc-edit-at').value;
@@ -2415,7 +2300,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       else toast('保存失敗: '+(j.error||''),'err');
     } catch(e) { toast('エラー: '+e.message,'err'); }
   };
-
   window.scDeletePost = async function(pid) {
     if (!confirm('この予約を削除しますか？')) return;
     try {
@@ -2435,9 +2319,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       else toast('削除失敗: '+(j.error||''),'err');
     } catch(e) { toast('エラー: '+e.message,'err'); }
   };
-
   window.cancelPost = function(id) { return scDeletePost(id); };
-
   document.addEventListener('DOMContentLoaded', loadSchedule);
   if (document.readyState !== 'loading') loadSchedule();
 })();
@@ -2473,7 +2355,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       </tbody>
     </table>
   </div>
-
   <!-- モーダル -->
   <div id="ap-modal" style="display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);overflow-y:auto;padding:1rem;align-items:flex-start;justify-content:center">
     <div style="background:#fff;border-radius:.75rem;max-width:42rem;width:100%;padding:1.5rem;margin:2rem auto;position:relative">
@@ -2578,7 +2459,6 @@ function deriveGenAt() {
   document.getElementById('ap-gen').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
 }
 window.deriveGenAt = deriveGenAt;
-
 window.apMedia = [];
 function apRenderMedia(){
   const el=document.getElementById('ap-media-list'); if(!el) return;
@@ -2591,7 +2471,6 @@ function apRenderMedia(){
   ).join('');
 }
 window.apRemoveMedia = function(mid){ window.apMedia = (window.apMedia||[]).filter(m=>m.id!==mid); apRenderMedia(); };
-
 // 画像/動画 ボタン: 直接ファイルピッカーを開く
 window.apAttachAny = async function(kind){
   if((window.apMedia||[]).length>=4){ toast('添付は最大4件まで','err'); return; }
@@ -2610,7 +2489,6 @@ window.apAttachAny = async function(kind){
   };
   inp.click();
 };
-
 window.apSaveDraft = function(){
   const d = {
     account: document.getElementById('ap-account').value,
@@ -2646,7 +2524,6 @@ window.apLoadDraft = function(){
     toast('下書きを再開しました','ok');
   } catch(e) { toast('読込失敗: '+e.message,'err'); }
 };
-
 async function submitApJob() {
   const body = {
     account_id: parseInt(document.getElementById('ap-account').value, 10) || null,
@@ -2726,7 +2603,6 @@ window.confirmApRetry = async function(id) {
     } else toast('失敗: ' + (j.error||''),'err');
   } catch(e) { toast('エラー: '+e.message,'err'); }
 };
-
 // URL ?new=1 で自動的にモーダルを開き、?date=YYYY-MM-DD を投稿日時に反映
 (function autoOpenAP(){
   try {
@@ -2746,7 +2622,6 @@ window.confirmApRetry = async function(id) {
     }
   } catch(e) {}
 })();
-
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 <\/script>`}function hn(e){return`
 <div class="space-y-4">
@@ -2784,7 +2659,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       </table>
     </div>
   `}
-
   <div id="add-acct-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:50;padding:1rem">
     <div style="background:#fff;border-radius:.75rem;max-width:32rem;width:100%;padding:1.5rem">
       <div class="flex items-center justify-between mb-4">
@@ -2845,7 +2719,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     <h1 class="section-title"><i class="fas fa-download"></i>一括ダウンロード</h1>
     <p class="section-desc">各データをCSV形式でダウンロードできます。ExcelやGoogleスプレッドシートで開けます。</p>
   </div>
-
   <!-- 全データ一括 -->
   <div class="card">
     <div class="flex items-center justify-between">
@@ -2858,7 +2731,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       </button>
     </div>
   </div>
-
   <!-- 個別ダウンロード -->
   <div class="card">
     <h3 class="font-bold text-ink mb-4"><i class="fas fa-file-csv text-accent"></i> 個別ダウンロード（CSV）</h3>
@@ -2881,7 +2753,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
       `).join("")}
     </div>
   </div>
-
   ${e.isAdmin?`
   <!-- 管理者向け -->
   <div class="card">
@@ -2912,7 +2783,6 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
     </div>
   </div>
   `:""}
-
   <!-- 使い方 -->
   <div class="card bg-paper-soft">
     <h3 class="font-bold text-ink mb-3"><i class="fas fa-circle-info text-accent"></i> 使い方</h3>
@@ -2965,7 +2835,6 @@ function dlExport(key) {
     <h1 class="section-title"><i class="fas fa-key"></i>API設定</h1>
     <p class="section-desc">X API / OpenAI / Google Gemini / Telegram の設定を行います。</p>
   </div>
-
   <div class="card space-y-4">
     <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fa-brands fa-x-twitter"></i> X API設定（OAuth 1.0a User Context）</h3>
     <div class="alert alert-warn">
@@ -2986,7 +2855,6 @@ function dlExport(key) {
       <span id="xapi-status" style="font-size:.8rem;color:var(--ink-muted)">未接続確認（保存後に「接続テスト」を実行してください）</span>
     </div>
   </div>
-
   <div class="card space-y-4">
     <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fas fa-circle-nodes" style="color:#10A37F"></i> OpenAI API設定</h3>
     <p style="font-size:.82rem;color:var(--ink-muted)">AI記事生成に使用するOpenAI APIキーを設定します。</p>
@@ -3008,7 +2876,6 @@ function dlExport(key) {
       <span id="oai-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
     </div>
   </div>
-
   <div class="card space-y-4">
     <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fas fa-gem" style="color:#4285F4"></i> Google Gemini API設定</h3>
     <p style="font-size:.82rem;color:var(--ink-muted)">Google AI Studio で取得した API キーを入力してください。</p>
@@ -3030,7 +2897,6 @@ function dlExport(key) {
       <span id="gem-status" style="font-size:.8rem;color:var(--ink-muted)"></span>
     </div>
   </div>
-
   <div class="card space-y-4">
     <h3 class="font-bold text-ink" style="font-size:1rem"><i class="fa-brands fa-telegram" style="color:#2AABEE"></i> Telegram 通知設定</h3>
     <p style="font-size:.82rem;color:var(--ink-muted)">投稿成功・失敗を Telegram に通知します（任意）。</p>
@@ -3160,7 +3026,6 @@ F.get("/admin",m,R,e=>{const t=`
       </div>
     </div>
   </header>
-
   <!-- タブ -->
   <nav class="border-b border-brand-800/40 bg-surface">
     <div class="max-w-7xl mx-auto flex gap-1 px-6 py-2 overflow-x-auto">
@@ -3173,9 +3038,7 @@ F.get("/admin",m,R,e=>{const t=`
       <button onclick="showSection('settings')"  id="nav-settings"  class="tab-trigger">システム設定</button>
     </div>
   </nav>
-
   <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8 space-y-6">
-
     <!-- === ユーザー === -->
     <section id="section-users" class="space-y-4">
       <div class="flex items-center justify-between">
@@ -3201,7 +3064,6 @@ F.get("/admin",m,R,e=>{const t=`
         </table>
       </div>
     </section>
-
     <!-- === ライセンス === -->
     <section id="section-licenses" class="space-y-4 hidden-force">
       <div class="flex items-center justify-between">
@@ -3222,7 +3084,6 @@ F.get("/admin",m,R,e=>{const t=`
           <tbody id="licenses-tbody"><tr><td colspan="9" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
         </table>
       </div>
-
       <!-- 発行モーダル -->
       <div id="issue-license-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
         <div class="card max-w-md w-full">
@@ -3268,7 +3129,6 @@ F.get("/admin",m,R,e=>{const t=`
         </div>
       </div>
     </section>
-
     <!-- === サブスク === -->
     <section id="section-subs" class="space-y-4 hidden-force">
       <div class="flex items-center justify-between">
@@ -3285,7 +3145,6 @@ F.get("/admin",m,R,e=>{const t=`
         </table>
       </div>
     </section>
-
     <!-- === 投稿管理 === -->
     <section id="section-posts" class="space-y-4 hidden-force">
       <h2 class="text-xl font-bold text-white">投稿キュー / ログ</h2>
@@ -3300,7 +3159,6 @@ F.get("/admin",m,R,e=>{const t=`
         </table>
       </div>
     </section>
-
     <!-- === Xアカウント === -->
     <section id="section-accounts" class="space-y-4 hidden-force">
       <h2 class="text-xl font-bold text-white">X アカウント</h2>
@@ -3314,7 +3172,6 @@ F.get("/admin",m,R,e=>{const t=`
         </table>
       </div>
     </section>
-
     <!-- === 監査ログ === -->
     <section id="section-audit" class="space-y-4 hidden-force">
       <div class="flex items-center justify-between">
@@ -3330,7 +3187,6 @@ F.get("/admin",m,R,e=>{const t=`
         </table>
       </div>
     </section>
-
     <!-- === システム設定 === -->
     <section id="section-settings" class="space-y-4 hidden-force">
       <h2 class="text-xl font-bold text-white">システム設定</h2>
@@ -3338,17 +3194,14 @@ F.get("/admin",m,R,e=>{const t=`
         <div class="space-y-4" id="settings-form"></div>
       </div>
     </section>
-
   </main>
 </div>
-
 <script>
 const sections = ['users','licenses','subs','posts','accounts','audit','settings'];
 const loaders = {
   users: loadUsers, licenses: loadLicenses, subs: loadSubs,
   posts: loadPosts, accounts: loadAccounts, audit: loadAudit, settings: loadSettings
 };
-
 function showSection(name) {
   sections.forEach(s => {
     document.getElementById('nav-' + s).classList.toggle('active', s === name);
@@ -3356,12 +3209,10 @@ function showSection(name) {
   });
   if (loaders[name]) loaders[name]();
 }
-
 async function doLogout() {
   await fetch('/api/auth/logout', { method: 'POST' });
   location.href = '/login';
 }
-
 // ---------- ユーザー ----------
 async function loadUsers() {
   const filter = document.getElementById('users-filter').value;
@@ -3405,7 +3256,6 @@ async function toggleAdmin(id, to) {
     body: JSON.stringify({ is_admin: to }) });
   loadUsers();
 }
-
 // ---------- ライセンス ----------
 async function loadLicenses() {
   const r = await fetch('/api/admin/licenses');
@@ -3472,7 +3322,6 @@ async function reactivateLicense(id) {
   await fetch(\`/api/admin/licenses/\${id}/reactivate\`, { method: 'POST' });
   loadLicenses();
 }
-
 // ---------- サブスク ----------
 async function loadSubs() {
   const r = await fetch('/api/admin/subscriptions');
@@ -3494,7 +3343,6 @@ async function loadSubs() {
     </tr>
   \`).join('');
 }
-
 // ---------- 投稿 ----------
 async function loadPosts() {
   const r = await fetch('/api/admin/posts/summary');
@@ -3521,7 +3369,6 @@ async function loadPosts() {
     </tr>
   \`).join('');
 }
-
 // ---------- Xアカウント ----------
 async function loadAccounts() {
   const r = await fetch('/api/admin/x-accounts');
@@ -3542,7 +3389,6 @@ async function loadAccounts() {
     </tr>
   \`).join('');
 }
-
 // ---------- 監査 ----------
 async function loadAudit() {
   const r = await fetch('/api/admin/audit-logs');
@@ -3562,7 +3408,6 @@ async function loadAudit() {
     </tr>
   \`).join('');
 }
-
 // ---------- 設定 ----------
 async function loadSettings() {
   const r = await fetch('/api/admin/settings');
@@ -3597,7 +3442,6 @@ async function saveSetting(key) {
   if (j.success) alert('保存しました: ' + (key === 'trial_days' ? 'トライアル日数 = ' + value + '日' : key));
   else alert('保存失敗: ' + (j.error || 'unknown'));
 }
-
 // ---------- 一括ダウンロード ----------
 function dlAdminExport(key) {
   const url = '/api/admin/export/' + key;
@@ -3616,7 +3460,6 @@ function dlAdminExport(key) {
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }).catch(e => alert(e.message));
 }
-
 // 起動時
 showSection('users');
 <\/script>
@@ -3863,16 +3706,13 @@ ${Rt[e.patternType].instruction}`);let n=`テーマ: ${e.theme||""}${e.keywords?
 X投稿用のフル文章を作成。読みやすく改行を入れる。ハッシュタグは含めない。`,e.cta&&(n+=`
 CTA: ${e.cta}`),e.userInput&&(n+=`
 追加指示: ${e.userInput}`);const i=t+a+s;return{messages:[{role:"system",content:i},{role:"user",content:n}],systemPrompt:i,userPrompt:n}}async function Hs(e,t,s,a,n,i="body"){const{messages:r}=Ps({theme:t,keywords:s,brandVoice:n,targetDna:a,postMode:i||"body"}),o=await qs(r,{apiKey:e,temperature:.8});return bt(o,i)}async function Us(e,t,s,a,n,i,r="body"){if(!Rt[t])throw new Error(`未対応のパターン: ${t}`);const{messages:o}=Ps({theme:s,keywords:a,brandVoice:i,targetDna:n,patternType:t,postMode:r||"body"}),d=await qs(o,{apiKey:e,temperature:.8});return bt(d,r)}function bt(e,t){if(!e)return"";let s=e.replace(/^#{1,4}\s*/gm,"").replace(/^[▪️■●•・\-\*]+\s*/gm,"").replace(/^\d+\.\s/gm,"").replace(/^(Step\d+)[:\s]/gim,"").replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/gm,"").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\n{3,}/g,`
-
 `).trim();return s=insertBreaks20(s),s=jn(s),t==="140"&&s.length>140&&(s=s.slice(0,137)+"..."),s}function insertBreaks20(text){if(!text)return"";const lines=text.split("\n");const out=[];for(const ln of lines){if(!ln.trim()){out.push(ln);continue;}if(/^https?:\/\//.test(ln.trim())||/^#/.test(ln.trim())){out.push(ln);continue;}let buf="";let cnt=0;for(let i=0;i<ln.length;i++){const ch=ln[i];buf+=ch;cnt++;if(cnt>=18&&i<ln.length-1){const next=ln[i+1];if(/[、。！？，．,.!?\s]/.test(ch)||/[「『（(]/.test(next)){out.push(buf);buf="";cnt=0;}else if(cnt>=24){out.push(buf);buf="";cnt=0;}}}if(buf)out.push(buf);}return out.join("\n");}function jn(e){if(!e)return"";const t=e.split(`
 `).length,s=e.replace(/\n/g,"").length;if(t>3||s<40)return e;const a=e.split(new RegExp("(?<=[。！？!?\\n])","g")).filter(r=>r.trim());if(a.length<=1)return e;let n="",i=0;for(let r=0;r<a.length;r++){const o=a[r].trim();if(o){if(/^https?:\/\//.test(o)||/^#/.test(o)||/^@/.test(o)){n&&!n.endsWith(`
 `)&&(n+=`
 `),n+=o,i=0;continue}n+=o,i++,i>=2&&r<a.length-1?(n+=`
-
 `,i=0):r<a.length-1&&!o.endsWith(`
 `)&&(n+=`
 `)}}return n.replace(/\n{3,}/g,`
-
 `).trim()}const In=new TextEncoder;async function Ae(e){const t=await crypto.subtle.digest("SHA-256",In.encode(e||""));return[...new Uint8Array(t)].slice(0,8).map(a=>a.toString(16).padStart(2,"0")).join("")}function Ot(e){const t=(e||"").replace(/\s+/g,"").slice(0,2e3),s=new Set;for(let a=0;a<t.length-1;a++)s.add(t.slice(a,a+2));return s}function Ws(e,t){const s=Ot(e),a=Ot(t);if(s.size===0&&a.size===0)return 0;let n=0;for(const r of s)a.has(r)&&n++;const i=s.size+a.size-n;return i===0?0:n/i}const Cn=15*1e3;async function Ys(e,t){const s=new Date().toISOString(),a=new Date(Date.now()-Cn).toISOString(),n=await e.DB.prepare("SELECT account_id, locked_at FROM post_locks WHERE account_id = ?").bind(t).first();return n&&n.locked_at>a?!1:(await e.DB.prepare(`INSERT INTO post_locks (account_id, locked_at) VALUES (?, ?)
      ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,s).run(),!0)}async function Js(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function Ks(e,t,s,a,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),0){}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
        WHERE account_id = ? AND status = 'posted'
@@ -3926,7 +3766,6 @@ if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepar
              ?, ?, ?, ?,
              ?, ?, ?, ?, ?,
              ?, ?)`).bind(t.id,acctId,s.body,s.link_url??null,s.hashtags??null,s.post_mode??"body",s.status??"pending",s.scheduled_at??null,effSched,n,s.generation_type??null,s.source_type??"manual_post",s.recurrence_type??null,s.recurrence_rule??null,s.recurrence_end_at??null,s.next_run_at??null,s.recycle_rule??null,s.source_post_id??null,s.min_engagement_score??0,s.rewrite_mode??null,s.thread_parent_id??null,s.thread_order??0,s.thread_count??0,s.media_type??null,s.media_file_path??null,a,a).run();return e.json({success:!0,id:i.meta.last_row_id})});U.post("/api/admin/posts/generate",m,async e=>{const t=e.get("user");let s=e.env.OPENAI_API_KEY;if(!s){try{const enc=await Tt(e,"openai_api_key");if(enc){s=await lt(enc,e.env.ENCRYPTION_KEY)}}catch{}}const{theme:a,keywords:n,count:i,pattern_type:r,post_mode:o,link_url:d,hashtags:l,footer_text:c,account_id:p,generation_type:_}=await e.req.json();if(!a)return e.json({error:"theme required"},400);if(!s)return e.json({error:"OpenAI API Key 未設定（API設定画面で保存してください）"},500);let b=p??null;if(!b){let k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_current=1 AND is_active=1 LIMIT 1").bind(t.id).first();if(!k)k=await e.env.DB.prepare("SELECT id FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id ASC LIMIT 1").bind(t.id).first();b=(k==null?void 0:k.id)??null}const{target:v,voice:T}=await qn(e.env,t.id,b),E=g(),D=[];try{const k=Math.min(i||1,10);for(let N=0;N<k;N++){const P=o||"body";let L;r?L=await Us(s,r,a,n||"",v,T,P):L=await Hs(s,a,n||"",v,T,P),c&&(L=L.trimEnd()+`
-
 `+c.trim());const nt=await Ae(L),Q=await e.env.DB.prepare(`INSERT INTO post_queue
            (platform, user_id, account_id, theme, keywords, body, link_url, hashtags, post_mode, pattern_type,
             content_hash, generation_type, source_type, status, created_at, updated_at)
