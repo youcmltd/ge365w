@@ -367,17 +367,24 @@ window.__autoCronStart = window.__autoCronStart || function() {
   // tick 起動関数（バックグラウンド実行、結果は無視）
   var runTick = function() {
     fetch('/api/admin/cron/run-autopilot', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' })
-      .catch(function(){})
-      .then(function(){
+      .then(function(r){ return r.json(); })
+      .catch(function(){ return {}; })
+      .then(function(ap){
+        var apPosted = ap && ap.post_result ? ap.post_result : null;
+        if (apPosted && ((apPosted.processed||0) > 0 || (apPosted.success||0) > 0 || (apPosted.failed||0) > 0)) {
+          return { success: true, result: apPosted };
+        }
         return fetch('/api/admin/cron/run-tick', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' });
       })
-      .then(function(r){ return r.json(); })
+      .then(function(r){ return typeof r.json === 'function' ? r.json() : r; })
       .then(function(j){
-        if (j && j.success && j.result) {
-          var processed = j.result.processed || 0;
-          var success = j.result.success || 0;
+        var res = (j && (j.post_result || j.result)) || {};
+        if (j && j.success && res) {
+          var processed = res.processed || 0;
+          var success = res.success || 0;
           if (processed > 0 && success > 0 && typeof toast === 'function') {
             toast('予約投稿 ' + success + ' 件を実行しました', 'ok');
+            setTimeout(function(){ location.reload(); }, 1200);
           }
         }
       })
@@ -816,9 +823,11 @@ window.aiChatSend = function() {
       const r = await fetch('/api/admin/cron/run-autopilot', {method:'POST'});
       const j = await r.json();
       if (j.success) {
-        const res = j.result || {};
-        out.innerHTML = '<span style="color:#059669"><i class="fas fa-check"></i> オートパイロット完了: 処理 ' + (res.processed||0) + ' 件 / 成功 ' + (res.success||0) + ' 件 / 失敗 ' + (res.failed||0) + ' 件</span>';
+        const gen = j.result || {};
+        const res = j.post_result || {};
+        out.innerHTML = '<span style="color:#059669"><i class="fas fa-check"></i> オートパイロット完了: 生成 ' + (gen.generated||0) + ' 件 / 投稿処理 ' + (res.processed||0) + ' 件 / 成功 ' + (res.success||0) + ' 件 / 失敗 ' + (res.failed||0) + ' 件</span>';
         toast('オートパイロットチェック完了','ok');
+        if ((res.success||0) > 0) setTimeout(()=>location.reload(), 1500);
       } else {
         out.innerHTML = '<span style="color:#dc2626"><i class="fas fa-xmark"></i> 失敗: ' + (j.error||'unknown') + '</span>';
       }
@@ -1560,8 +1569,8 @@ window.openSchedRowModal = function(postId) {
   // 既存モーダルを削除
   const old = document.getElementById('row-sched-modal');
   if (old) old.remove();
-  // 1時間後をJST固定でデフォルト値に
-  const def = jstNowDatetimeLocal(60);
+  // 現在時刻をJST固定でデフォルト値に
+  const def = jstNowDatetimeLocal(0);
   const modal = document.createElement('div');
   modal.id = 'row-sched-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
@@ -2004,8 +2013,8 @@ async function submitSchedule() {
   // 既存のモーダルを削除
   const old = document.getElementById('th-sched-modal');
   if (old) old.remove();
-  // 1時間後をJST固定でデフォルト値に
-  const def = jstNowDatetimeLocal(60);
+  // 現在時刻をJST固定でデフォルト値に
+  const def = jstNowDatetimeLocal(0);
   const modal = document.createElement('div');
   modal.id = 'th-sched-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem';
