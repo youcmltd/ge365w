@@ -1824,8 +1824,8 @@ window.dlExportPosts = function() {
 };
 function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 function statusPill(s) {
-  const map = {pending:'pill-warn',approved:'pill-blue',publishing:'pill-blue',posted:'pill-ok',failed:'pill-err',cancelled:'pill-soft'};
-  const txt = {pending:'未承認',approved:'承認済',publishing:'送信中',posted:'投稿済',failed:'失敗',cancelled:'キャンセル'}[s] || s;
+  const map = {pending:'pill-soft',approved:'pill-blue',scheduled:'pill-blue',publishing:'pill-blue',posted:'pill-ok',failed:'pill-err',cancelled:'pill-soft',draft:'pill-soft'};
+  const txt = {pending:'下書き',approved:'予約済',scheduled:'予約済',publishing:'送信中',posted:'投稿済',failed:'失敗',cancelled:'キャンセル',draft:'下書き'}[s] || s;
   return '<span class="pill ' + (map[s]||'pill-soft') + '">' + txt + '</span>';
 }
 <\/script>`}function un(e){return`
@@ -2250,7 +2250,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   window.reloadSchedule = loadSchedule;
 
   function statusBadge(s) {
-    const map = {posted:['投稿済','#065F46','#ECFDF5'],failed:['失敗','#991B1B','#FEF2F2'],pending:['予約','#1D4ED8','#EFF6FF'],approved:['承認済','#1D4ED8','#EFF6FF'],scheduled:['予約','#1D4ED8','#EFF6FF'],draft:['下書き','#6B7280','#F3F4F6'],cancelled:['取消','#6B7280','#F3F4F6'],canceled:['取消','#6B7280','#F3F4F6'],publishing:['投稿中','#92400E','#FFFBEB'],configured:['設定済','#1D4ED8','#EFF6FF']};
+    const map = {posted:['投稿済','#065F46','#ECFDF5'],failed:['失敗','#991B1B','#FEF2F2'],pending:['下書き','#6B7280','#F3F4F6'],approved:['予約済','#1D4ED8','#EFF6FF'],scheduled:['予約済','#1D4ED8','#EFF6FF'],draft:['下書き','#6B7280','#F3F4F6'],cancelled:['取消','#6B7280','#F3F4F6'],canceled:['取消','#6B7280','#F3F4F6'],publishing:['投稿中','#92400E','#FFFBEB'],configured:['予約済','#1D4ED8','#EFF6FF']};
     const m = map[s] || [s||'-','#6B7280','#F3F4F6'];
     return '<span style="display:inline-block;padding:.1rem .5rem;font-size:.7rem;border-radius:.25rem;color:'+m[1]+';background:'+m[2]+';font-weight:600">'+m[0]+'</span>';
   }
@@ -2295,7 +2295,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
         const textColor = col===0?'#ef4444':col===6?'#2563EB':'var(--ink)';
         const cursor = isCurrentMonth ? 'cursor:pointer;' : '';
         const click = isCurrentMonth ? ' onclick="scOpenDay(\\''+dateStr+'\\')"' : '';
-        html += '<div'+click+' style="position:relative;min-height:5.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
+        html += '<div'+click+' style="position:relative;min-height:7rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:.375rem;background:' + (isToday?'#EFF6FF':'#fff') + ';' + cursor + '">';
         if (isCurrentMonth) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">';
           html += '<span style="font-size:.8rem;font-weight:'+(isToday?'700':'400')+';color:'+textColor+'">' + day + '</span>';
@@ -2304,7 +2304,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
           if (posts.length > 0) html += '<div style="margin-bottom:2px"><span style="font-size:.65rem;background:#1D4ED8;color:#fff;border-radius:.75rem;padding:0 .4rem;font-weight:600">'+posts.length+'件</span></div>';
           // 縦5×横4=20件まで表示。グリッド2列で密度を高める
           html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px">';
-          posts.slice(0,8).forEach(p => {
+          posts.slice(0,10).forEach(p => {
             const color = p.status==='posted'?'#065F46':p.status==='failed'?'#991B1B':'#1D4ED8';
             const bg = p.status==='posted'?'#ECFDF5':p.status==='failed'?'#FEF2F2':p.source_type==='autopilot'?'#FEF3C7':'#EFF6FF';
             const label = p.source_type==='autopilot' ? '[AP]' : '';
@@ -2312,7 +2312,7 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
             html += '<div style="background:'+bg+';color:'+color+';font-size:.6rem;padding:1px 3px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2" title="'+timeStr+' '+((p.body||'').replace(/"/g,"&quot;")).slice(0,80)+'">' + '<span style="font-weight:700;font-family:monospace">' + timeStr + '</span> ' + label + '</div>';
           });
           html += '</div>';
-          if (posts.length > 8) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-8) + '件</div>';
+          if (posts.length > 10) html += '<div style="font-size:.65rem;color:var(--ink-muted)">+' + (posts.length-10) + '件</div>';
         }
         html += '</div>';
         day++;
@@ -3873,7 +3873,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
 `)&&(n+=`
 `)}}return n.replace(/\n{3,}/g,`
 
-`).trim()}const In=new TextEncoder;async function Ae(e){const t=await crypto.subtle.digest("SHA-256",In.encode(e||""));return[...new Uint8Array(t)].slice(0,8).map(a=>a.toString(16).padStart(2,"0")).join("")}function Ot(e){const t=(e||"").replace(/\s+/g,"").slice(0,2e3),s=new Set;for(let a=0;a<t.length-1;a++)s.add(t.slice(a,a+2));return s}function Ws(e,t){const s=Ot(e),a=Ot(t);if(s.size===0&&a.size===0)return 0;let n=0;for(const r of s)a.has(r)&&n++;const i=s.size+a.size-n;return i===0?0:n/i}const Cn=120*1e3;async function Ys(e,t){const s=new Date().toISOString(),a=new Date(Date.now()-Cn).toISOString(),n=await e.DB.prepare("SELECT account_id, locked_at FROM post_locks WHERE account_id = ?").bind(t).first();return n&&n.locked_at>a?!1:(await e.DB.prepare(`INSERT INTO post_locks (account_id, locked_at) VALUES (?, ?)
+`).trim()}const In=new TextEncoder;async function Ae(e){const t=await crypto.subtle.digest("SHA-256",In.encode(e||""));return[...new Uint8Array(t)].slice(0,8).map(a=>a.toString(16).padStart(2,"0")).join("")}function Ot(e){const t=(e||"").replace(/\s+/g,"").slice(0,2e3),s=new Set;for(let a=0;a<t.length-1;a++)s.add(t.slice(a,a+2));return s}function Ws(e,t){const s=Ot(e),a=Ot(t);if(s.size===0&&a.size===0)return 0;let n=0;for(const r of s)a.has(r)&&n++;const i=s.size+a.size-n;return i===0?0:n/i}const Cn=15*1e3;async function Ys(e,t){const s=new Date().toISOString(),a=new Date(Date.now()-Cn).toISOString(),n=await e.DB.prepare("SELECT account_id, locked_at FROM post_locks WHERE account_id = ?").bind(t).first();return n&&n.locked_at>a?!1:(await e.DB.prepare(`INSERT INTO post_locks (account_id, locked_at) VALUES (?, ?)
      ON CONFLICT(account_id) DO UPDATE SET locked_at = excluded.locked_at`).bind(t,s).run(),!0)}async function Js(e,t){await e.DB.prepare("DELETE FROM post_locks WHERE account_id = ?").bind(t).run()}async function Ks(e,t,s,a,n){const i={ok:!0,errors:[],warnings:[]},r=await e.DB.prepare("SELECT daily_post_count, daily_post_limit, last_posted_at, last_daily_reset_date, health_status FROM x_accounts WHERE id = ?").bind(t).first();if(!r)return i.ok=!1,i.errors.push({code:"account_not_found",message:"アカウントが存在しません"}),i;const o=new Date(Date.now()+9*3600*1e3).toISOString().slice(0,10);let d=r.daily_post_count||0;if(r.last_daily_reset_date!==o&&(d=0),0){}const{results:l}=await e.DB.prepare(`SELECT id, body FROM post_queue
        WHERE account_id = ? AND status = 'posted'
        ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC
@@ -3983,7 +3983,11 @@ if(!r.account_id&&acctRow.id){
   await e.env.DB.prepare("UPDATE post_queue SET account_id=? WHERE id=?").bind(acctRow.id,r.id).run();
   r.account_id=acctRow.id;
 }
-const d=acctRow;const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id))throw new Error("account_busy");try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
+const d=acctRow;const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if(!l.ok)throw new Error("safety: "+l.errors.map(c=>c.message).join("; "));if(!await Ys(e.env,d.id)){
+  // ロック取得失敗 = 同アカウント別投稿が処理中。リトライ可能エラーとして status を approved に戻す（次回 cron tick で再試行）
+  await e.env.DB.prepare("UPDATE post_queue SET status='approved', updated_at=? WHERE id=?").bind(g(),r.id).run();
+  continue;
+}try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
 `+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=?").bind(T).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}// thread_parent_id を解決
 let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){replyToId=tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),
