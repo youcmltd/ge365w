@@ -3568,6 +3568,39 @@ td:last-child{font-family:monospace;font-weight:600;color:#1f2937;background:#f8
       WHERE user_id = ?
       ORDER BY created_at DESC
       LIMIT 50`).bind(t.id).all();return e.json({payments:s||[]})});be.post("/api/subscription/stripe/checkout",m,async e=>e.env.STRIPE_SECRET_KEY?e.json({error:"not_implemented_yet"},501):e.json({error:"stripe_not_configured"},501));be.post("/api/subscription/webhook/stripe",async e=>e.json({received:!0}));const Qt=new TextEncoder,vn="https://api.x.com/2";class $ extends Error{constructor(s,a=0,n="api_error"){super(s);h(this,"statusCode");h(this,"errorType");this.name="XApiError",this.statusCode=a,this.errorType=n}}class Mt extends ${constructor(s){super("Rate limited by X API (429)",429,"rate_limit");h(this,"resetAtEpoch");this.name="XApiRateLimitError",this.resetAtEpoch=s}}function oe(e){return encodeURIComponent(e).replace(/[!'()*]/g,t=>"%"+t.charCodeAt(0).toString(16).toUpperCase())}function yn(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),[...t].map(s=>s.toString(16).padStart(2,"0")).join("")}function En(){return yn(16)}async function xn(e,t){const s=await crypto.subtle.importKey("raw",Qt.encode(e),{name:"HMAC",hash:"SHA-1"},!1,["sign"]),a=await crypto.subtle.sign("HMAC",s,Qt.encode(t)),n=new Uint8Array(a);let i="";for(let r=0;r<n.length;r++)i+=String.fromCharCode(n[r]);return btoa(i)}async function wn(e,t,s,a){const n={oauth_consumer_key:s.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:s.accessToken,oauth_version:"1.0"},i=new URL(t),r={...n};i.searchParams.forEach((_,b)=>{r[b]=_});const o=Object.keys(r).sort().map(_=>`${oe(_)}=${oe(r[_])}`).join("&"),d=[e.toUpperCase(),oe(`${i.origin}${i.pathname}`),oe(o)].join("&"),l=`${oe(s.consumerSecret)}&${oe(s.accessTokenSecret)}`,c=await xn(l,d);return n.oauth_signature=c,`OAuth ${Object.keys(n).sort().map(_=>`${oe(_)}="${oe(n[_])}"`).join(", ")}`}async function $t(e,t,s,a){const n=`${vn}${t}`,i=await wn(e,n,a),r={method:e,headers:{authorization:i,"content-type":"application/json"},signal:AbortSignal.timeout(3e4)};s!==void 0&&(r.body=JSON.stringify(s));const o=await fetch(n,r);if(o.status===429){const d=o.headers.get("x-rate-limit-reset");throw new Mt(d?Number(d):void 0)}if(!o.ok){const d=await o.text();let detail=d.slice(0,300);try{const j=JSON.parse(d);if(j.detail)detail=j.detail;else if(j.errors&&j.errors[0])detail=j.errors[0].message||j.errors[0].detail||detail;else if(j.title)detail=j.title}catch{}let hint="";if(o.status===401)hint="（401 Unauthorized: X Developer Portalで App permissions を Read+Write に変更後、Keys and tokens タブで Access Token & Secret を再生成してください。再生成後の新しいトークンをアカウント管理に登録し直す必要があります）";else if(o.status===403)hint="（403 Forbidden: アプリの権限が不足しています）";throw new $(`X API ${e} ${t} failed: ${o.status} ${detail}${hint}`,o.status,"api_error")}return o.status===204?{}:o.json()}async function Ms(e,t){var a,n;const s=await $t("POST","/tweets",{text:t},e);return{id:((a=s==null?void 0:s.data)==null?void 0:a.id)||"",text:((n=s==null?void 0:s.data)==null?void 0:n.text)||t}}async function $s(e,t,s,a){var r,o;const n={text:t};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function $sReply(e,t,parentId,s){var r,o;const n={text:t,reply:{in_reply_to_tweet_id:parentId}};s&&s.length&&(n.media={media_ids:s.slice(0,4)});const i=await $t("POST","/tweets",n,e);return{id:((r=i==null?void 0:i.data)==null?void 0:r.id)||"",text:((o=i==null?void 0:i.data)==null?void 0:o.text)||t}}async function kn(e){var s,a,n,i;if(!e)throw new $("credentials未設定",0,"missing_credentials");if(!((s=e.consumerKey)!=null&&s.trim()))throw new $("API Key未設定",0,"missing_credentials");if(!((a=e.consumerSecret)!=null&&a.trim()))throw new $("API Secret未設定",0,"missing_credentials");if(!((n=e.accessToken)!=null&&n.trim()))throw new $("Access Token未設定",0,"missing_token");if(!((i=e.accessTokenSecret)!=null&&i.trim()))throw new $("Access Token Secret未設定",0,"missing_token");const t=await $t("GET","/users/me?user.fields=profile_image_url,public_metrics",void 0,e);return t==null?void 0:t.data}async function Ft(e,t,s){var o,d;let a=((s==null?void 0:s.apiKey)??e.X_API_KEY??"").trim();let n=((s==null?void 0:s.apiSecret)??e.X_API_SECRET??"").trim();if((!a||!n)&&e.DB&&t&&t.user_id){try{const row=await e.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.user_id).first();if(row){if(!a&&row.api_key){try{a=(await At(row.api_key,e.ENCRYPTION_KEY)).trim()}catch{}}if(!n&&row.api_secret){try{n=(await At(row.api_secret,e.ENCRYPTION_KEY)).trim()}catch{}}}}catch{}}if(!a||!n)throw new $("X API Key/Secret 未設定",0,"no_api_key");if(!((o=t==null?void 0:t.access_token)!=null&&o.trim()))throw new $("Access Token 未設定",0,"no_token");if(!((d=t==null?void 0:t.access_token_secret)!=null&&d.trim()))throw new $("Access Token Secret 未設定",0,"no_token_secret");let i,r;try{i=await At(t.access_token,e.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}try{r=await At(t.access_token_secret,e.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}if(!i.trim())throw new $("Access Token が空",0,"decrypt_failed");if(!r.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");return{consumerKey:a,consumerSecret:n,accessToken:i,accessTokenSecret:r}}
+async function __resolveXApiPair(env,account,override){
+  const hasOverride=!!(override&&((override.apiKey||"").trim()||(override.apiSecret||"").trim()));
+  let apiKey=hasOverride?((override.apiKey||"").trim()):"";
+  let apiSecret=hasOverride?((override.apiSecret||"").trim()):"";
+  let usedStored=false;
+  if(!hasOverride&&env.DB&&account&&account.user_id){
+    try{
+      const row=await env.DB.prepare("SELECT api_key, api_secret FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(account.user_id).first();
+      if(row&&(row.api_key||row.api_secret)){
+        usedStored=true;
+        if(row.api_key)apiKey=(await At(row.api_key,env.ENCRYPTION_KEY)).trim();
+        if(row.api_secret)apiSecret=(await At(row.api_secret,env.ENCRYPTION_KEY)).trim();
+      }
+    }catch{}
+  }
+  if(!usedStored&&!hasOverride){
+    apiKey=(env.X_API_KEY||"").trim();
+    apiSecret=(env.X_API_SECRET||"").trim();
+  }
+  return{apiKey,apiSecret};
+}
+Ft=async function(env,account,override){
+  const pair=await __resolveXApiPair(env,account,override);
+  if(!pair.apiKey||!pair.apiSecret)throw new $("X API Key/Secret 未設定（X API設定で同じDeveloper AppのConsumer KeyとConsumer Secretを両方保存してください）",0,"no_api_key");
+  if(!((account==null?void 0:account.access_token)||"").trim())throw new $("Access Token 未設定",0,"no_token");
+  if(!((account==null?void 0:account.access_token_secret)||"").trim())throw new $("Access Token Secret 未設定",0,"no_token_secret");
+  let accessToken,accessTokenSecret;
+  try{accessToken=await At(account.access_token,env.ENCRYPTION_KEY)}catch{throw new $("Access Token の復号に失敗",0,"decrypt_failed")}
+  try{accessTokenSecret=await At(account.access_token_secret,env.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}
+  if(!accessToken.trim())throw new $("Access Token が空",0,"decrypt_failed");
+  if(!accessTokenSecret.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");
+  return{consumerKey:pair.apiKey,consumerSecret:pair.apiSecret,accessToken,accessTokenSecret};
+};
 const xMU_URL="https://upload.twitter.com/1.1/media/upload.json";
 async function xMU_oauth(method,url,creds,bodyParams){
   const oa={oauth_consumer_key:creds.consumerKey,oauth_nonce:En(),oauth_signature_method:"HMAC-SHA1",oauth_timestamp:Math.floor(Date.now()/1e3).toString(),oauth_token:creds.accessToken,oauth_version:"1.0"};
