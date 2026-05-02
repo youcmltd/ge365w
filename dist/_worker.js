@@ -3809,7 +3809,7 @@ if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepar
      VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[0].body,s[0].link_url??a??null,s.length,r,i,i).run()).meta.last_row_id,l=[d];for(let c=1;c<s.length;c++){const p=await Ae(s[c].body),_=await e.env.DB.prepare(`INSERT INTO post_queue
          (platform, user_id, account_id, body, link_url, post_mode,
           thread_parent_id, thread_order, content_hash, source_type, status, created_at, updated_at)
-       VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[c].body,s[c].link_url??null,d,c,p,i,i).run();l.push(_.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const zs=new A,Pn=5;zs.post("/cron/tick",async e=>{const t=g(),{results:s}=await e.env.DB.prepare(`SELECT * FROM post_queue
+       VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[c].body,s[c].link_url??null,"prev:"+l[l.length-1],c,p,i,i).run();l.push(_.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const zs=new A,Pn=5;zs.post("/cron/tick",async e=>{const t=g(),{results:s}=await e.env.DB.prepare(`SELECT * FROM post_queue
       WHERE platform='x'
         AND status IN ('pending','approved')
         AND COALESCE(effective_scheduled_at, scheduled_at) IS NOT NULL
@@ -3840,7 +3840,7 @@ const d=acctRow;const l=await Ks(e.env,d.id,r.body||"",r.link_url,r.hashtags);if
 }try{const c=await Ft(e.env,d);let p=bt(r.body||"",r.post_mode);r.link_url&&(p+=`
 `+r.link_url),r.hashtags&&(p+=`
 `+r.hashtags);const _=[];if(r.media_json)try{const v=JSON.parse(r.media_json);for(const T of(v||[]).slice(0,4)){const E=await e.env.DB.prepare("SELECT * FROM media_assets WHERE id=? AND user_id=?").bind(T,r.user_id).first();if(E){if(!E.x_media_id){try{const{bytes,mime}=await readMediaBytes(e.env,E);if(bytes){const xid=await xMU_upload(c,bytes,mime);await e.env.DB.prepare("UPDATE media_assets SET x_media_id=?, upload_status='uploaded', updated_at=? WHERE id=?").bind(xid,g(),E.id).run();_.push(xid)}}catch(uErr){console.error("[mediaUp-cron]",uErr&&uErr.message)}}else _.push(E.x_media_id)}}}catch{}// thread_parent_id を解決
-let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){replyToId=tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),
+let replyToId=null;if(r.thread_parent_id){const tp=String(r.thread_parent_id);if(tp.startsWith("prev:")){const prevId=parseInt(tp.slice(5),10);if(prevId){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=?").bind(prevId).first();if(prev&&prev.external_post_id)replyToId=prev.external_post_id;else throw new Error("親返信がまだ投稿されていません(post_queue id="+prevId+")")}}else if(/^\d+$/.test(tp)){const prev=await e.env.DB.prepare("SELECT external_post_id FROM post_queue WHERE id=? AND user_id=?").bind(Number(tp),r.user_id).first();replyToId=prev&&prev.external_post_id?prev.external_post_id:tp}}const b=replyToId?(_.length>0?await $sReply(c,p,replyToId,_):await $sReply(c,p,replyToId)):(_.length>0?await $s(c,p,_,null):await Ms(c,p));await e.env.DB.prepare("UPDATE post_queue SET status='posted', external_post_id=?, posted_at=?, updated_at=? WHERE id=?").bind(b.id||"",g(),g(),r.id).run(),
 // autopilot_jobs に紐づく投稿の場合は autopilot_jobs.status='posted' にも同期
 await e.env.DB.prepare("UPDATE autopilot_jobs SET status='posted', updated_at=? WHERE generated_post_id=? AND user_id=?").bind(g(),r.id,r.user_id).run(),
 await e.env.DB.prepare(`UPDATE x_accounts SET
@@ -4072,14 +4072,15 @@ at.post("/api/admin/thread/post-now",m,async e=>{
       }
     }
     try{
-      const r=xMids.length>0?await $sReply(creds,it.body,parent,xMids):await $sReply(creds,it.body,parent);
+      const replyTo=parent;
+      const r=xMids.length>0?await $sReply(creds,it.body,replyTo,xMids):await $sReply(creds,it.body,replyTo);
       posted.push({index:i,id:r.id});parent=r.id;
       const tt=g();
       await e.env.DB.prepare(`INSERT INTO post_queue
          (platform, user_id, account_id, body, post_mode, scheduled_at, effective_scheduled_at,
-          status, source_type, thread_parent_id, external_post_id, posted_at, media_json, media_type, created_at, updated_at)
-         VALUES ('x', ?, ?, ?, 'body', ?, ?, 'posted', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
-          t.id, acct.id, it.body, tt, tt, parent===r.id?tid:parent, r.id, tt,
+          status, source_type, thread_parent_id, thread_order, thread_count, external_post_id, posted_at, media_json, media_type, created_at, updated_at)
+         VALUES ('x', ?, ?, ?, 'thread', ?, ?, 'posted', 'thread', ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
+          t.id, acct.id, it.body, tt, tt, replyTo, i, arr.length, r.id, tt,
           xMids.length>0?JSON.stringify(it.media_ids.slice(0,4)):null,
           xMids.length>0?"image":null, tt, tt
         ).run().catch(()=>{});
@@ -4105,7 +4106,7 @@ at.post("/api/admin/thread/schedule",m,async e=>{
     const r=await e.env.DB.prepare(`INSERT INTO post_queue
        (platform, user_id, account_id, body, post_mode, scheduled_at, effective_scheduled_at,
         status, source_type, thread_parent_id, thread_order, thread_count, media_json, media_type, created_at, updated_at)
-       VALUES ('x', ?, ?, ?, 'body', ?, ?, 'approved', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
+       VALUES ('x', ?, ?, ?, 'thread', ?, ?, 'approved', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
         t.id, acct.id, it.body, sched, sched, i===0?tid:"prev:"+(ids[i-1]||""), i, arr.length,
         mediaJson, mediaJson?"image":null, tt, tt
       ).run();
