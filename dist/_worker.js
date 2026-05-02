@@ -1640,8 +1640,8 @@ window.filterPosts = function(btn, st) {
     else if (st === 'posted') show = (s === 'posted');
     else if (st === 'failed') show = (s === 'failed' || s === 'rejected' || s === 'error');
     else if (st === 'draft') show = (s === 'draft');
-    else if (st === 'scheduled') show = ((s === 'approved' || s === 'pending' || s === 'publishing') && sched);
-    else if (st === 'pending') show = ((s === 'pending' || s === 'approved') && !sched);
+    else if (st === 'scheduled') show = ((s === 'approved' || s === 'scheduled' || s === 'pending' || s === 'publishing') && sched);
+    else if (st === 'pending') show = ((s === 'pending' || s === 'approved' || s === 'scheduled') && !sched);
     tr.style.display = show ? '' : 'none';
   });
 };
@@ -1696,7 +1696,7 @@ window.openSchedModal = function() {
   window.psMedia = [];
   psRenderMedia();
   document.getElementById('ps-body').value = '';
-  document.getElementById('ps-when').value = '';
+  document.getElementById('ps-when').value = jstNowDatetimeLocal(0);
   document.getElementById('ps-url').value = '';
   const m = document.getElementById('post-sched-modal');
   m.style.display = 'flex';
@@ -1736,10 +1736,10 @@ window.submitScheduledPost = async function() {
   const when = document.getElementById('ps-when').value;
   if (!body) { toast('本文を入力してください','err'); return; }
   if (!when) { toast('予約日時を入力してください','err'); return; }
-  const scheduledAt = when.replace('T',' ') + ':00';
+  const scheduledAt = datetimeLocalToJst(when);
   try {
     const r = await fetch('/api/admin/posts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
-      body, scheduled_at: scheduledAt, status:'approved', post_mode:'body',
+      body, scheduled_at: scheduledAt, status:'scheduled', post_mode:'body',
       link_url: document.getElementById('ps-url').value || null,
       source_type:'manual_scheduled',
     })});
@@ -3158,7 +3158,7 @@ async function testApi(kind){
 }
 window.testApi = testApi;
 <\/script>`}const H=new A;async function gn(e,t){const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, is_current
-       FROM x_accounts WHERE user_id = ? AND is_active = 1 ORDER BY id`).bind(t.id).all(),a=(s||[]).map(i=>({id:i.id,account_name:i.account_name,x_username:i.x_username})),n=(s||[]).find(i=>i.is_current===1);return{accounts:a,currentAccountId:(n==null?void 0:n.id)??null}}H.get("/",e=>e.redirect("/login"));async function K(e,t,s){const a=e.get("user"),{accounts:n,currentAccountId:i}=await gn(e,a),r=n.length>0&&i!==null,o=await Promise.resolve(s({user:a,hasAccount:r,accounts:n,currentAccountId:i})),d=an({active:t,user:a,accounts:n,currentAccountId:i,pageBody:o});return e.html(It("GE365x",d))}H.get("/dashboard",m,async e=>K(e,"dashboard",async({user:t,hasAccount:s})=>{const a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND DATE(created_at)=DATE('now','+9 hours') AND status='posted'").bind(t.id).first(),i=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE user_id=? AND status IN ('pending','approved')").bind(t.id).first(),r=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND status='failed' AND DATE(created_at)=DATE('now','+9 hours')").bind(t.id).first(),{results:o}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status, is_active
+       FROM x_accounts WHERE user_id = ? AND is_active = 1 ORDER BY id`).bind(t.id).all(),a=(s||[]).map(i=>({id:i.id,account_name:i.account_name,x_username:i.x_username})),n=(s||[]).find(i=>i.is_current===1);return{accounts:a,currentAccountId:(n==null?void 0:n.id)??null}}H.get("/",e=>e.redirect("/login"));async function K(e,t,s){const a=e.get("user"),{accounts:n,currentAccountId:i}=await gn(e,a),r=n.length>0&&i!==null,o=await Promise.resolve(s({user:a,hasAccount:r,accounts:n,currentAccountId:i})),d=an({active:t,user:a,accounts:n,currentAccountId:i,pageBody:o});return e.html(It("GE365x",d))}H.get("/dashboard",m,async e=>K(e,"dashboard",async({user:t,hasAccount:s})=>{const a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND DATE(created_at)=DATE('now','+9 hours') AND status='posted'").bind(t.id).first(),i=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE user_id=? AND status IN ('pending','approved','scheduled')").bind(t.id).first(),r=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND status='failed' AND DATE(created_at)=DATE('now','+9 hours')").bind(t.id).first(),{results:o}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status, is_active
          FROM x_accounts WHERE user_id = ? ORDER BY id`).bind(t.id).all(),{results:d}=await e.env.DB.prepare(`SELECT pl.content, pl.status, pl.posted_at, xa.x_username
          FROM post_logs pl LEFT JOIN x_accounts xa ON xa.id = pl.account_id
          WHERE pl.user_id = ? AND pl.status = 'posted'
@@ -3183,9 +3183,14 @@ F.get("/api/server-time",e=>e.json({now:g(),now_ms:Date.now()}));
 // 手動cron起動: ブラウザから /api/admin/cron/run-tick を叩くと即時実行（cron triggers が動かない時の救済）
 F.post("/api/admin/cron/run-tick",m,async e=>{
   try {
+    let apj=null;
+    try{
+      const ap=await S.fetch(new Request("https://internal/cron/autopilot-tick",{method:"POST"}), e.env, e.executionCtx);
+      apj=await ap.json().catch(()=>({}));
+    }catch(apErr){apj={ok:false,error:(apErr&&apErr.message)||"autopilot_tick_failed"}}
     const r = await S.fetch(new Request("https://internal/cron/tick",{method:"POST"}), e.env, e.executionCtx);
     const j = await r.json().catch(()=>({}));
-    return e.json({success:true, kind:'tick', result: j});
+    return e.json({success:true, kind:'scheduler', autopilot_result: apj, result: j});
   } catch(err) {
     return e.json({success:false, error: err.message}, 500);
   }
@@ -3989,7 +3994,7 @@ CTA: ${e.cta}`),e.userInput&&(n+=`
           AND DATE(COALESCE(posted_at, scheduled_at, created_at)) >= DATE('now','+9 hours','-7 days')`).bind(t,a).first();((c==null?void 0:c.n)??0)>=3&&i.errors.push({code:"link_spam",message:`同一リンクを過去7日で${c==null?void 0:c.n}回使用しています`})}if(n){const c=es(n);if(c.size>0){const{results:p}=await e.DB.prepare(`SELECT hashtags FROM post_queue
            WHERE account_id = ? AND status IN ('posted','approved','publishing') AND hashtags IS NOT NULL AND hashtags != ''
            ORDER BY COALESCE(posted_at, scheduled_at, created_at) DESC LIMIT 3`).bind(t).all();(p||[]).length>=3&&(p||[]).every(b=>{const T=[...es(b.hashtags||"")].filter(D=>c.has(D)).length;return(c.size===0?0:T/c.size)>=.8})&&i.errors.push({code:"hashtag_spam",message:"同一ハッシュタグセットが 3 回連続で 80%以上一致しています"})}}return r.health_status==="risk"&&i.errors.push({code:"health_risk",message:"アカウント健全性スコアが危険域です。投稿を控えてください。"}),i.ok=i.errors.length===0,i}function es(e){return new Set((e||"").split(/[\s,]+/).map(t=>t.trim().replace(/^#/,"").toLowerCase()).filter(Boolean))}async function mt(e,t,s,a,n){const i=await e.DB.prepare("SELECT account_health_score FROM x_accounts WHERE id = ?").bind(t).first();if(!i)return{score_after:100,status_after:"healthy"};let r=Math.max(0,Math.min(100,(i.account_health_score??100)+a));const o=r>=80?"healthy":r>=60?"caution":"risk";return await e.DB.prepare("UPDATE x_accounts SET account_health_score = ?, health_status = ?, updated_at = datetime('now','+9 hours') WHERE id = ?").bind(r,o,t).run(),await e.DB.prepare(`INSERT INTO account_health_events (account_id, event_type, delta, score_after, status_after, metadata)
-     VALUES (?, ?, ?, ?, ?, ?)`).bind(t,s,a,r,o,n?JSON.stringify(n):null).run(),{score_after:r,status_after:o}}function ts(e){if(!e)return Date.now();const t=e.replace(" ","T")+"+09:00",s=Date.parse(t);return Number.isNaN(s)?Date.now():s}function ss(e){return new Date(e+324e5).toISOString().replace("T"," ").slice(0,19)}async function Bn(e,t,s){const a=s.jitter_enabled!==!1,n=s.jitter_minutes??5,i=s.collision_avoidance_enabled!==!1,r=s.min_spacing_seconds??90;let o=ts(t),d=0,l=0;if(a&&n>0){const _=Math.floor((Math.random()*2-1)*n*60);d=_,o+=_*1e3}if(i&&s.account_id){const _=ss(o),b=[s.account_id,_,_];let v=`
+     VALUES (?, ?, ?, ?, ?, ?)`).bind(t,s,a,r,o,n?JSON.stringify(n):null).run(),{score_after:r,status_after:o}}function ts(e){if(!e)return Date.now();const raw=String(e).trim().replace(/\//g,"-").replace("T"," "),t=raw.replace(" ","T")+"+09:00",s=Date.parse(t);return Number.isNaN(s)?Date.now():s}function ss(e){return new Date(e+324e5).toISOString().replace("T"," ").slice(0,19)}async function Bn(e,t,s){const a=s.jitter_enabled!==!1,n=s.jitter_minutes??5,i=s.collision_avoidance_enabled!==!1,r=s.min_spacing_seconds??90;let o=ts(t),d=0,l=0;if(a&&n>0){const _=Math.floor((Math.random()*2-1)*n*60);d=_,o+=_*1e3}if(i&&s.account_id){const _=ss(o),b=[s.account_id,_,_];let v=`
       SELECT COALESCE(effective_scheduled_at, scheduled_at) AS sat
         FROM post_queue
        WHERE account_id = ?
@@ -4040,7 +4045,7 @@ if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepar
          VALUES ('x', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`).bind(t.id,b,a,n||"",L,d||null,l||null,P,r||null,nt,_||r||"general",r?"pattern_generated_post":"ai_generated_post",E,E).run();D.push({id:Q.meta.last_row_id,body:L,link_url:d||"",post_mode:P});try{await e.env.DB.prepare(`INSERT INTO generation_logs
              (user_id, account_id, brand_voice_id, target_setting_id, post_mode, generation_type, output_text)
            VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(t.id,b,(T==null?void 0:T.id)??null,(v==null?void 0:v.id)??null,P,r||"general",L.slice(0,500)).run()}catch{}}return e.json({success:!0,generated:D,count:D.length})}catch(k){return e.json({error:"AI error: "+k.message},500)}});U.post("/api/admin/posts/:id/approve",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='approved', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});U.post("/api/admin/posts/:id/reject",m,async e=>{const t=e.get("user");return await e.env.DB.prepare("UPDATE post_queue SET status='rejected', updated_at=? WHERE id=? AND user_id=?").bind(g(),parseInt(e.req.param("id"),10),t.id).run(),e.json({success:!0})});U.post("/api/admin/posts/:id/schedule",m,async e=>{const t=e.get("user"),s=parseInt(e.req.param("id"),10),{scheduled_at:a,jitter_enabled:n=!0,jitter_minutes:i=5,collision_avoidance_enabled:r=!0,min_spacing_seconds:o=90}=await e.req.json();if(!a)return e.json({error:"scheduled_at required"},400);const d=await e.env.DB.prepare("SELECT * FROM post_queue WHERE id=? AND user_id=?").bind(s,t.id).first();if(!d)return e.json({success:!1,error:"Not found"},404);const l=await Fn(e.env,d.body||"",d.account_id??null,{post_id:d.id});if(!l.pass)return e.json({success:!1,error:"類似: "+l.blocked_reason,similarity_blocked:!0,scores:l.scores});const{effective_at:c,audit:p}=await Bn(e.env,a,{jitter_enabled:n,jitter_minutes:i,collision_avoidance_enabled:r,min_spacing_seconds:o,account_id:d.account_id,exclude_id:d.id}),_=await Mn(d.body||"");return await $n(e.env,d.id,d.account_id,_),await e.env.DB.prepare(`UPDATE post_queue SET
-       status='approved', base_scheduled_at=?, effective_scheduled_at=?, scheduled_at=?,
+       status='scheduled', base_scheduled_at=?, effective_scheduled_at=?, scheduled_at=?,
        jitter_enabled=?, jitter_minutes=?, collision_avoidance_enabled=?, min_spacing_seconds=?,
        schedule_resolution_log=?, updated_at=?
      WHERE id=?`).bind(a,c,c,n?1:0,i,r?1:0,o,JSON.stringify(p),g(),s).run(),await Nn(e.env,d.id,d.account_id,p),e.json({success:!0,base_scheduled_at:a,effective_scheduled_at:c,scheduled_at:c,audit:p})});U.post("/api/admin/posts/:id/post-now",m,async e=>{
@@ -4097,13 +4102,13 @@ if(s.scheduled_at&&s.post_mode==="scheduled_once"){const r=await e.env.DB.prepar
      VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[0].body,s[0].link_url??a??null,s.length,r,i,i).run()).meta.last_row_id,l=[d];for(let c=1;c<s.length;c++){const p=await Ae(s[c].body),_=await e.env.DB.prepare(`INSERT INTO post_queue
          (platform, user_id, account_id, body, link_url, post_mode,
           thread_parent_id, thread_order, content_hash, source_type, status, created_at, updated_at)
-       VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[c].body,s[c].link_url??null,"prev:"+l[l.length-1],c,p,i,i).run();l.push(_.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const zs=new A,Pn=5;zs.post("/cron/tick",async e=>{const t=g(),{results:s}=await e.env.DB.prepare(`SELECT * FROM post_queue
+       VALUES ('x', ?, ?, ?, ?, 'thread', ?, ?, ?, 'manual_post', 'pending', ?, ?)`).bind(t.id,n??null,s[c].body,s[c].link_url??null,"prev:"+l[l.length-1],c,p,i,i).run();l.push(_.meta.last_row_id)}return e.json({success:!0,parent_id:d,ids:l})});const zs=new A,Pn=10;zs.post("/cron/tick",async e=>{const t=g(),{results:s}=await e.env.DB.prepare(`SELECT * FROM post_queue
       WHERE platform='x'
-        AND status IN ('pending','approved')
+        AND status IN ('pending','approved','scheduled')
         AND COALESCE(effective_scheduled_at, scheduled_at) IS NOT NULL
-        AND COALESCE(effective_scheduled_at, scheduled_at) <= datetime('now','+9 hours')
-      ORDER BY COALESCE(effective_scheduled_at, scheduled_at, created_at) ASC, COALESCE(thread_order, 0) ASC
-      LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{
+        AND datetime(replace(replace(COALESCE(effective_scheduled_at, scheduled_at),'T',' '),'/','-')) <= datetime('now','+9 hours')
+      ORDER BY datetime(replace(replace(COALESCE(effective_scheduled_at, scheduled_at),'T',' '),'/','-')) ASC, COALESCE(thread_order, 0) ASC
+      LIMIT ?`).bind(Pn).all();let a=0,n=0,i=0;for(const r of s||[]){const o=await e.env.DB.prepare("UPDATE post_queue SET status='publishing', updated_at=? WHERE id=? AND status IN ('pending','approved','scheduled')").bind(t,r.id).run();if(!(!o.success||o.meta.changes===0)){a++;try{
 // account_id NULLの場合: is_current=1 → 任意のアクティブアカウント の順で fallback
 let acctRow=null;
 if(r.account_id){
@@ -4381,7 +4386,7 @@ at.post("/api/admin/thread/schedule",m,async e=>{
     const r=await e.env.DB.prepare(`INSERT INTO post_queue
        (platform, user_id, account_id, body, post_mode, scheduled_at, effective_scheduled_at,
         status, source_type, thread_parent_id, thread_order, thread_count, media_json, media_type, created_at, updated_at)
-       VALUES ('x', ?, ?, ?, 'thread', ?, ?, 'approved', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
+       VALUES ('x', ?, ?, ?, 'thread', ?, ?, 'scheduled', 'thread', ?, ?, ?, ?, ?, ?, ?)`).bind(
         t.id, acct.id, it.body, sched, sched, i===0?tid:"prev:"+(ids[i-1]||""), i, arr.length,
         mediaJson, mediaJson?"image":null, tt, tt
       ).run();
@@ -4518,9 +4523,8 @@ const __wrappedDefault = {
   scheduled(controller, env, ctx) {
     const cron = controller && controller.cron;
     const run = async () => {
-      if (!cron || cron === "*/5 * * * *") {
-        await S.fetch(new Request("https://internal/cron/autopilot-tick", { method: "POST" }), env, ctx);
-      }
+      console.log("[scheduled] cron:", cron || "(manual)");
+      await S.fetch(new Request("https://internal/cron/autopilot-tick", { method: "POST" }), env, ctx);
       await S.fetch(new Request("https://internal/cron/tick", { method: "POST" }), env, ctx);
     };
     if (ctx && ctx.waitUntil) return ctx.waitUntil(run().catch(err => console.error("[scheduled]", err)));
