@@ -245,24 +245,45 @@ body.admin-body .max-w-7xl{max-width:96rem!important}
 body.admin-body main.max-w-7xl{max-width:96rem!important;width:100%!important}
 body.admin-body section{max-width:96rem;width:100%;margin:0 auto}
 body.admin-body .card{width:100%;box-sizing:border-box}
-body.admin-body{font-size:16px!important}
-.tab-trigger{padding:.55rem 1rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+body.admin-body{font-size:14px!important}
+.tab-trigger{padding:.5rem .9rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab-trigger:hover{color:#1E40AF;background:#F1F5F9}
 .tab-trigger.active{color:#1E40AF;border-bottom-color:#2563EB;background:#EFF6FF}
 .data-table{width:100%;border-collapse:collapse;font-size:.88rem}
 .data-table thead th{text-align:left;padding:.7rem .85rem;background:#F1F5F9;color:#1F2937;font-weight:600;font-size:.85rem;border-bottom:1px solid #E5E7EB}
 .data-table tbody td{padding:.7rem .85rem;border-bottom:1px solid #F1F5F9;color:#1F2937;vertical-align:middle}
 .data-table tbody tr:hover{background:#F8FAFC}
-body.admin-body .tab-trigger{font-size:1rem}
-body.admin-body .data-table{font-size:1rem}
-body.admin-body .data-table thead th{font-size:.95rem;padding:.85rem 1rem}
-body.admin-body .data-table tbody td{padding:.85rem 1rem}
-body.admin-body .text-xs{font-size:.9rem;line-height:1.35rem}
-body.admin-body .text-sm{font-size:1rem;line-height:1.5rem}
-body.admin-body .btn-ghost.text-xs,body.admin-body .btn-danger.text-xs,body.admin-body .btn-primary.text-xs{font-size:.9rem;padding:.4rem .65rem}
-.admin-table-license{min-width:1320px}
-.admin-table-audit{min-width:1120px}
-.admin-table-audit td:last-child{max-width:36rem;white-space:normal;word-break:break-all}
+body.admin-body .tab-trigger{font-size:.95rem}
+body.admin-body .data-table{font-size:.86rem}
+body.admin-body .data-table thead th{font-size:.82rem;padding:.65rem .55rem}
+body.admin-body .data-table tbody td{padding:.65rem .55rem}
+body.admin-body .text-xs{font-size:.8rem;line-height:1.25rem}
+body.admin-body .text-sm{font-size:.9rem;line-height:1.35rem}
+body.admin-body .btn-ghost.text-xs,body.admin-body .btn-danger.text-xs,body.admin-body .btn-primary.text-xs{font-size:.82rem;padding:.3rem .5rem;white-space:nowrap}
+.admin-nav-row{align-items:center;flex-wrap:wrap}
+.admin-nav-search{margin-left:auto;display:flex;align-items:center;min-width:16rem}
+.admin-nav-search .input-field{height:2.1rem;padding:.35rem .65rem;font-size:.9rem}
+.admin-table-license{min-width:0;table-layout:fixed}
+.admin-table-license th:nth-child(1){width:3.2rem}
+.admin-table-license th:nth-child(2){width:12rem}
+.admin-table-license th:nth-child(3){width:7rem}
+.admin-table-license th:nth-child(4){width:5.5rem}
+.admin-table-license th:nth-child(5){width:7rem}
+.admin-table-license th:nth-child(6){width:5rem}
+.admin-table-license th:nth-child(7){width:9rem}
+.admin-table-license th:nth-child(8){width:7rem}
+.admin-table-license th:nth-child(9){width:9rem}
+.admin-table-license th:nth-child(11){width:7rem}
+.admin-table-license td{white-space:normal;word-break:break-word}
+.admin-table-license td:nth-child(2),.admin-table-license td:nth-child(10){word-break:break-all}
+.admin-table-license td:last-child{flex-wrap:wrap}
+.admin-table-audit{min-width:0;table-layout:fixed}
+.admin-table-audit th:nth-child(1){width:12rem}
+.admin-table-audit th:nth-child(2){width:15rem}
+.admin-table-audit th:nth-child(3){width:13rem}
+.admin-table-audit th:nth-child(4){width:9rem}
+.admin-table-audit td{white-space:normal;word-break:break-word}
+.admin-table-audit td:last-child{white-space:normal;word-break:break-all}
 .modal-title-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
 .modal-close-btn{width:2rem;height:2rem;border-radius:.4rem;border:1px solid #E5E7EB;background:#fff;color:#475569;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .modal-close-btn:hover{background:#F8FAFC;color:#DC2626}
@@ -3346,12 +3367,15 @@ F.get("/admin",m,R,e=>{const t=`
 
   <!-- タブ -->
   <nav class="border-b border-brand-800/40 bg-surface">
-    <div class="max-w-7xl mx-auto flex gap-1 px-6 py-2 overflow-x-auto">
+    <div class="max-w-7xl mx-auto flex gap-1 px-6 py-2 admin-nav-row">
       <button onclick="showSection('users')"     id="nav-users"     class="tab-trigger active">ユーザー</button>
       <button onclick="showSection('licenses')"  id="nav-licenses"  class="tab-trigger">ライセンス</button>
       <button onclick="showSection('subs')"      id="nav-subs"      class="tab-trigger">サブスクリプション</button>
       <button onclick="showSection('audit')"     id="nav-audit"     class="tab-trigger">監査ログ</button>
       <button onclick="showSection('settings')"  id="nav-settings"  class="tab-trigger">システム設定</button>
+      <div class="admin-nav-search">
+        <input type="search" id="users-search" class="input-field" placeholder="名前・メールで検索" oninput="scheduleLoadUsers()">
+      </div>
     </div>
   </nav>
 
@@ -3362,7 +3386,6 @@ F.get("/admin",m,R,e=>{const t=`
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">ユーザー一覧</h2>
         <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
-          <input type="search" id="users-search" class="input-field" style="width:18rem" placeholder="名前・メールで検索" oninput="scheduleLoadUsers()">
           <select id="users-filter" class="input-field w-auto" onchange="loadUsers()">
             <option value="all">全て</option>
             <option value="pending">承認待ち</option>
@@ -3582,7 +3605,11 @@ async function doLogout() {
 let usersSearchTimer = null;
 function scheduleLoadUsers() {
   clearTimeout(usersSearchTimer);
-  usersSearchTimer = setTimeout(loadUsers, 250);
+  usersSearchTimer = setTimeout(() => {
+    const sec = document.getElementById('section-users');
+    if (sec && sec.classList.contains('hidden-force')) showSection('users');
+    else loadUsers();
+  }, 250);
 }
 async function loadUsers() {
   const filter = document.getElementById('users-filter').value;
@@ -3794,7 +3821,7 @@ async function loadAudit() {
       <td class="text-xs">\${l.email || '-'}</td>
       <td><span class="pill pill-inactive">\${l.event_type}</span></td>
       <td class="text-xs text-brand-300">\${l.ip_address || ''}</td>
-      <td class="text-xs text-brand-400 truncate max-w-xs">\${(l.user_agent||'').slice(0,60)}</td>
+      <td class="text-xs text-brand-400">\${l.user_agent || ''}</td>
     </tr>
   \`).join('');
 }
