@@ -241,7 +241,10 @@ body.admin-body main{max-width:64rem!important;padding-left:1.5rem;padding-right
 body.admin-body header > div,
 body.admin-body nav > div{max-width:64rem;padding-left:1.5rem;padding-right:1.5rem}
 body.admin-body nav{border-bottom:1px solid #E5E7EB}
-body.admin-body section{max-width:96rem;margin:0 auto}
+body.admin-body .max-w-7xl{max-width:96rem!important}
+body.admin-body main.max-w-7xl{max-width:96rem!important;width:100%!important}
+body.admin-body section{max-width:96rem;width:100%;margin:0 auto}
+body.admin-body .card{width:100%;box-sizing:border-box}
 .tab-trigger{padding:.55rem 1rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab-trigger:hover{color:#1E40AF;background:#F1F5F9}
 .tab-trigger.active{color:#1E40AF;border-bottom-color:#2563EB;background:#EFF6FF}
@@ -663,7 +666,7 @@ async function doLicenseActivate(e) {
     </div>
     <form id="license-auto-form" class="space-y-4" onsubmit="return doLicenseAuto(event)">
       <div>
-        <label class="field-label"><i class="fas fa-user icon-blue"></i>購入時のお名前</label>
+        <label class="field-label"><i class="fas fa-user icon-blue"></i>名前</label>
         <input type="text" id="lic-buyer-name" class="inp" required autocomplete="name" placeholder="例: 山田 太郎">
       </div>
       <div>
@@ -3387,7 +3390,7 @@ F.get("/admin",m,R,e=>{const t=`
       <div class="card overflow-x-auto">
         <table class="data-table admin-table-license">
           <thead><tr>
-            <th>ID</th><th>キー</th><th>購入者名</th><th>種別</th><th>プラン</th><th>状態</th>
+            <th>ID</th><th>キー</th><th>名前</th><th>種別</th><th>プラン</th><th>状態</th>
             <th>ユーザー</th><th>有効期限</th><th>発行日</th><th>操作</th>
           </tr></thead>
           <tbody id="licenses-tbody"><tr><td colspan="10" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
@@ -3405,18 +3408,18 @@ F.get("/admin",m,R,e=>{const t=`
             <div>
               <label class="text-sm text-brand-300 mb-1 block">プラン</label>
               <select id="issue-plan" class="input-field">
-                <option value="ge365x_free">Free</option>
-                <option value="ge365x_standard" selected>Standard</option>
-                <option value="ge365x_pro">Pro</option>
+                <option value="ge365x_free">トライアル</option>
+                <option value="ge365x_standard" selected>スタンダード</option>
+                <option value="ge365x_pro">プロ（アカウント数無制限予定）</option>
               </select>
             </div>
             <div>
               <label class="text-sm text-brand-300 mb-1 block">種別</label>
               <select id="issue-type" class="input-field">
-                <option value="paid" selected>paid（有料）</option>
-                <option value="trial">trial（試用）</option>
-                <option value="lifetime">lifetime（永久）</option>
-                <option value="comp">comp（招待）</option>
+                <option value="paid" selected>有料</option>
+                <option value="trial">試用</option>
+                <option value="lifetime">無期限</option>
+                <option value="comp">招待</option>
               </select>
             </div>
             <div>
@@ -3428,7 +3431,7 @@ F.get("/admin",m,R,e=>{const t=`
               <input type="number" id="issue-count" class="input-field" value="1" min="1" max="100">
             </div>
             <div>
-              <label class="text-sm text-brand-300 mb-1 block">購入者名</label>
+              <label class="text-sm text-brand-300 mb-1 block">名前</label>
               <input type="text" id="issue-buyer-name" class="input-field" placeholder="例: 山田 太郎">
             </div>
             <div>
@@ -3527,6 +3530,33 @@ const loaders = {
   posts: loadPosts, audit: loadAudit, settings: loadSettings
 };
 
+function formatPlanLabel(code, status, licenseType) {
+  const c = String(code || '').toLowerCase();
+  const s = String(status || '').toLowerCase();
+  const t = String(licenseType || '').toLowerCase();
+  if (s === 'trial' || t === 'trial' || c.includes('free')) return 'トライアル';
+  if (c.includes('pro')) return 'プロ';
+  if (c.includes('standard') || c.includes('paid')) return 'スタンダード';
+  return code || '-';
+}
+function formatStatusLabel(status) {
+  const s = String(status || '').toLowerCase();
+  if (s === 'active') return '有効';
+  if (s === 'trial') return 'トライアル';
+  if (s === 'expired') return '期限切れ';
+  if (s === 'canceled' || s === 'cancelled') return '停止';
+  if (s === 'inactive') return '無効';
+  return status || '-';
+}
+function formatLicenseTypeLabel(type) {
+  const t = String(type || '').toLowerCase();
+  if (t === 'trial') return '試用';
+  if (t === 'paid') return '有料';
+  if (t === 'lifetime') return '無期限';
+  if (t === 'comp') return '招待';
+  return type || '-';
+}
+
 function showSection(name) {
   sections.forEach(s => {
     document.getElementById('nav-' + s).classList.toggle('active', s === name);
@@ -3557,8 +3587,8 @@ async function loadUsers() {
       <td>\${u.email}</td>
       <td>\${u.is_approved ? '<span class="pill pill-active">承認済</span>' : '<span class="pill pill-pending">保留</span>'}</td>
       <td>\${u.is_admin ? '<i class="fas fa-shield text-brand-400"></i>' : ''}</td>
-      <td class="text-xs">\${u.plan_code || '-'}</td>
-      <td>\${u.sub_status ? '<span class="pill pill-active">'+u.sub_status+'</span>' : '-'}</td>
+      <td class="text-xs">\${formatPlanLabel(u.plan_code, u.sub_status)}</td>
+      <td>\${u.sub_status ? '<span class="pill pill-active">'+formatStatusLabel(u.sub_status)+'</span>' : '-'}</td>
       <td class="text-xs text-brand-300">\${u.trial_end || '-'}</td>
       <td class="text-xs text-brand-300">\${u.created_at}</td>
       <td class="flex gap-1">
@@ -3599,8 +3629,8 @@ async function loadLicenses() {
       <td class="text-brand-300">\${l.id}</td>
       <td class="font-mono text-xs">\${l.license_key}</td>
       <td class="text-xs">\${l.buyer_name || l.user_name || '-'}</td>
-      <td><span class="pill pill-inactive">\${l.license_type}</span></td>
-      <td class="text-xs">\${l.plan_code || '-'}</td>
+      <td><span class="pill pill-inactive">\${formatLicenseTypeLabel(l.license_type)}</span></td>
+      <td class="text-xs">\${formatPlanLabel(l.plan_code, null, l.license_type)}</td>
       <td>\${l.is_active ? '<span class="pill pill-active">有効</span>' : '<span class="pill pill-inactive">無効</span>'}</td>
       <td class="text-xs">\${l.user_email || '-'}</td>
       <td class="text-xs text-brand-300">\${l.expires_at || '無期限'}</td>
@@ -3678,8 +3708,8 @@ async function loadSubs() {
     <tr>
       <td class="text-brand-300">\${s.id}</td>
       <td>\${s.user_email}</td>
-      <td>\${s.plan_code}</td>
-      <td><span class="pill pill-\${s.status==='active'?'active':'inactive'}">\${s.status}</span></td>
+      <td>\${formatPlanLabel(s.plan_code, s.status)}</td>
+      <td><span class="pill pill-\${s.status==='active'||s.status==='trial'?'active':'inactive'}">\${formatStatusLabel(s.status)}</span></td>
       <td class="text-xs text-brand-300">\${s.started_at || '-'}</td>
       <td class="text-xs text-brand-300">\${s.current_period_end || '-'}</td>
       <td>\${s.cancel_at_period_end ? '<span class="pill pill-pending">停止予定</span>' : '-'}</td>
