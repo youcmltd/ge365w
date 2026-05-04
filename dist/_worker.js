@@ -261,7 +261,7 @@ body.admin-body .text-xs{font-size:.8rem;line-height:1.25rem}
 body.admin-body .text-sm{font-size:.9rem;line-height:1.35rem}
 body.admin-body .btn-ghost.text-xs,body.admin-body .btn-danger.text-xs,body.admin-body .btn-primary.text-xs{font-size:.82rem;padding:.3rem .5rem;white-space:nowrap}
 .admin-nav-row{align-items:center;flex-wrap:wrap}
-.admin-nav-search{margin-left:auto;display:flex;align-items:center;min-width:16rem}
+.admin-nav-search{margin-left:auto;display:flex;align-items:center;gap:.45rem;min-width:24rem}
 .admin-nav-search .input-field{height:2.1rem;padding:.35rem .65rem;font-size:.9rem}
 .admin-table-license{min-width:0;table-layout:fixed}
 .admin-table-license th:nth-child(1){width:3.2rem}
@@ -273,10 +273,10 @@ body.admin-body .btn-ghost.text-xs,body.admin-body .btn-danger.text-xs,body.admi
 .admin-table-license th:nth-child(7){width:9rem}
 .admin-table-license th:nth-child(8){width:7rem}
 .admin-table-license th:nth-child(9){width:9rem}
-.admin-table-license th:nth-child(11){width:7rem}
+.admin-table-license th:nth-child(11){width:9rem}
 .admin-table-license td{white-space:normal;word-break:break-word}
 .admin-table-license td:nth-child(2),.admin-table-license td:nth-child(10){word-break:break-all}
-.admin-table-license td:last-child{flex-wrap:wrap}
+.admin-table-license td:last-child{flex-wrap:nowrap;white-space:nowrap;min-width:8.5rem}
 .admin-table-audit{min-width:0;table-layout:fixed}
 .admin-table-audit th:nth-child(1){width:12rem}
 .admin-table-audit th:nth-child(2){width:15rem}
@@ -3375,6 +3375,12 @@ F.get("/admin",m,R,e=>{const t=`
       <button onclick="showSection('settings')"  id="nav-settings"  class="tab-trigger">システム設定</button>
       <div class="admin-nav-search">
         <input type="search" id="users-search" class="input-field" placeholder="名前・メールで検索" oninput="scheduleLoadUsers()">
+        <select id="users-filter" class="input-field w-auto" onchange="applyUserFilter()">
+          <option value="all">全て</option>
+          <option value="pending">承認待ち</option>
+          <option value="approved">承認済</option>
+          <option value="admin">管理者</option>
+        </select>
       </div>
     </div>
   </nav>
@@ -3386,12 +3392,6 @@ F.get("/admin",m,R,e=>{const t=`
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">ユーザー一覧</h2>
         <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
-          <select id="users-filter" class="input-field w-auto" onchange="loadUsers()">
-            <option value="all">全て</option>
-            <option value="pending">承認待ち</option>
-            <option value="approved">承認済</option>
-            <option value="admin">管理者</option>
-          </select>
           <button onclick="loadUsers()" class="btn-ghost"><i class="fas fa-rotate"></i></button>
           <button onclick="dlAdminExport('admin/users')" class="btn-ghost" title="ユーザー一覧CSV"><i class="fas fa-download"></i></button>
         </div>
@@ -3603,6 +3603,11 @@ async function doLogout() {
 
 // ---------- ユーザー ----------
 let usersSearchTimer = null;
+function applyUserFilter() {
+  const sec = document.getElementById('section-users');
+  if (sec && sec.classList.contains('hidden-force')) showSection('users');
+  else loadUsers();
+}
 function scheduleLoadUsers() {
   clearTimeout(usersSearchTimer);
   usersSearchTimer = setTimeout(() => {
@@ -3634,10 +3639,10 @@ async function loadUsers() {
       <td class="text-xs text-brand-300">\${u.created_at}</td>
       <td class="flex gap-1">
         \${u.is_approved
-          ? \`<button onclick="toggleApprove(\${u.id},0)" class="btn-ghost text-xs"><i class="fas fa-ban"></i></button>\`
-          : \`<button onclick="toggleApprove(\${u.id},1)" class="btn-primary text-xs"><i class="fas fa-check"></i></button>\`}
+          ? \`<button onclick="toggleApprove(\${u.id},0)" class="btn-ghost text-xs">承認解除</button>\`
+          : \`<button onclick="toggleApprove(\${u.id},1)" class="btn-primary text-xs">承認</button>\`}
         <button onclick="toggleAdmin(\${u.id},\${u.is_admin?0:1})" class="btn-ghost text-xs">
-          <i class="fas fa-shield"></i>
+          \${u.is_admin ? '管理解除' : '管理者'}
         </button>
       </td>
     </tr>
