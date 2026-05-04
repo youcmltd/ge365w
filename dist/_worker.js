@@ -241,7 +241,7 @@ body.admin-body main{max-width:64rem!important;padding-left:1.5rem;padding-right
 body.admin-body header > div,
 body.admin-body nav > div{max-width:64rem;padding-left:1.5rem;padding-right:1.5rem}
 body.admin-body nav{border-bottom:1px solid #E5E7EB}
-body.admin-body section{max-width:64rem;margin:0 auto}
+body.admin-body section{max-width:96rem;margin:0 auto}
 .tab-trigger{padding:.55rem 1rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab-trigger:hover{color:#1E40AF;background:#F1F5F9}
 .tab-trigger.active{color:#1E40AF;border-bottom-color:#2563EB;background:#EFF6FF}
@@ -249,6 +249,12 @@ body.admin-body section{max-width:64rem;margin:0 auto}
 .data-table thead th{text-align:left;padding:.7rem .85rem;background:#F1F5F9;color:#1F2937;font-weight:600;font-size:.85rem;border-bottom:1px solid #E5E7EB}
 .data-table tbody td{padding:.7rem .85rem;border-bottom:1px solid #F1F5F9;color:#1F2937;vertical-align:middle}
 .data-table tbody tr:hover{background:#F8FAFC}
+.admin-table-license{min-width:1180px}
+.admin-table-audit{min-width:1120px}
+.admin-table-audit td:last-child{max-width:36rem;white-space:normal;word-break:break-all}
+.modal-title-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.modal-close-btn{width:2rem;height:2rem;border-radius:.4rem;border:1px solid #E5E7EB;background:#fff;color:#475569;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.modal-close-btn:hover{background:#F8FAFC;color:#DC2626}
 .input-field{display:block;width:100%;padding:.5rem .75rem;border-radius:.4rem;background:#fff;border:1px solid #E5E7EB;color:#1F2937;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .15s}
 .input-field:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
 .btn-ghost.text-xs{padding:.3rem .55rem;font-size:.72rem}
@@ -657,6 +663,10 @@ async function doLicenseActivate(e) {
     </div>
     <form id="license-auto-form" class="space-y-4" onsubmit="return doLicenseAuto(event)">
       <div>
+        <label class="field-label"><i class="fas fa-user icon-blue"></i>購入時のお名前</label>
+        <input type="text" id="lic-buyer-name" class="inp" required autocomplete="name" placeholder="例: 山田 太郎">
+      </div>
+      <div>
         <label class="field-label"><i class="fas fa-envelope icon-blue"></i>メールアドレス</label>
         <input type="email" id="lic-email" class="inp" required autocomplete="email">
       </div>
@@ -680,12 +690,13 @@ async function doLicenseActivate(e) {
 function licMsg(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.remove('hide')}
 async function doLicenseAuto(e){
   e.preventDefault();
+  const buyer_name=document.getElementById('lic-buyer-name').value.trim();
   const email=document.getElementById('lic-email').value.trim();
   const password=document.getElementById('lic-password').value;
   const license_key=document.getElementById('lic-key').value.trim().toUpperCase();
   ['license-auto-error','license-auto-success'].forEach(id=>document.getElementById(id).classList.add('hide'));
   try{
-    const r=await fetch('/api/auth/license/auto-activate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password,license_key})});
+    const r=await fetch('/api/auth/license/auto-activate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({buyer_name,email,password,license_key})});
     const j=await r.json();
     if(!r.ok){const map={invalid_input:'入力内容を確認してください',invalid_credentials:'既存アカウントのパスワードが違います',invalid_license_format:'ライセンスキーの形式が違います',license_not_found:'ライセンスキーが見つかりません',license_inactive:'このライセンスは無効です',license_expired:'このライセンスは期限切れです',license_already_used:'このライセンスは別のアカウントで使用済みです'};licMsg('license-auto-error',map[j.error]||'認証に失敗しました');return false}
     licMsg('license-auto-success','認証が完了しました。ダッシュボードへ移動します');
@@ -3329,7 +3340,6 @@ F.get("/admin",m,R,e=>{const t=`
       <button onclick="showSection('licenses')"  id="nav-licenses"  class="tab-trigger">ライセンス</button>
       <button onclick="showSection('subs')"      id="nav-subs"      class="tab-trigger">サブスクリプション</button>
       <button onclick="showSection('posts')"     id="nav-posts"     class="tab-trigger">投稿管理</button>
-      <button onclick="showSection('accounts')"  id="nav-accounts"  class="tab-trigger">Xアカウント</button>
       <button onclick="showSection('audit')"     id="nav-audit"     class="tab-trigger">監査ログ</button>
       <button onclick="showSection('settings')"  id="nav-settings"  class="tab-trigger">システム設定</button>
     </div>
@@ -3355,10 +3365,10 @@ F.get("/admin",m,R,e=>{const t=`
       <div class="card overflow-x-auto">
         <table class="data-table" id="users-table">
           <thead><tr>
-            <th>ID</th><th>メール</th><th>承認</th><th>管理者</th><th>プラン</th>
+            <th>ID</th><th>名前</th><th>メール</th><th>承認</th><th>管理者</th><th>プラン</th>
             <th>ステータス</th><th>トライアル終了</th><th>登録日</th><th>操作</th>
           </tr></thead>
-          <tbody id="users-tbody"><tr><td colspan="9" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
+          <tbody id="users-tbody"><tr><td colspan="10" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -3375,19 +3385,22 @@ F.get("/admin",m,R,e=>{const t=`
         </div>
       </div>
       <div class="card overflow-x-auto">
-        <table class="data-table">
+        <table class="data-table admin-table-license">
           <thead><tr>
-            <th>ID</th><th>キー</th><th>種別</th><th>プラン</th><th>状態</th>
+            <th>ID</th><th>キー</th><th>購入者名</th><th>種別</th><th>プラン</th><th>状態</th>
             <th>ユーザー</th><th>有効期限</th><th>発行日</th><th>操作</th>
           </tr></thead>
-          <tbody id="licenses-tbody"><tr><td colspan="9" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
+          <tbody id="licenses-tbody"><tr><td colspan="10" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
         </table>
       </div>
 
       <!-- 発行モーダル -->
       <div id="issue-license-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
         <div class="card max-w-md w-full">
-          <h3 class="text-lg font-bold text-white mb-4">新規ライセンス発行</h3>
+          <div class="modal-title-row">
+            <h3 class="text-lg font-bold text-white">新規ライセンス発行</h3>
+            <button type="button" onclick="closeIssueLicenseModal()" class="modal-close-btn" title="閉じる"><i class="fas fa-xmark"></i></button>
+          </div>
           <div class="space-y-4">
             <div>
               <label class="text-sm text-brand-300 mb-1 block">プラン</label>
@@ -3415,12 +3428,16 @@ F.get("/admin",m,R,e=>{const t=`
               <input type="number" id="issue-count" class="input-field" value="1" min="1" max="100">
             </div>
             <div>
+              <label class="text-sm text-brand-300 mb-1 block">購入者名</label>
+              <input type="text" id="issue-buyer-name" class="input-field" placeholder="例: 山田 太郎">
+            </div>
+            <div>
               <label class="text-sm text-brand-300 mb-1 block">メモ</label>
               <input type="text" id="issue-note" class="input-field" placeholder="用途・顧客名など">
             </div>
             <div class="flex gap-2">
-              <button onclick="closeIssueLicenseModal()" class="btn-ghost flex-1">キャンセル</button>
-              <button onclick="submitIssueLicense()" class="btn-primary flex-1">
+              <button type="button" onclick="closeIssueLicenseModal()" class="btn-ghost flex-1">キャンセル</button>
+              <button type="button" onclick="submitIssueLicense()" class="btn-primary flex-1">
                 <i class="fas fa-key"></i>発行
               </button>
             </div>
@@ -3463,10 +3480,10 @@ F.get("/admin",m,R,e=>{const t=`
     </section>
 
     <!-- === Xアカウント === -->
-    <section id="section-accounts" class="space-y-4 hidden-force">
+    <section id="section-accounts" class="space-y-4 hidden-force" style="display:none!important">
       <h2 class="text-xl font-bold text-white">X アカウント</h2>
       <div class="card overflow-x-auto">
-        <table class="data-table">
+        <table class="data-table admin-table-audit">
           <thead><tr>
             <th>ID</th><th>ユーザー</th><th>@handle</th><th>状態</th>
             <th>最終使用</th><th>トークン期限</th>
@@ -3504,10 +3521,10 @@ F.get("/admin",m,R,e=>{const t=`
 </div>
 
 <script>
-const sections = ['users','licenses','subs','posts','accounts','audit','settings'];
+const sections = ['users','licenses','subs','posts','audit','settings'];
 const loaders = {
   users: loadUsers, licenses: loadLicenses, subs: loadSubs,
-  posts: loadPosts, accounts: loadAccounts, audit: loadAudit, settings: loadSettings
+  posts: loadPosts, audit: loadAudit, settings: loadSettings
 };
 
 function showSection(name) {
@@ -3530,12 +3547,13 @@ async function loadUsers() {
   const j = await r.json();
   const tbody = document.getElementById('users-tbody');
   if (!j.users || !j.users.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-brand-400 py-6">対象なし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-brand-400 py-6">対象なし</td></tr>';
     return;
   }
   tbody.innerHTML = j.users.map(u => \`
     <tr>
       <td class="text-brand-300">\${u.id}</td>
+      <td class="text-xs">\${u.display_name || '-'}</td>
       <td>\${u.email}</td>
       <td>\${u.is_approved ? '<span class="pill pill-active">承認済</span>' : '<span class="pill pill-pending">保留</span>'}</td>
       <td>\${u.is_admin ? '<i class="fas fa-shield text-brand-400"></i>' : ''}</td>
@@ -3573,13 +3591,14 @@ async function loadLicenses() {
   const j = await r.json();
   const tbody = document.getElementById('licenses-tbody');
   if (!j.licenses || !j.licenses.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-brand-400 py-6">発行済キーなし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-brand-400 py-6">発行済キーなし</td></tr>';
     return;
   }
   tbody.innerHTML = j.licenses.map(l => \`
     <tr>
       <td class="text-brand-300">\${l.id}</td>
       <td class="font-mono text-xs">\${l.license_key}</td>
+      <td class="text-xs">\${l.buyer_name || l.user_name || '-'}</td>
       <td><span class="pill pill-inactive">\${l.license_type}</span></td>
       <td class="text-xs">\${l.plan_code || '-'}</td>
       <td>\${l.is_active ? '<span class="pill pill-active">有効</span>' : '<span class="pill pill-inactive">無効</span>'}</td>
@@ -3591,6 +3610,7 @@ async function loadLicenses() {
         \${l.is_active
           ? \`<button onclick="revokeLicense(\${l.id})" class="btn-danger text-xs" title="無効化"><i class="fas fa-ban"></i></button>\`
           : \`<button onclick="reactivateLicense(\${l.id})" class="btn-ghost text-xs" title="再有効化"><i class="fas fa-check"></i></button>\`}
+        <button onclick="deleteLicense(\${l.id})" class="btn-danger text-xs" title="削除"><i class="fas fa-trash"></i></button>
       </td>
     </tr>
   \`).join('');
@@ -3611,6 +3631,7 @@ async function submitIssueLicense() {
     license_type: document.getElementById('issue-type').value,
     expires_at: document.getElementById('issue-expires').value || null,
     count: parseInt(document.getElementById('issue-count').value, 10) || 1,
+    buyer_name: document.getElementById('issue-buyer-name').value.trim() || null,
     note: document.getElementById('issue-note').value || null,
   };
   const r = await fetch('/api/admin/licenses/issue', {
@@ -3631,6 +3652,16 @@ async function revokeLicense(id) {
 }
 async function reactivateLicense(id) {
   await fetch(\`/api/admin/licenses/\${id}/reactivate\`, { method: 'POST' });
+  loadLicenses();
+}
+async function deleteLicense(id) {
+  if (!confirm('このライセンスキーを削除しますか？削除後は一覧から消えます。')) return;
+  const r = await fetch(\`/api/admin/licenses/\${id}\`, { method: 'DELETE' });
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    alert('削除失敗: ' + (j.error || ''));
+    return;
+  }
   loadLicenses();
 }
 
@@ -3781,19 +3812,19 @@ function dlAdminExport(key) {
 // 起動時
 showSection('users');
 <\/script>
-`;return e.html(It("管理画面",t,{bodyClass:"bg-paper text-ink min-h-screen font-sans antialiased admin-body"}))});F.get("/api/admin/users",m,R,async e=>{await e.env.DB.prepare(`UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE is_approved=0 AND id IN (SELECT user_id FROM user_subscriptions WHERE status='trial' AND (current_period_end IS NULL OR current_period_end >= datetime('now','+9 hours')))`).run().catch(()=>{});const t=e.req.query("filter")||"all",s=[];t==="pending"&&s.push("u.is_approved = 0"),t==="approved"&&s.push("u.is_approved = 1"),t==="admin"&&s.push("u.is_admin = 1");const a=`
-    SELECT u.id, u.email, u.is_approved, u.is_admin, u.trial_start, u.trial_end, u.created_at,
+`;return e.html(It("管理画面",t,{bodyClass:"bg-paper text-ink min-h-screen font-sans antialiased admin-body"}))});async function __ensureLicenseAdminColumns(e){await e.env.DB.prepare("ALTER TABLE users ADD COLUMN display_name TEXT").run().catch(()=>{});await e.env.DB.prepare("ALTER TABLE licenses ADD COLUMN buyer_name TEXT").run().catch(()=>{})}F.get("/api/admin/users",m,R,async e=>{await __ensureLicenseAdminColumns(e);await e.env.DB.prepare(`UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE is_approved=0 AND id IN (SELECT user_id FROM user_subscriptions WHERE status='trial' AND (current_period_end IS NULL OR current_period_end >= datetime('now','+9 hours')))`).run().catch(()=>{});const t=e.req.query("filter")||"all",s=[];t==="pending"&&s.push("u.is_approved = 0"),t==="approved"&&s.push("u.is_approved = 1"),t==="admin"&&s.push("u.is_admin = 1");const a=`
+    SELECT u.id, u.display_name, u.email, u.is_approved, u.is_admin, u.trial_start, u.trial_end, u.created_at,
            s.plan_code, s.status AS sub_status
       FROM users u
       LEFT JOIN user_subscriptions s ON s.user_id = u.id
       ${s.length?"WHERE "+s.join(" AND "):""}
       ORDER BY u.id DESC
-      LIMIT 200`,{results:n}=await e.env.DB.prepare(a).all();return e.json({users:n||[]})});F.post("/api/admin/users/:id/approve",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_approved:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_approved=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_approval",{userId:e.get("user").id,metadata:{target_user_id:t,is_approved:s}}),e.json({ok:!0})});F.post("/api/admin/users/:id/admin",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_admin:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_admin=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_admin",{userId:e.get("user").id,metadata:{target_user_id:t,is_admin:s}}),e.json({ok:!0})});F.get("/api/admin/licenses",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT l.*, u.email AS user_email
+      LIMIT 200`,{results:n}=await e.env.DB.prepare(a).all();return e.json({users:n||[]})});F.post("/api/admin/users/:id/approve",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_approved:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_approved=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_approval",{userId:e.get("user").id,metadata:{target_user_id:t,is_approved:s}}),e.json({ok:!0})});F.post("/api/admin/users/:id/admin",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_admin:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_admin=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_admin",{userId:e.get("user").id,metadata:{target_user_id:t,is_admin:s}}),e.json({ok:!0})});F.get("/api/admin/licenses",m,R,async e=>{await __ensureLicenseAdminColumns(e);const{results:t}=await e.env.DB.prepare(`SELECT l.*, u.email AS user_email, u.display_name AS user_name
        FROM licenses l
        LEFT JOIN users u ON u.id = l.user_id
-       ORDER BY l.id DESC LIMIT 500`).all();return e.json({licenses:t||[]})});F.post("/api/admin/licenses/issue",m,R,async e=>{const t=e.get("user"),{plan_code:s,license_type:a,expires_at:n,count:i=1,note:r}=await e.req.json();if(i<1||i>100)return e.json({error:"invalid_count"},400);let exp=n||null;if(!exp&&a==="trial"){const td=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_days'").first();const days=Math.max(0,parseInt((td==null?void 0:td.value)??"14",10)||0);exp=new Date(Date.now()+324e5+days*864e5).toISOString().slice(0,10)}const o=[];for(let d=0;d<i;d++){let l=Zt("VPS-GE365X");for(let c=0;c<3&&await e.env.DB.prepare("SELECT 1 FROM licenses WHERE license_key=?").bind(l).first();c++)l=Zt("VPS-GE365X");await e.env.DB.prepare(`INSERT INTO licenses (license_key, license_type, plan_code, is_active, expires_at, issued_by, note)
-       VALUES (?, ?, ?, 1, ?, ?, ?)`).bind(l,a,s,exp?exp+" 23:59:59":null,t.id,r||null).run(),o.push(l)}return await Z(e,"admin_issue_license",{userId:t.id,metadata:{count:i,plan_code:s,license_type:a}}),e.json({ok:!0,keys:o})});F.post("/api/admin/licenses/:id/revoke",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=0, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),await e.env.DB.prepare(`INSERT INTO license_activations (license_id, user_id, event_type)
-     VALUES (?, ?, 'revoked')`).bind(t,e.get("user").id).run(),e.json({ok:!0})});F.post("/api/admin/licenses/:id/reactivate",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),e.json({ok:!0})});F.get("/api/admin/subscriptions",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT s.*, u.email AS user_email
+       ORDER BY l.id DESC LIMIT 500`).all();return e.json({licenses:t||[]})});F.post("/api/admin/licenses/issue",m,R,async e=>{await __ensureLicenseAdminColumns(e);const t=e.get("user"),{plan_code:s,license_type:a,expires_at:n,count:i=1,buyer_name:b,note:r}=await e.req.json();if(i<1||i>100)return e.json({error:"invalid_count"},400);let exp=n||null;if(!exp&&a==="trial"){const td=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_days'").first();const days=Math.max(0,parseInt((td==null?void 0:td.value)??"14",10)||0);exp=new Date(Date.now()+324e5+days*864e5).toISOString().slice(0,10)}const o=[];for(let d=0;d<i;d++){let l=Zt("VPS-GE365X");for(let c=0;c<3&&await e.env.DB.prepare("SELECT 1 FROM licenses WHERE license_key=?").bind(l).first();c++)l=Zt("VPS-GE365X");await e.env.DB.prepare(`INSERT INTO licenses (license_key, license_type, plan_code, is_active, expires_at, issued_by, buyer_name, note)
+       VALUES (?, ?, ?, 1, ?, ?, ?, ?)`).bind(l,a,s,exp?exp+" 23:59:59":null,t.id,b||null,r||null).run(),o.push(l)}return await Z(e,"admin_issue_license",{userId:t.id,metadata:{count:i,plan_code:s,license_type:a,buyer_name:b||null}}),e.json({ok:!0,keys:o})});F.post("/api/admin/licenses/:id/revoke",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=0, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),await e.env.DB.prepare(`INSERT INTO license_activations (license_id, user_id, event_type)
+     VALUES (?, ?, 'revoked')`).bind(t,e.get("user").id).run(),e.json({ok:!0})});F.post("/api/admin/licenses/:id/reactivate",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),e.json({ok:!0})});F.delete("/api/admin/licenses/:id",m,R,async e=>{const t=parseInt(e.req.param("id"),10);if(!Number.isFinite(t)||t<=0)return e.json({error:"invalid_id"},400);const s=await e.env.DB.prepare("SELECT id, license_key FROM licenses WHERE id=?").bind(t).first();if(!s)return e.json({error:"not_found"},404);await e.env.DB.prepare("DELETE FROM license_activations WHERE license_id=?").bind(t).run().catch(()=>{});await e.env.DB.prepare("DELETE FROM licenses WHERE id=?").bind(t).run();return await Z(e,"admin_delete_license",{userId:e.get("user").id,metadata:{license_id:t,license_key:s.license_key}}),e.json({ok:!0})});F.get("/api/admin/subscriptions",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT s.*, u.email AS user_email
        FROM user_subscriptions s
        LEFT JOIN users u ON u.id = s.user_id
        ORDER BY s.updated_at DESC LIMIT 300`).all();return e.json({subscriptions:t||[]})});F.get("/api/admin/posts/summary",m,R,async e=>{const t=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue").first(),s=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE status='pending'").first(),a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE status='success'").first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE status='failed'").first(),{results:i}=await e.env.DB.prepare(`SELECT pl.created_at, pl.content, pl.status,
@@ -3816,7 +3847,7 @@ showSection('users');
      VALUES (?, ?, datetime('now','+9 hours'),
              datetime('now','+9 hours', '+' || ? || ' days'))`).bind(s,_,d).run(),await Z(e,"register",{userId:_,email:s}),e.json({ok:!0,user_id:_,approved:true,message:"無料トライアル登録が完了しました。ログインしてください。"})});fe.post("/api/auth/login",async e=>{const t=await e.req.json(),s=(t.email||"").trim().toLowerCase(),a=t.password||"";if(!s||!a)return e.json({error:"invalid_input"},400);const n=await e.env.DB.prepare("SELECT id,email,password_hash,is_approved,is_admin FROM users WHERE email = ?").bind(s).first();if(!n)return await Z(e,"login_fail",{email:s,metadata:{reason:"no_user"}}),e.json({error:"invalid_credentials"},401);if(!await Cs(a,n.password_hash))return await Z(e,"login_fail",{userId:n.id,email:s,metadata:{reason:"bad_password"}}),e.json({error:"invalid_credentials"},401);let sub=await e.env.DB.prepare("SELECT status,current_period_end FROM user_subscriptions WHERE user_id = ?").bind(n.id).first();if(n.is_approved===0){if(sub&&sub.status==="trial"&&(!sub.current_period_end||sub.current_period_end>=g())){await e.env.DB.prepare("UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(n.id).run();n.is_approved=1}else return await Z(e,"login_blocked",{userId:n.id,email:s,metadata:{reason:"not_approved"}}),e.json({error:"not_approved"},403)}if(!n.is_admin){const exp=(sub&&sub.current_period_end)||n.trial_end||null;if(exp&&exp<g()){try{await e.env.DB.prepare("UPDATE user_subscriptions SET status='expired', updated_at=datetime('now','+9 hours') WHERE user_id=? AND status IN ('trial','active')").bind(n.id).run()}catch{}return await Z(e,"login_blocked",{userId:n.id,email:s,metadata:{reason:"expired"}}),e.json({error:(sub&&sub.status)==="trial"?"trial_expired":"subscription_expired"},403)}}const nowIat=Math.floor(Date.now()/1e3);await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at)
        VALUES (?, ?, ?, datetime('now','+9 hours'))
-       ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind("user_session_iat:"+n.id,String(nowIat),"User session iat (single-device enforcement)").run().catch(()=>{});const r=await za({uid:n.id,email:n.email,adm:n.is_admin===1,iat:nowIat},e.env.JWT_SECRET,3600*24*7),o=Ls(Nt,r,{maxAge:3600*24*7});return await Z(e,"login_success",{userId:n.id,email:s}),new Response(JSON.stringify({ok:!0,user_id:n.id,email:n.email,is_admin:n.is_admin===1}),{headers:{"content-type":"application/json","set-cookie":o}})});fe.post("/api/auth/logout",async e=>{const t=e.get("user");t&&await Z(e,"logout",{userId:t.id,email:t.email});const s=Ls(Nt,"",{maxAge:0});return new Response(JSON.stringify({ok:!0}),{headers:{"content-type":"application/json","set-cookie":s}})});fe.get("/api/auth/me",m,e=>e.json({ok:!0,user:e.get("user")}));fe.post("/api/auth/license/auto-activate",async e=>{const body=await e.req.json().catch(()=>({})),email=(body.email||"").trim().toLowerCase(),password=body.password||"",rawKey=(body.license_key||"").trim().toUpperCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)||password.length<8)return e.json({error:"invalid_input"},400);if(!rawKey||!Xa(rawKey))return e.json({error:"invalid_license_format"},400);const lic=await e.env.DB.prepare("SELECT * FROM licenses WHERE license_key = ?").bind(rawKey).first();if(!lic)return e.json({error:"license_not_found"},404);if(lic.is_active===0)return e.json({error:"license_inactive"},409);if(lic.expires_at&&lic.expires_at<g())return e.json({error:"license_expired"},409);let user=await e.env.DB.prepare("SELECT id,email,password_hash,is_admin FROM users WHERE email = ?").bind(email).first();let userId;if(user){if(!await Cs(password,user.password_hash))return e.json({error:"invalid_credentials"},401);if(lic.user_id&&lic.user_id!==user.id)return e.json({error:"license_already_used"},409);userId=user.id;await e.env.DB.prepare("UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(userId).run()}else{if(lic.user_id)return e.json({error:"license_already_used"},409);const hash=await Bt(password),trialEnd=lic.license_type==="trial"&&lic.expires_at?lic.expires_at:null;userId=(await e.env.DB.prepare("INSERT INTO users (email, password_hash, is_approved, is_admin, trial_start, trial_end) VALUES (?, ?, 1, 0, datetime('now','+9 hours'), ?)").bind(email,hash,trialEnd).run()).meta.last_row_id;user={id:userId,email,is_admin:0}}await e.env.DB.prepare("UPDATE licenses SET user_id=?, activated_at=COALESCE(activated_at, datetime('now','+9 hours')), updated_at=datetime('now','+9 hours') WHERE id=?").bind(userId,lic.id).run();const plan=lic.plan_code||"ge365x_standard",status=lic.license_type==="trial"?"trial":"active",periodEnd=lic.expires_at?lic.expires_at:lic.license_type==="lifetime"?"2099-12-31 23:59:59":null;await e.env.DB.prepare(`INSERT INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end, updated_at) VALUES (?, ?, ?, datetime('now','+9 hours'), ?, datetime('now','+9 hours')) ON CONFLICT(user_id) DO UPDATE SET plan_code=excluded.plan_code,status=excluded.status,current_period_end=excluded.current_period_end,updated_at=datetime('now','+9 hours')`).bind(userId,plan,status,periodEnd).run();if(lic.license_type==="trial"&&periodEnd)await e.env.DB.prepare("UPDATE users SET trial_end=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(periodEnd,userId).run();await e.env.DB.prepare("INSERT INTO license_activations (license_id, user_id, event_type, ip_address, user_agent) VALUES (?, ?, 'activated', ?, ?)").bind(lic.id,userId,e.req.header("cf-connecting-ip")||"",e.req.header("user-agent")||"").run();const nowIat=Math.floor(Date.now()/1e3);await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at) VALUES (?, ?, ?, datetime('now','+9 hours')) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind("user_session_iat:"+userId,String(nowIat),"User session iat (license auto activation)").run().catch(()=>{});const token=await za({uid:userId,email,adm:false,iat:nowIat},e.env.JWT_SECRET,3600*24*7),cookie=Ls(Nt,token,{maxAge:3600*24*7});await Z(e,"license_auto_activate",{userId,email,metadata:{license_id:lic.id,plan_code:plan,license_type:lic.license_type}});return new Response(JSON.stringify({ok:true,user_id:userId,email,plan_code:plan,status,expires_at:periodEnd}),{status:200,headers:{"content-type":"application/json","set-cookie":cookie}})});fe.post("/api/auth/license/activate",m,async e=>{const t=e.get("user"),{license_key:s}=await e.req.json();if(!s||!Xa(s))return e.json({error:"invalid_license_format"},400);const a=s.trim().toUpperCase(),n=await e.env.DB.prepare("SELECT * FROM licenses WHERE license_key = ?").bind(a).first();if(!n)return e.json({error:"license_not_found"},404);if(n.is_active===0)return e.json({error:"license_inactive"},409);if(n.expires_at&&n.expires_at<g())return e.json({error:"license_expired"},409);if(n.user_id&&n.user_id!==t.id)return e.json({error:"license_already_used"},409);await e.env.DB.prepare(`UPDATE licenses
+       ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind("user_session_iat:"+n.id,String(nowIat),"User session iat (single-device enforcement)").run().catch(()=>{});const r=await za({uid:n.id,email:n.email,adm:n.is_admin===1,iat:nowIat},e.env.JWT_SECRET,3600*24*7),o=Ls(Nt,r,{maxAge:3600*24*7});return await Z(e,"login_success",{userId:n.id,email:s}),new Response(JSON.stringify({ok:!0,user_id:n.id,email:n.email,is_admin:n.is_admin===1}),{headers:{"content-type":"application/json","set-cookie":o}})});fe.post("/api/auth/logout",async e=>{const t=e.get("user");t&&await Z(e,"logout",{userId:t.id,email:t.email});const s=Ls(Nt,"",{maxAge:0});return new Response(JSON.stringify({ok:!0}),{headers:{"content-type":"application/json","set-cookie":s}})});fe.get("/api/auth/me",m,e=>e.json({ok:!0,user:e.get("user")}));fe.post("/api/auth/license/auto-activate",async e=>{const body=await e.req.json().catch(()=>({})),email=(body.email||"").trim().toLowerCase(),password=body.password||"",rawKey=(body.license_key||"").trim().toUpperCase(),buyerName=(body.buyer_name||body.name||"").trim();await __ensureLicenseAdminColumns(e);if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)||password.length<8)return e.json({error:"invalid_input"},400);if(!rawKey||!Xa(rawKey))return e.json({error:"invalid_license_format"},400);const lic=await e.env.DB.prepare("SELECT * FROM licenses WHERE license_key = ?").bind(rawKey).first();if(!lic)return e.json({error:"license_not_found"},404);if(lic.is_active===0)return e.json({error:"license_inactive"},409);if(lic.expires_at&&lic.expires_at<g())return e.json({error:"license_expired"},409);let user=await e.env.DB.prepare("SELECT id,email,password_hash,is_admin FROM users WHERE email = ?").bind(email).first();let userId;if(user){if(!await Cs(password,user.password_hash))return e.json({error:"invalid_credentials"},401);if(lic.user_id&&lic.user_id!==user.id)return e.json({error:"license_already_used"},409);userId=user.id;await e.env.DB.prepare("UPDATE users SET is_approved=1, display_name=COALESCE(NULLIF(?,''), display_name), updated_at=datetime('now','+9 hours') WHERE id=?").bind(buyerName,userId).run()}else{if(lic.user_id)return e.json({error:"license_already_used"},409);const hash=await Bt(password),trialEnd=lic.license_type==="trial"&&lic.expires_at?lic.expires_at:null;userId=(await e.env.DB.prepare("INSERT INTO users (email, password_hash, display_name, is_approved, is_admin, trial_start, trial_end) VALUES (?, ?, ?, 1, 0, datetime('now','+9 hours'), ?)").bind(email,hash,buyerName||null,trialEnd).run()).meta.last_row_id;user={id:userId,email,is_admin:0}}await e.env.DB.prepare("UPDATE licenses SET user_id=?, buyer_name=COALESCE(NULLIF(?,''), buyer_name), activated_at=COALESCE(activated_at, datetime('now','+9 hours')), updated_at=datetime('now','+9 hours') WHERE id=?").bind(userId,buyerName,lic.id).run();const plan=lic.plan_code||"ge365x_standard",status=lic.license_type==="trial"?"trial":"active",periodEnd=lic.expires_at?lic.expires_at:lic.license_type==="lifetime"?"2099-12-31 23:59:59":null;await e.env.DB.prepare(`INSERT INTO user_subscriptions (user_id, plan_code, status, started_at, current_period_end, updated_at) VALUES (?, ?, ?, datetime('now','+9 hours'), ?, datetime('now','+9 hours')) ON CONFLICT(user_id) DO UPDATE SET plan_code=excluded.plan_code,status=excluded.status,current_period_end=excluded.current_period_end,updated_at=datetime('now','+9 hours')`).bind(userId,plan,status,periodEnd).run();if(lic.license_type==="trial"&&periodEnd)await e.env.DB.prepare("UPDATE users SET trial_end=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(periodEnd,userId).run();await e.env.DB.prepare("INSERT INTO license_activations (license_id, user_id, event_type, ip_address, user_agent) VALUES (?, ?, 'activated', ?, ?)").bind(lic.id,userId,e.req.header("cf-connecting-ip")||"",e.req.header("user-agent")||"").run();const nowIat=Math.floor(Date.now()/1e3);await e.env.DB.prepare(`INSERT INTO system_settings (key, value, description, updated_at) VALUES (?, ?, ?, datetime('now','+9 hours')) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now','+9 hours')`).bind("user_session_iat:"+userId,String(nowIat),"User session iat (license auto activation)").run().catch(()=>{});const token=await za({uid:userId,email,adm:false,iat:nowIat},e.env.JWT_SECRET,3600*24*7),cookie=Ls(Nt,token,{maxAge:3600*24*7});await Z(e,"license_auto_activate",{userId,email,metadata:{license_id:lic.id,plan_code:plan,license_type:lic.license_type}});return new Response(JSON.stringify({ok:true,user_id:userId,email,plan_code:plan,status,expires_at:periodEnd}),{status:200,headers:{"content-type":"application/json","set-cookie":cookie}})});fe.post("/api/auth/license/activate",m,async e=>{const t=e.get("user"),{license_key:s}=await e.req.json();if(!s||!Xa(s))return e.json({error:"invalid_license_format"},400);const a=s.trim().toUpperCase(),n=await e.env.DB.prepare("SELECT * FROM licenses WHERE license_key = ?").bind(a).first();if(!n)return e.json({error:"license_not_found"},404);if(n.is_active===0)return e.json({error:"license_inactive"},409);if(n.expires_at&&n.expires_at<g())return e.json({error:"license_expired"},409);if(n.user_id&&n.user_id!==t.id)return e.json({error:"license_already_used"},409);await e.env.DB.prepare(`UPDATE licenses
        SET user_id = ?, activated_at = COALESCE(activated_at, datetime('now','+9 hours')),
            updated_at = datetime('now','+9 hours')
      WHERE id = ?`).bind(t.id,n.id).run();const i=n.plan_code||"ge365x_standard",r=n.license_type==="trial"?"trial":"active",o=n.expires_at?n.expires_at:n.license_type==="lifetime"?"2099-12-31 23:59:59":null;return await e.env.DB.prepare(`INSERT INTO user_subscriptions
