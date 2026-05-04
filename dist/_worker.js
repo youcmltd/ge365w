@@ -245,6 +245,7 @@ body.admin-body .max-w-7xl{max-width:96rem!important}
 body.admin-body main.max-w-7xl{max-width:96rem!important;width:100%!important}
 body.admin-body section{max-width:96rem;width:100%;margin:0 auto}
 body.admin-body .card{width:100%;box-sizing:border-box}
+body.admin-body{font-size:16px!important}
 .tab-trigger{padding:.55rem 1rem;border-radius:.4rem .4rem 0 0;font-size:.9rem;font-weight:600;color:#64748B;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab-trigger:hover{color:#1E40AF;background:#F1F5F9}
 .tab-trigger.active{color:#1E40AF;border-bottom-color:#2563EB;background:#EFF6FF}
@@ -252,7 +253,14 @@ body.admin-body .card{width:100%;box-sizing:border-box}
 .data-table thead th{text-align:left;padding:.7rem .85rem;background:#F1F5F9;color:#1F2937;font-weight:600;font-size:.85rem;border-bottom:1px solid #E5E7EB}
 .data-table tbody td{padding:.7rem .85rem;border-bottom:1px solid #F1F5F9;color:#1F2937;vertical-align:middle}
 .data-table tbody tr:hover{background:#F8FAFC}
-.admin-table-license{min-width:1180px}
+body.admin-body .tab-trigger{font-size:1rem}
+body.admin-body .data-table{font-size:1rem}
+body.admin-body .data-table thead th{font-size:.95rem;padding:.85rem 1rem}
+body.admin-body .data-table tbody td{padding:.85rem 1rem}
+body.admin-body .text-xs{font-size:.9rem;line-height:1.35rem}
+body.admin-body .text-sm{font-size:1rem;line-height:1.5rem}
+body.admin-body .btn-ghost.text-xs,body.admin-body .btn-danger.text-xs,body.admin-body .btn-primary.text-xs{font-size:.9rem;padding:.4rem .65rem}
+.admin-table-license{min-width:1320px}
 .admin-table-audit{min-width:1120px}
 .admin-table-audit td:last-child{max-width:36rem;white-space:normal;word-break:break-all}
 .modal-title-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
@@ -528,8 +536,8 @@ ${t}
         <div>
           <label class="field-label"><i class="fas fa-key icon-yellow"></i>ライセンスキー</label>
           <input type="text" id="license-key" class="inp input-mono" style="text-transform:uppercase"
-                 placeholder="VPS-GE365X-XXXXXXXX" required
-                 pattern="VPS-GE365X-[A-Za-z0-9]{6,12}">
+                 placeholder="GE365X-XXXXXXXX" required
+                 pattern="(VPS-)?GE365X-[A-Za-z0-9]{6,12}">
         </div>
         <button type="submit" class="btn btn-primary w-full justify-center">
           <i class="fas fa-key"></i>ライセンスを認証
@@ -679,7 +687,7 @@ async function doLicenseActivate(e) {
       </div>
       <div>
         <label class="field-label"><i class="fas fa-key icon-yellow"></i>ライセンスキー</label>
-        <input type="text" id="lic-key" class="inp input-mono" style="text-transform:uppercase" placeholder="VPS-GE365X-XXXXXXXX" required pattern="VPS-GE365X-[A-Za-z0-9]{6,12}">
+        <input type="text" id="lic-key" class="inp input-mono" style="text-transform:uppercase" placeholder="GE365X-XXXXXXXX" required pattern="(VPS-)?GE365X-[A-Za-z0-9]{6,12}">
       </div>
       <button type="submit" class="btn btn-primary w-full justify-center"><i class="fas fa-circle-check"></i>認証して開始</button>
       <div id="license-auto-error" class="text-red-600 text-xs text-center hide"></div>
@@ -707,7 +715,7 @@ async function doLicenseAuto(e){
   }catch(err){licMsg('license-auto-error','通信エラー: '+err.message)}
   return false;
 }
-<\/script>`;return e.html(It("ライセンス認証",t))});const ie=new TextEncoder,Is=new TextDecoder;function ut(e){let t="";for(let s=0;s<e.length;s++)t+=String.fromCharCode(e[s]);return btoa(t)}function pt(e){const t=atob(e),s=new Uint8Array(t.length);for(let a=0;a<t.length;a++)s[a]=t.charCodeAt(a);return s}function St(e){return ut(e).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}function Vt(e){const t="=".repeat((4-e.length%4)%4);return pt((e+t).replace(/-/g,"+").replace(/_/g,"/"))}function Ct(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),t}const Xt=1e5,Ja=32;async function Bt(e){const t=Ct(16),s=await crypto.subtle.importKey("raw",ie.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),a=await crypto.subtle.deriveBits({name:"PBKDF2",salt:t,iterations:Xt,hash:"SHA-256"},s,Ja*8);return`pbkdf2$${Xt}$${ut(t)}$${ut(new Uint8Array(a))}`}async function Cs(e,t){try{const[s,a,n,i]=t.split("$");if(s!=="pbkdf2")return!1;const r=parseInt(a,10),o=pt(n),d=pt(i),l=await crypto.subtle.importKey("raw",ie.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),c=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:o,iterations:r,hash:"SHA-256"},l,d.length*8));return Ka(c,d)}catch{return!1}}function Ka(e,t){if(e.length!==t.length)return!1;let s=0;for(let a=0;a<e.length;a++)s|=e[a]^t[a];return s===0}async function Bs(e){return crypto.subtle.importKey("raw",ie.encode(e),{name:"HMAC",hash:"SHA-256"},!1,["sign","verify"])}async function za(e,t,s=3600*24*7){const a=Math.floor(Date.now()/1e3),n={iat:a,exp:a+s,...e},i=St(ie.encode(JSON.stringify({alg:"HS256",typ:"JWT"}))),r=St(ie.encode(JSON.stringify(n))),o=`${i}.${r}`,d=await Bs(t),l=new Uint8Array(await crypto.subtle.sign("HMAC",d,ie.encode(o)));return`${o}.${St(l)}`}async function Va(e,t){try{const[s,a,n]=e.split(".");if(!s||!a||!n)return null;const i=await Bs(t);if(!await crypto.subtle.verify("HMAC",i,Vt(n),ie.encode(`${s}.${a}`)))return null;const o=JSON.parse(Is.decode(Vt(a)));return o.exp&&o.exp<Math.floor(Date.now()/1e3)?null:o}catch{return null}}async function Ns(e){const t=ie.encode(e),s=t.length>=32?t.slice(0,32):new Uint8Array(await crypto.subtle.digest("SHA-256",t));return crypto.subtle.importKey("raw",s,{name:"AES-GCM"},!1,["encrypt","decrypt"])}async function _e(e,t){const s=Ct(12),a=await Ns(t),n=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:s},a,ie.encode(e))),i=new Uint8Array(s.length+n.length);return i.set(s),i.set(n,s.length),ut(i)}async function At(e,t){const s=pt(e),a=s.slice(0,12),n=s.slice(12),i=await Ns(t),r=await crypto.subtle.decrypt({name:"AES-GCM",iv:a},i,n);return Is.decode(r)}const Gt="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";function Zt(e="VPS-GE365X"){const t=Ct(8);let s="";for(let a=0;a<8;a++)s+=Gt[t[a]%Gt.length];return`${e}-${s}`}function Xa(e){return/^VPS-GE365X-[A-Z0-9]{6,12}$/i.test(e.trim())}function g(){return new Date(Date.now()+324e5).toISOString().replace("T"," ").slice(0,19)}function Ga(e,t){const a=(e.headers.get("cookie")||"").split(";").map(n=>n.trim()).find(n=>n.startsWith(t+"="));return a?decodeURIComponent(a.slice(t.length+1)):null}function Ls(e,t,s={}){const a=[`${e}=${encodeURIComponent(t)}`];return a.push(`Path=${s.path??"/"}`),s.maxAge!==void 0&&a.push(`Max-Age=${s.maxAge}`),s.httpOnly!==!1&&a.push("HttpOnly"),s.secure!==!1&&a.push("Secure"),a.push(`SameSite=${s.sameSite??"Lax"}`),a.join("; ")}const Nt="ge365x_session";function Za(e){const t=e.req.header("Authorization")||e.req.header("authorization");return t&&t.startsWith("Bearer ")?t.slice(7):Ga(e.req.raw,Nt)}async function m(e,t){const s=Za(e);if(!s)return e.json({error:"unauthenticated"},401);const a=await Va(s,e.env.JWT_SECRET);if(!(a!=null&&a.uid))return e.json({error:"invalid_token"},401);try{const sess=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key = ?").bind("user_session_iat:"+a.uid).first();if(sess&&sess.value){const validFrom=parseInt(sess.value,10);if(a.iat&&a.iat<validFrom)return e.json({error:"session_replaced",message:"別の端末でログインされたためセッションが無効化されました"},401)}}catch{}const n=await e.env.DB.prepare("SELECT id,email,is_approved,is_admin,trial_start,trial_end FROM users WHERE id = ?").bind(a.uid).first();if(!n)return e.json({error:"user_not_found"},401);if(n.is_approved===0){const pre=await e.env.DB.prepare("SELECT status,current_period_end FROM user_subscriptions WHERE user_id = ?").bind(n.id).first();if(pre&&pre.status==="trial"&&(!pre.current_period_end||pre.current_period_end>=g())){await e.env.DB.prepare("UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(n.id).run();n.is_approved=1}else return e.json({error:"not_approved"},403)}const i=await e.env.DB.prepare("SELECT plan_code,status,current_period_end FROM user_subscriptions WHERE user_id = ?").bind(n.id).first();const exp=(i&&i.current_period_end)||n.trial_end||null;if(!n.is_admin&&exp&&exp<g()){try{await e.env.DB.prepare("UPDATE user_subscriptions SET status='expired', updated_at=datetime('now','+9 hours') WHERE user_id=? AND status IN ('trial','active')").bind(n.id).run()}catch{}return e.json({error:(i&&i.status)==="trial"?"trial_expired":"subscription_expired",message:"利用期限が終了しています。管理者へ連絡するか、ライセンスを更新してください。"},403)}const r={id:n.id,email:n.email,is_admin:n.is_admin===1,is_approved:n.is_approved===1,plan_code:i==null?void 0:i.plan_code,subscription_status:i==null?void 0:i.status,current_period_end:i==null?void 0:i.current_period_end,trial_end:n.trial_end};e.set("user",r),await t()}async function R(e,t){const s=e.get("user");if(!s)return e.json({error:"unauthenticated"},401);if(!s.is_admin)return e.json({error:"forbidden"},403);await t()}async function Z(e,t,s={}){const a=e.req.header("cf-connecting-ip")||e.req.header("x-forwarded-for")||"",n=e.req.header("user-agent")||"";await e.env.DB.prepare(`INSERT INTO auth_logs (user_id, email, event_type, ip_address, user_agent, metadata)
+<\/script>`;return e.html(It("ライセンス認証",t))});const ie=new TextEncoder,Is=new TextDecoder;function ut(e){let t="";for(let s=0;s<e.length;s++)t+=String.fromCharCode(e[s]);return btoa(t)}function pt(e){const t=atob(e),s=new Uint8Array(t.length);for(let a=0;a<t.length;a++)s[a]=t.charCodeAt(a);return s}function St(e){return ut(e).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}function Vt(e){const t="=".repeat((4-e.length%4)%4);return pt((e+t).replace(/-/g,"+").replace(/_/g,"/"))}function Ct(e){const t=new Uint8Array(e);return crypto.getRandomValues(t),t}const Xt=1e5,Ja=32;async function Bt(e){const t=Ct(16),s=await crypto.subtle.importKey("raw",ie.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),a=await crypto.subtle.deriveBits({name:"PBKDF2",salt:t,iterations:Xt,hash:"SHA-256"},s,Ja*8);return`pbkdf2$${Xt}$${ut(t)}$${ut(new Uint8Array(a))}`}async function Cs(e,t){try{const[s,a,n,i]=t.split("$");if(s!=="pbkdf2")return!1;const r=parseInt(a,10),o=pt(n),d=pt(i),l=await crypto.subtle.importKey("raw",ie.encode(e),{name:"PBKDF2"},!1,["deriveBits"]),c=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:o,iterations:r,hash:"SHA-256"},l,d.length*8));return Ka(c,d)}catch{return!1}}function Ka(e,t){if(e.length!==t.length)return!1;let s=0;for(let a=0;a<e.length;a++)s|=e[a]^t[a];return s===0}async function Bs(e){return crypto.subtle.importKey("raw",ie.encode(e),{name:"HMAC",hash:"SHA-256"},!1,["sign","verify"])}async function za(e,t,s=3600*24*7){const a=Math.floor(Date.now()/1e3),n={iat:a,exp:a+s,...e},i=St(ie.encode(JSON.stringify({alg:"HS256",typ:"JWT"}))),r=St(ie.encode(JSON.stringify(n))),o=`${i}.${r}`,d=await Bs(t),l=new Uint8Array(await crypto.subtle.sign("HMAC",d,ie.encode(o)));return`${o}.${St(l)}`}async function Va(e,t){try{const[s,a,n]=e.split(".");if(!s||!a||!n)return null;const i=await Bs(t);if(!await crypto.subtle.verify("HMAC",i,Vt(n),ie.encode(`${s}.${a}`)))return null;const o=JSON.parse(Is.decode(Vt(a)));return o.exp&&o.exp<Math.floor(Date.now()/1e3)?null:o}catch{return null}}async function Ns(e){const t=ie.encode(e),s=t.length>=32?t.slice(0,32):new Uint8Array(await crypto.subtle.digest("SHA-256",t));return crypto.subtle.importKey("raw",s,{name:"AES-GCM"},!1,["encrypt","decrypt"])}async function _e(e,t){const s=Ct(12),a=await Ns(t),n=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:s},a,ie.encode(e))),i=new Uint8Array(s.length+n.length);return i.set(s),i.set(n,s.length),ut(i)}async function At(e,t){const s=pt(e),a=s.slice(0,12),n=s.slice(12),i=await Ns(t),r=await crypto.subtle.decrypt({name:"AES-GCM",iv:a},i,n);return Is.decode(r)}const Gt="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";function Zt(e="GE365X"){const t=Ct(8);let s="";for(let a=0;a<8;a++)s+=Gt[t[a]%Gt.length];return`${e}-${s}`}function Xa(e){return/^(VPS-)?GE365X-[A-Z0-9]{6,12}$/i.test(e.trim())}function g(){return new Date(Date.now()+324e5).toISOString().replace("T"," ").slice(0,19)}function Ga(e,t){const a=(e.headers.get("cookie")||"").split(";").map(n=>n.trim()).find(n=>n.startsWith(t+"="));return a?decodeURIComponent(a.slice(t.length+1)):null}function Ls(e,t,s={}){const a=[`${e}=${encodeURIComponent(t)}`];return a.push(`Path=${s.path??"/"}`),s.maxAge!==void 0&&a.push(`Max-Age=${s.maxAge}`),s.httpOnly!==!1&&a.push("HttpOnly"),s.secure!==!1&&a.push("Secure"),a.push(`SameSite=${s.sameSite??"Lax"}`),a.join("; ")}const Nt="ge365x_session";function Za(e){const t=e.req.header("Authorization")||e.req.header("authorization");return t&&t.startsWith("Bearer ")?t.slice(7):Ga(e.req.raw,Nt)}async function m(e,t){const s=Za(e);if(!s)return e.json({error:"unauthenticated"},401);const a=await Va(s,e.env.JWT_SECRET);if(!(a!=null&&a.uid))return e.json({error:"invalid_token"},401);try{const sess=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key = ?").bind("user_session_iat:"+a.uid).first();if(sess&&sess.value){const validFrom=parseInt(sess.value,10);if(a.iat&&a.iat<validFrom)return e.json({error:"session_replaced",message:"別の端末でログインされたためセッションが無効化されました"},401)}}catch{}const n=await e.env.DB.prepare("SELECT id,email,is_approved,is_admin,trial_start,trial_end FROM users WHERE id = ?").bind(a.uid).first();if(!n)return e.json({error:"user_not_found"},401);if(n.is_approved===0){const pre=await e.env.DB.prepare("SELECT status,current_period_end FROM user_subscriptions WHERE user_id = ?").bind(n.id).first();if(pre&&pre.status==="trial"&&(!pre.current_period_end||pre.current_period_end>=g())){await e.env.DB.prepare("UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(n.id).run();n.is_approved=1}else return e.json({error:"not_approved"},403)}const i=await e.env.DB.prepare("SELECT plan_code,status,current_period_end FROM user_subscriptions WHERE user_id = ?").bind(n.id).first();const exp=(i&&i.current_period_end)||n.trial_end||null;if(!n.is_admin&&exp&&exp<g()){try{await e.env.DB.prepare("UPDATE user_subscriptions SET status='expired', updated_at=datetime('now','+9 hours') WHERE user_id=? AND status IN ('trial','active')").bind(n.id).run()}catch{}return e.json({error:(i&&i.status)==="trial"?"trial_expired":"subscription_expired",message:"利用期限が終了しています。管理者へ連絡するか、ライセンスを更新してください。"},403)}const r={id:n.id,email:n.email,is_admin:n.is_admin===1,is_approved:n.is_approved===1,plan_code:i==null?void 0:i.plan_code,subscription_status:i==null?void 0:i.status,current_period_end:i==null?void 0:i.current_period_end,trial_end:n.trial_end};e.set("user",r),await t()}async function R(e,t){const s=e.get("user");if(!s)return e.json({error:"unauthenticated"},401);if(!s.is_admin)return e.json({error:"forbidden"},403);await t()}async function Z(e,t,s={}){const a=e.req.header("cf-connecting-ip")||e.req.header("x-forwarded-for")||"",n=e.req.header("user-agent")||"";await e.env.DB.prepare(`INSERT INTO auth_logs (user_id, email, event_type, ip_address, user_agent, metadata)
      VALUES (?, ?, ?, ?, ?, ?)`).bind(s.userId??null,s.email??null,t,a,n,s.metadata?JSON.stringify(s.metadata):null).run()}const Qa=[{key:"dashboard",label:"ダッシュボード",icon:"fa-gauge-high",path:"/dashboard"},{key:"target",label:"ターゲット設定",icon:"fa-bullseye",path:"/dashboard/target"},{key:"voice",label:"ブランドボイス",icon:"fa-palette",path:"/dashboard/voice"},{key:"pattern",label:"パターン別AI生成",icon:"fa-wand-magic-sparkles",path:"/dashboard/pattern"},{key:"generate",label:"AI生成2",icon:"fa-pen-to-square",path:"/dashboard/generate"},{key:"posts",label:"X投稿管理",icon:"fa-brands fa-x-twitter",path:"/dashboard/posts"},{key:"thread",label:"ツリー投稿",icon:"fa-reply",path:"/dashboard/thread"},{key:"scheduled",label:"予約状況",icon:"fa-calendar",path:"/dashboard/scheduled"},{key:"autopilot",label:"オートパイロット",icon:"fa-plane-departure",path:"/dashboard/autopilot"},{key:"accounts",label:"アカウント管理",icon:"fa-users-gear",path:"/dashboard/accounts"},{key:"api",label:"API設定",icon:"fa-key",path:"/dashboard/api"},{key:"export",label:"一括ダウンロード",icon:"fa-download",path:"/dashboard/export"}];function en(e,t){return`
 <aside class="w-56 bg-sidebar flex-shrink-0 flex flex-col">
   <div class="px-4 py-4 border-b border-[#2A3B52]">
@@ -3342,7 +3350,6 @@ F.get("/admin",m,R,e=>{const t=`
       <button onclick="showSection('users')"     id="nav-users"     class="tab-trigger active">ユーザー</button>
       <button onclick="showSection('licenses')"  id="nav-licenses"  class="tab-trigger">ライセンス</button>
       <button onclick="showSection('subs')"      id="nav-subs"      class="tab-trigger">サブスクリプション</button>
-      <button onclick="showSection('posts')"     id="nav-posts"     class="tab-trigger">投稿管理</button>
       <button onclick="showSection('audit')"     id="nav-audit"     class="tab-trigger">監査ログ</button>
       <button onclick="showSection('settings')"  id="nav-settings"  class="tab-trigger">システム設定</button>
     </div>
@@ -3354,7 +3361,8 @@ F.get("/admin",m,R,e=>{const t=`
     <section id="section-users" class="space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">ユーザー一覧</h2>
-        <div class="flex gap-2">
+        <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
+          <input type="search" id="users-search" class="input-field" style="width:18rem" placeholder="名前・メールで検索" oninput="scheduleLoadUsers()">
           <select id="users-filter" class="input-field w-auto" onchange="loadUsers()">
             <option value="all">全て</option>
             <option value="pending">承認待ち</option>
@@ -3391,9 +3399,9 @@ F.get("/admin",m,R,e=>{const t=`
         <table class="data-table admin-table-license">
           <thead><tr>
             <th>ID</th><th>キー</th><th>名前</th><th>種別</th><th>プラン</th><th>状態</th>
-            <th>ユーザー</th><th>有効期限</th><th>発行日</th><th>操作</th>
+            <th>ユーザー</th><th>有効期限</th><th>発行日</th><th>メモ</th><th>操作</th>
           </tr></thead>
-          <tbody id="licenses-tbody"><tr><td colspan="10" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
+          <tbody id="licenses-tbody"><tr><td colspan="11" class="text-center text-brand-400 py-8">読込中...</td></tr></tbody>
         </table>
       </div>
 
@@ -3524,10 +3532,10 @@ F.get("/admin",m,R,e=>{const t=`
 </div>
 
 <script>
-const sections = ['users','licenses','subs','posts','audit','settings'];
+const sections = ['users','licenses','subs','audit','settings'];
 const loaders = {
   users: loadUsers, licenses: loadLicenses, subs: loadSubs,
-  posts: loadPosts, audit: loadAudit, settings: loadSettings
+  audit: loadAudit, settings: loadSettings
 };
 
 function formatPlanLabel(code, status, licenseType) {
@@ -3571,9 +3579,15 @@ async function doLogout() {
 }
 
 // ---------- ユーザー ----------
+let usersSearchTimer = null;
+function scheduleLoadUsers() {
+  clearTimeout(usersSearchTimer);
+  usersSearchTimer = setTimeout(loadUsers, 250);
+}
 async function loadUsers() {
   const filter = document.getElementById('users-filter').value;
-  const r = await fetch('/api/admin/users?filter=' + filter);
+  const q = (document.getElementById('users-search')?.value || '').trim();
+  const r = await fetch('/api/admin/users?filter=' + encodeURIComponent(filter) + '&q=' + encodeURIComponent(q));
   const j = await r.json();
   const tbody = document.getElementById('users-tbody');
   if (!j.users || !j.users.length) {
@@ -3621,7 +3635,7 @@ async function loadLicenses() {
   const j = await r.json();
   const tbody = document.getElementById('licenses-tbody');
   if (!j.licenses || !j.licenses.length) {
-    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-brand-400 py-6">発行済キーなし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center text-brand-400 py-6">発行済キーなし</td></tr>';
     return;
   }
   tbody.innerHTML = j.licenses.map(l => \`
@@ -3635,12 +3649,12 @@ async function loadLicenses() {
       <td class="text-xs">\${l.user_email || '-'}</td>
       <td class="text-xs text-brand-300">\${l.expires_at || '無期限'}</td>
       <td class="text-xs text-brand-300">\${l.created_at}</td>
+      <td class="text-xs">\${l.note || '-'}</td>
       <td class="flex gap-1">
-        <button onclick="copyKey('\${l.license_key}')" class="btn-ghost text-xs" title="コピー"><i class="fas fa-copy"></i></button>
         \${l.is_active
-          ? \`<button onclick="revokeLicense(\${l.id})" class="btn-danger text-xs" title="無効化"><i class="fas fa-ban"></i></button>\`
-          : \`<button onclick="reactivateLicense(\${l.id})" class="btn-ghost text-xs" title="再有効化"><i class="fas fa-check"></i></button>\`}
-        <button onclick="deleteLicense(\${l.id})" class="btn-danger text-xs" title="削除"><i class="fas fa-trash"></i></button>
+          ? \`<button onclick="revokeLicense(\${l.id})" class="btn-danger text-xs" title="無効化">無効</button>\`
+          : \`<button onclick="reactivateLicense(\${l.id})" class="btn-ghost text-xs" title="有効化">有効</button>\`}
+        <button onclick="deleteLicense(\${l.id})" class="btn-danger text-xs" title="削除">削除</button>
       </td>
     </tr>
   \`).join('');
@@ -3842,17 +3856,17 @@ function dlAdminExport(key) {
 // 起動時
 showSection('users');
 <\/script>
-`;return e.html(It("管理画面",t,{bodyClass:"bg-paper text-ink min-h-screen font-sans antialiased admin-body"}))});async function __ensureLicenseAdminColumns(e){await e.env.DB.prepare("ALTER TABLE users ADD COLUMN display_name TEXT").run().catch(()=>{});await e.env.DB.prepare("ALTER TABLE licenses ADD COLUMN buyer_name TEXT").run().catch(()=>{})}F.get("/api/admin/users",m,R,async e=>{await __ensureLicenseAdminColumns(e);await e.env.DB.prepare(`UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE is_approved=0 AND id IN (SELECT user_id FROM user_subscriptions WHERE status='trial' AND (current_period_end IS NULL OR current_period_end >= datetime('now','+9 hours')))`).run().catch(()=>{});const t=e.req.query("filter")||"all",s=[];t==="pending"&&s.push("u.is_approved = 0"),t==="approved"&&s.push("u.is_approved = 1"),t==="admin"&&s.push("u.is_admin = 1");const a=`
+`;return e.html(It("管理画面",t,{bodyClass:"bg-paper text-ink min-h-screen font-sans antialiased admin-body"}))});async function __ensureLicenseAdminColumns(e){await e.env.DB.prepare("ALTER TABLE users ADD COLUMN display_name TEXT").run().catch(()=>{});await e.env.DB.prepare("ALTER TABLE licenses ADD COLUMN buyer_name TEXT").run().catch(()=>{})}F.get("/api/admin/users",m,R,async e=>{await __ensureLicenseAdminColumns(e);await e.env.DB.prepare(`UPDATE users SET is_approved=1, updated_at=datetime('now','+9 hours') WHERE is_approved=0 AND id IN (SELECT user_id FROM user_subscriptions WHERE status='trial' AND (current_period_end IS NULL OR current_period_end >= datetime('now','+9 hours')))`).run().catch(()=>{});const t=e.req.query("filter")||"all",q=(e.req.query("q")||"").trim(),s=[],i=[];t==="pending"&&s.push("u.is_approved = 0"),t==="approved"&&s.push("u.is_approved = 1"),t==="admin"&&s.push("u.is_admin = 1");if(q){s.push("(u.email LIKE ? OR COALESCE(u.display_name,'') LIKE ?)");const like="%"+q+"%";i.push(like,like)}const a=`
     SELECT u.id, u.display_name, u.email, u.is_approved, u.is_admin, u.trial_start, u.trial_end, u.created_at,
            s.plan_code, s.status AS sub_status
       FROM users u
       LEFT JOIN user_subscriptions s ON s.user_id = u.id
       ${s.length?"WHERE "+s.join(" AND "):""}
       ORDER BY u.id DESC
-      LIMIT 200`,{results:n}=await e.env.DB.prepare(a).all();return e.json({users:n||[]})});F.post("/api/admin/users/:id/approve",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_approved:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_approved=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_approval",{userId:e.get("user").id,metadata:{target_user_id:t,is_approved:s}}),e.json({ok:!0})});F.post("/api/admin/users/:id/admin",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_admin:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_admin=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_admin",{userId:e.get("user").id,metadata:{target_user_id:t,is_admin:s}}),e.json({ok:!0})});F.get("/api/admin/licenses",m,R,async e=>{await __ensureLicenseAdminColumns(e);const{results:t}=await e.env.DB.prepare(`SELECT l.*, u.email AS user_email, u.display_name AS user_name
+      LIMIT 200`,p=e.env.DB.prepare(a),{results:n}=i.length?await p.bind(...i).all():await p.all();return e.json({users:n||[]})});F.post("/api/admin/users/:id/approve",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_approved:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_approved=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_approval",{userId:e.get("user").id,metadata:{target_user_id:t,is_approved:s}}),e.json({ok:!0})});F.post("/api/admin/users/:id/admin",m,R,async e=>{const t=parseInt(e.req.param("id"),10),{is_admin:s}=await e.req.json();return await e.env.DB.prepare("UPDATE users SET is_admin=?, updated_at=datetime('now','+9 hours') WHERE id=?").bind(s,t).run(),await Z(e,"admin_toggle_admin",{userId:e.get("user").id,metadata:{target_user_id:t,is_admin:s}}),e.json({ok:!0})});F.get("/api/admin/licenses",m,R,async e=>{await __ensureLicenseAdminColumns(e);const{results:t}=await e.env.DB.prepare(`SELECT l.*, u.email AS user_email, u.display_name AS user_name
        FROM licenses l
        LEFT JOIN users u ON u.id = l.user_id
-       ORDER BY l.id DESC LIMIT 500`).all();return e.json({licenses:t||[]})});F.post("/api/admin/licenses/issue",m,R,async e=>{await __ensureLicenseAdminColumns(e);const t=e.get("user"),{plan_code:s,license_type:a,expires_at:n,count:i=1,buyer_name:b,note:r}=await e.req.json();if(i<1||i>100)return e.json({error:"invalid_count"},400);let exp=n||null;if(!exp&&a==="trial"){const td=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_days'").first();const days=Math.max(0,parseInt((td==null?void 0:td.value)??"14",10)||0);exp=new Date(Date.now()+324e5+days*864e5).toISOString().slice(0,10)}const o=[];for(let d=0;d<i;d++){let l=Zt("VPS-GE365X");for(let c=0;c<3&&await e.env.DB.prepare("SELECT 1 FROM licenses WHERE license_key=?").bind(l).first();c++)l=Zt("VPS-GE365X");await e.env.DB.prepare(`INSERT INTO licenses (license_key, license_type, plan_code, is_active, expires_at, issued_by, buyer_name, note)
+       ORDER BY l.id DESC LIMIT 500`).all();return e.json({licenses:t||[]})});F.post("/api/admin/licenses/issue",m,R,async e=>{await __ensureLicenseAdminColumns(e);const t=e.get("user"),{plan_code:s,license_type:a,expires_at:n,count:i=1,buyer_name:b,note:r}=await e.req.json();if(i<1||i>100)return e.json({error:"invalid_count"},400);let exp=n||null;if(!exp&&a==="trial"){const td=await e.env.DB.prepare("SELECT value FROM system_settings WHERE key='trial_days'").first();const days=Math.max(0,parseInt((td==null?void 0:td.value)??"14",10)||0);exp=new Date(Date.now()+324e5+days*864e5).toISOString().slice(0,10)}const o=[];for(let d=0;d<i;d++){let l=Zt("GE365X");for(let c=0;c<3&&await e.env.DB.prepare("SELECT 1 FROM licenses WHERE license_key=?").bind(l).first();c++)l=Zt("GE365X");await e.env.DB.prepare(`INSERT INTO licenses (license_key, license_type, plan_code, is_active, expires_at, issued_by, buyer_name, note)
        VALUES (?, ?, ?, 1, ?, ?, ?, ?)`).bind(l,a,s,exp?exp+" 23:59:59":null,t.id,b||null,r||null).run(),o.push(l)}return await Z(e,"admin_issue_license",{userId:t.id,metadata:{count:i,plan_code:s,license_type:a,buyer_name:b||null}}),e.json({ok:!0,keys:o})});F.post("/api/admin/licenses/:id/revoke",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=0, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),await e.env.DB.prepare(`INSERT INTO license_activations (license_id, user_id, event_type)
      VALUES (?, ?, 'revoked')`).bind(t,e.get("user").id).run(),e.json({ok:!0})});F.post("/api/admin/licenses/:id/reactivate",m,R,async e=>{const t=parseInt(e.req.param("id"),10);return await e.env.DB.prepare("UPDATE licenses SET is_active=1, updated_at=datetime('now','+9 hours') WHERE id=?").bind(t).run(),e.json({ok:!0})});F.delete("/api/admin/licenses/:id",m,R,async e=>{const t=parseInt(e.req.param("id"),10);if(!Number.isFinite(t)||t<=0)return e.json({error:"invalid_id"},400);const s=await e.env.DB.prepare("SELECT id, license_key FROM licenses WHERE id=?").bind(t).first();if(!s)return e.json({error:"not_found"},404);await e.env.DB.prepare("DELETE FROM license_activations WHERE license_id=?").bind(t).run().catch(()=>{});await e.env.DB.prepare("DELETE FROM licenses WHERE id=?").bind(t).run();return await Z(e,"admin_delete_license",{userId:e.get("user").id,metadata:{license_id:t,license_key:s.license_key}}),e.json({ok:!0})});F.get("/api/admin/subscriptions",m,R,async e=>{const{results:t}=await e.env.DB.prepare(`SELECT s.*, u.email AS user_email
        FROM user_subscriptions s
