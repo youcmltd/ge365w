@@ -3170,7 +3170,7 @@ function dlExport(key) {
     <div class="soft-panel" style="padding:.75rem;border-radius:.5rem;background:#F8FAFC;border:1px solid var(--border)">
       <div style="font-size:.78rem;color:var(--ink-muted);margin-bottom:.35rem">Developer Portal に登録するCallback URL</div>
       <code id="x-oauth-callback" style="display:block;font-size:.78rem;word-break:break-all;color:#111827;background:#fff;border:1px solid var(--border);padding:.45rem;border-radius:.35rem"></code>
-      <button type="button" class="btn btn-subtle btn-sm" style="margin-top:.5rem" onclick="location.href='/api/admin/x/oauth2/start'"><i class="fa-brands fa-x-twitter"></i> X OAuth2認証を開始</button>
+      <button type="button" class="btn btn-subtle btn-sm" style="margin-top:.5rem" onclick="startXOAuth2()"><i class="fa-brands fa-x-twitter"></i> X OAuth2認証を開始</button>
     </div>
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="saveXApi()"><i class="fas fa-save"></i>保存</button>
@@ -3248,13 +3248,21 @@ function dlExport(key) {
 <script>
 function setStatus(id,msg,ok){const el=document.getElementById(id);if(el){el.textContent=msg;el.style.color=ok?'#059669':'#DC2626';}}
 setTimeout(()=>{const cb=document.getElementById('x-oauth-callback');if(cb)cb.textContent=location.origin+'/api/admin/x/oauth2/callback';},0);
-async function saveXApi(){
+async function saveXApi(quiet=false){
   const r=await fetch('/api/admin/api-settings/x',{method:'POST',headers:{'content-type':'application/json'},
     body:JSON.stringify({api_key:document.getElementById('api-xk').value,api_secret:document.getElementById('api-xs').value,oauth2_client_id:document.getElementById('api-xcid')?document.getElementById('api-xcid').value:'',oauth2_client_secret:document.getElementById('api-xcsec')?document.getElementById('api-xcsec').value:'',oauth2_user_token:document.getElementById('api-xoauth2')?document.getElementById('api-xoauth2').value:''})});
   const j=await r.json();
-  if(j.success){toast('X API設定を保存しました','ok');}else{toast('保存失敗: '+(j.error||''),'err');}
+  if(j.success){if(!quiet)toast('X API設定を保存しました','ok');return true;}else{toast('保存失敗: '+(j.error||''),'err');return false;}
 }
 window.saveXApi = saveXApi;
+async function startXOAuth2(){
+  const cid=(document.getElementById('api-xcid')?.value||'').trim();
+  if(!cid){toast('OAuth2 Client IDを入力してから認証を開始してください','err');return;}
+  const ok=await saveXApi(true);
+  if(!ok)return;
+  location.href='/api/admin/x/oauth2/start?ts='+Date.now();
+}
+window.startXOAuth2 = startXOAuth2;
 async function saveOpenAI(){
   const key=document.getElementById('api-oai').value.trim();
   const r=await fetch('/api/admin/api-settings/openai',{method:'POST',headers:{'content-type':'application/json'},
@@ -3334,55 +3342,67 @@ async function __geUserPlan(e,t){let s=null;try{s=await e.DB.prepare(`SELECT s.p
         ORDER BY CASE WHEN s.status='active' THEN 0 WHEN s.status='trial' THEN 1 ELSE 2 END, s.updated_at DESC
         LIMIT 1`).bind(t.id).first()}catch{}const a=__gePlanRule((s&&s.plan_code)||t.plan_code);return{...a,raw_code:(s&&s.plan_code)||t.plan_code||a.code,status:(s&&s.status)||t.subscription_status||null,current_period_end:(s&&s.current_period_end)||t.current_period_end||null}}
 function __geLimitText(e){return e===0?"無制限":`${e}アカウント`}
-function __renderBilling(e){const t=[{code:"ge365x_lite",name:"ライトプラン",price:"¥1,980/月",accounts:"3アカウント",buzz:"利用不可",desc:"少数アカウントで始める基本プラン"},{code:"ge365x_standard",name:"スタンダードプラン",price:"¥3,980/月",accounts:"10アカウント",buzz:"利用可能",desc:"複数アカウント運用とバズリサーチ対応"},{code:"ge365x_pro",name:"プロプラン",price:"¥9,980/月",accounts:"無制限",buzz:"利用可能",desc:"アカウント数制限なしの上位プラン"}];return`
-  <div class="space-y-5">
-    <div>
-      <h1 class="section-title"><i class="fas fa-credit-card"></i>プラン・お支払い</h1>
-      <p class="section-desc">現在のプランと利用できる機能を確認できます。決済リンクは後で設定します。</p>
-    </div>
-    <div class="card">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <div class="text-xs text-ink-muted">現在のプラン</div>
-          <div class="text-2xl font-bold">${w(e.label)}</div>
-          <div class="text-sm text-ink-muted mt-1">Xアカウント上限: ${w(__geLimitText(e.accountLimit))} / バズリサーチ: ${e.buzzResearch?"利用可能":"ライトプランでは利用不可"}</div>
-        </div>
-        <span class="pill ${e.buzzResearch?"pill-ok":"pill-warn"}">${w(e.raw_code||e.code)}</span>
+async function __gePaymentLinks(e){const keys=["payment_setup_url","payment_lite_url","payment_standard_url","payment_pro_url"];const out={};try{const{results:t}=await e.DB.prepare(`SELECT key, value FROM system_settings WHERE key IN (${keys.map(()=>"?").join(",")})`).bind(...keys).all();for(const s of t||[])out[s.key]=s.value||""}catch{}return out}
+function __paymentLinkButton(e,t,s=""){const url=String(e||"").trim();if(url)return`<a class="billing-btn ${s}" href="${w(url)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i>${w(t)}</a>`;return`<button class="billing-btn ${s}" type="button" onclick="alert('決済リンクは管理画面のシステム設定で登録してください')"><i class="fas fa-arrow-up-right-from-square"></i>${w(t)}</button>`}
+function __renderBilling(e,links={}){const remainMs=e.status==="trial"&&e.current_period_end?Date.parse(String(e.current_period_end).replace(" ","T")+"+09:00")-Date.now():NaN,remain=Number.isFinite(remainMs)?Math.max(0,Math.ceil(remainMs/864e5)):0,currentLabel=e.status==="trial"?"無料トライアル":e.label;const t=[{code:"ge365x_lite",badge:"シンプルプラン",name:"ライトプラン",price:"¥1,980",unit:"/月",link:links.payment_lite_url,accent:"purple",features:["予約投稿・スケジュール","AI投稿生成（月30回）","3アカウント連携","メールサポート"]},{code:"ge365x_standard",badge:"プロプラン",popular:!0,name:"スタンダードプラン",price:"¥3,980",unit:"/月",link:links.payment_standard_url,accent:"blue",features:["シンプルの全機能","AI投稿生成（無制限）","10アカウント連携","バズリサーチ","優先サポート"]},{code:"ge365x_pro",badge:"アドバンスプラン",name:"プロプラン",price:"¥9,980",unit:"/月",link:links.payment_pro_url,accent:"cyan",features:["プロの全機能","無制限アカウント連携","バズリサーチ","自動DM","専任サポート"]}];return`
+  <style>
+    .billing-shell{background:#050812;color:#F8FAFC;border-radius:16px;padding:2.25rem;max-width:1180px;margin:0 auto;box-shadow:0 20px 55px rgba(2,6,23,.22)}
+    .billing-shell *{box-sizing:border-box}.billing-muted{color:#9AA6B8}.billing-current{border:1px solid #182238;background:#07101E;border-radius:16px;padding:1.4rem 1.6rem;display:flex;align-items:center;gap:1.2rem}
+    .billing-icon{width:3rem;height:3rem;border-radius:999px;background:#1E1647;color:#A78BFA;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+    .billing-status{display:inline-flex;align-items:center;gap:.5rem;background:#211B08;border:1px solid #A16207;color:#FACC15;border-radius:999px;font-size:.78rem;font-weight:700;padding:.15rem .55rem;margin-left:.5rem}
+    .billing-step-title{font-weight:800;font-size:1.05rem;margin:2.1rem 0 .9rem;display:flex;align-items:center;gap:.55rem}.billing-step-title.setup{color:#FCD34D}.billing-step-title.plan{color:#A78BFA}
+    .billing-setup{border:1px solid #854D0E;background:linear-gradient(135deg,rgba(65,45,6,.58),rgba(23,16,5,.92));border-radius:16px;padding:1.7rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
+    .billing-tags{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:1rem}.billing-tags span{border:1px solid #A16207;color:#EAB308;background:rgba(113,63,18,.25);border-radius:999px;font-size:.78rem;padding:.28rem .58rem}
+    .billing-price{text-align:right;min-width:10rem}.billing-price strong{display:block;font-size:2rem;line-height:1;color:#fff}.billing-price small{color:#9AA6B8}
+    .billing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.15rem}.billing-plan{position:relative;border-radius:16px;padding:1.55rem;border:1px solid rgba(148,163,184,.28);min-height:24rem;display:flex;flex-direction:column;overflow:visible}
+    .billing-plan.purple{background:linear-gradient(160deg,#2A0D43,#12071F);border-color:#7E22CE}.billing-plan.blue{background:linear-gradient(160deg,#2B1E62,#082233);border-color:#6477FF}.billing-plan.cyan{background:linear-gradient(160deg,#073949,#061E2A);border-color:#0891B2}
+    .billing-popular{position:absolute;top:-.85rem;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#8B5CF6,#06B6D4);color:#fff;border-radius:999px;padding:.25rem .75rem;font-size:.78rem;font-weight:800}
+    .billing-plan-badge{display:inline-flex;width:max-content;align-items:center;gap:.45rem;border-radius:999px;padding:.4rem .75rem;font-size:.82rem;font-weight:700;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}
+    .billing-plan h3{font-size:1.05rem;margin:.85rem 0 0}.billing-plan-price{font-size:2rem;font-weight:900;margin:1.3rem 0 .35rem}.billing-plan-price span{font-size:.9rem;font-weight:500;color:#B8C2D6}
+    .billing-features{list-style:none;padding:0;margin:1.2rem 0 1.4rem;display:grid;gap:.72rem;color:#C9D3E5}.billing-features li{display:flex;align-items:center;gap:.55rem}.billing-features i{color:#34D399}
+    .billing-btn{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;min-height:2.7rem;border:0;border-radius:.55rem;color:#fff;text-decoration:none;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#A855F7,#06B6D4)}
+    .billing-btn.setup{background:#F59E0B;color:#111827;width:auto;padding:0 1.2rem}.billing-btn.purple{background:#B010F4}.billing-btn.cyan{background:#0891B2}
+    @media(max-width:900px){.billing-shell{padding:1.25rem}.billing-setup{display:block}.billing-price{text-align:left;margin-top:1.25rem}.billing-grid{grid-template-columns:1fr}.billing-btn.setup{width:100%}}
+  </style>
+  <div class="billing-shell">
+    <div class="billing-current">
+      <div class="billing-icon"><i class="fas fa-credit-card"></i></div>
+      <div>
+        <div class="billing-muted">現在のプラン</div>
+        <div style="font-size:1.15rem;font-weight:900">${w(currentLabel)}${e.status==="trial"?`<span class="billing-status">残り ${remain}日</span>`:""}</div>
+        <div class="billing-muted" style="font-size:.86rem;margin-top:.25rem">Xアカウント上限: ${w(__geLimitText(e.accountLimit))} / バズリサーチ: ${e.buzzResearch?"利用可能":"ライトプランでは利用不可"}</div>
       </div>
     </div>
-    <div class="card" style="border-color:#FCD34D;background:#FFFBEB">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h3 class="font-bold text-ink">STEP 1 — ツール導入費（初回一括・必須）</h3>
-          <p class="section-desc mt-1">初回設定サポート、アカウント連携、使い方レクチャーを含みます。</p>
-        </div>
-        <div class="text-right">
-          <div class="text-2xl font-bold">¥29,800</div>
-          <button class="btn btn-primary mt-2" type="button" onclick="alert('決済リンクは準備中です')"><i class="fas fa-arrow-up-right-from-square"></i>決済ページへ</button>
-        </div>
+
+    <div class="billing-step-title setup"><i class="fas fa-shield-halved"></i> STEP 1 — ツール導入費（初回一括・必須）</div>
+    <div class="billing-setup">
+      <div>
+        <p class="billing-muted">初回のみ必要な導入費用です。設定サポート・初期セットアップ・アカウント連携をすべて含みます。</p>
+        <div class="billing-tags"><span>初期設定サポート</span><span>アカウント連携</span><span>使い方レクチャー</span><span>専用サポート</span></div>
+      </div>
+      <div class="billing-price">
+        <strong>¥29,800</strong>
+        <small>初回一括払い</small>
+        <div style="margin-top:.85rem">${__paymentLinkButton(links.payment_setup_url,"決済ページへ","setup")}</div>
       </div>
     </div>
-    <div>
-      <h3 class="font-bold text-ink mb-3">STEP 2 — 月額プラン</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        ${t.map(s=>`
-          <div class="card ${s.code===e.code?"border-accent bg-accent-light":""}">
-            <div class="flex items-center justify-between gap-2">
-              <h3 class="font-bold">${w(s.name)}</h3>
-              ${s.code===e.code?'<span class="pill pill-blue">現在</span>':""}
-            </div>
-            <div class="text-2xl font-bold mt-3">${w(s.price)}</div>
-            <p class="text-sm text-ink-muted mt-2">${w(s.desc)}</p>
-            <div class="mt-4 space-y-2 text-sm">
-              <div><i class="fas fa-circle-check text-green-600"></i> Xアカウント: ${w(s.accounts)}</div>
-              <div><i class="fas ${s.buzz==="利用可能"?"fa-circle-check text-green-600":"fa-circle-xmark text-rose-600"}"></i> バズリサーチ: ${w(s.buzz)}</div>
-            </div>
-            <button class="btn btn-subtle w-full mt-4" type="button" onclick="alert('決済リンクは後で設定します')">このプランを申し込む</button>
-          </div>
-        `).join("")}
-      </div>
+
+    <div class="billing-step-title plan"><i class="fas fa-bolt"></i> STEP 2 — 月額プランを選ぶ</div>
+    <div class="billing-grid">
+      ${t.map(s=>`
+        <section class="billing-plan ${s.accent}">
+          ${s.popular?'<div class="billing-popular">人気No.1</div>':""}
+          <div class="billing-plan-badge"><i class="fas ${s.code==="ge365x_pro"?"fa-crown":s.code==="ge365x_standard"?"fa-bolt":"fa-star"}"></i>${w(s.badge)}</div>
+          <h3>${w(s.name)}${s.code===e.code?'<span class="billing-status">現在</span>':""}</h3>
+          <div class="billing-plan-price">${w(s.price)}<span>${w(s.unit)}</span></div>
+          <ul class="billing-features">${s.features.map(f=>`<li><i class="fas fa-circle-check"></i>${w(f)}</li>`).join("")}</ul>
+          ${__paymentLinkButton(s.link,"このプランを申し込む",s.accent)}
+        </section>
+      `).join("")}
     </div>
   </div>`}
+F.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a,oauth2_client_id:cid,oauth2_client_secret:csec,oauth2_user_token:oauth2Token}=await e.req.json();const newKey=s&&!s.includes("•")?s.trim():null,newSecret=a&&!a.includes("•")?a.trim():null,newClientId=cid&&!cid.includes("•")?cid.trim():null,newClientSecret=csec&&!csec.includes("•")?csec.trim():null,newOauth2=oauth2Token&&!oauth2Token.includes("•")&&oauth2Token.trim()?oauth2Token.trim():null;if(newClientId)await _t(e,"x_oauth2_client_id",newClientId,"X OAuth2 Client ID");if(newClientSecret)await _t(e,"x_oauth2_client_secret",await _e(newClientSecret,e.env.ENCRYPTION_KEY),"X OAuth2 Client Secret");if(newOauth2)await _t(e,"x_oauth2_user_token",await _e(newOauth2,e.env.ENCRYPTION_KEY),"X OAuth2 User Access Token (tweet.write)");if(!newKey&&!newSecret){if(newClientId||newClientSecret||newOauth2)return e.json({success:!0});const ex=await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first(),hasOauth=(await __xReadSetting(e.env,"x_oauth2_client_id")).trim();if(!ex&&!hasOauth)return e.json({success:!1,error:"API KeyまたはOAuth2 Client IDを入力してください"},400);return e.json({success:!0,unchanged:!0})}const encKey=newKey?await _e(newKey,e.env.ENCRYPTION_KEY):null,encSec=newSecret?await _e(newSecret,e.env.ENCRYPTION_KEY):null,exist=await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first();if(exist){if(encKey&&encSec)await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encKey,encSec,t.id).run();else if(encKey)await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encKey,t.id).run();else if(encSec)await e.env.DB.prepare("UPDATE x_api_settings SET api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encSec,t.id).run()}else{if(!encKey)return e.json({success:!1,error:"初回保存時はAPI Keyを入力してください"},400);await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,encKey,encSec||"").run()}return e.json({success:!0})});
+F.get("/api/admin/x/oauth2/start",m,async e=>{try{const clientId=(await __xReadSetting(e.env,"x_oauth2_client_id")).trim();if(!clientId)return e.text("OAuth2 Client ID未設定。API設定でClient IDを保存してください。",400);const origin=new URL(e.req.url).origin,redirectUri=origin+"/api/admin/x/oauth2/callback";const state=St(Ct(24)),verifier=St(Ct(48));const digest=new Uint8Array(await crypto.subtle.digest("SHA-256",ie.encode(verifier)));const challenge=St(digest);const scope="tweet.read tweet.write users.read offline.access";const u=new URL("https://x.com/i/oauth2/authorize");u.searchParams.set("response_type","code");u.searchParams.set("client_id",clientId);u.searchParams.set("redirect_uri",redirectUri);u.searchParams.set("scope",scope);u.searchParams.set("state",state);u.searchParams.set("code_challenge",challenge);u.searchParams.set("code_challenge_method","S256");e.header("Set-Cookie",Ls("x_oauth2_state",state,{maxAge:600,sameSite:"Lax"}),{append:true});e.header("Set-Cookie",Ls("x_oauth2_verifier",verifier,{maxAge:600,sameSite:"Lax"}),{append:true});return e.redirect(u.toString())}catch(err){return e.text((err&&err.message)||String(err),500)}});
 function __renderBuzz(e){if(!e.buzzResearch)return`
   <div class="space-y-4">
     <div>
@@ -3440,7 +3460,7 @@ function __renderBuzz(e){if(!e.buzzResearch)return`
   async function saveBuzzDraft(){var body=document.getElementById('buzz-draft').value.trim();if(!body){buzzMsg('保存する投稿案がありません',false);return}var r=await fetch('/api/admin/drafts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:'バズリサーチ投稿案',body:body,post_mode:'body'})});var j=await r.json();if(j.success){buzzMsg('下書きへ保存しました',true)}else buzzMsg(j.error||'下書き保存に失敗しました',false)}
   loadBuzzResults();
   <\/script>`}
-H.get("/dashboard/billing",m,async e=>K(e,"billing",async({user:t})=>__renderBilling(await __geUserPlan(e.env,t))));
+H.get("/dashboard/billing",m,async e=>K(e,"billing",async({user:t})=>__renderBilling(await __geUserPlan(e.env,t),await __gePaymentLinks(e.env))));
 H.get("/dashboard/buzz",m,async e=>K(e,"buzz",async({user:t})=>__renderBuzz(await __geUserPlan(e.env,t))));
 async function __ensureBuzzTable(e){await e.DB.prepare(`CREATE TABLE IF NOT EXISTS buzz_research_results (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -4053,25 +4073,36 @@ async function loadAudit() {
 async function loadSettings() {
   const r = await fetch('/api/admin/settings');
   const j = await r.json();
-  // トライアル日数設定のみ表示（管理画面では他の設定項目は表示しない）
-  const allowedKeys = ['trial_days'];
+  const defaults = {
+    trial_days: { value: '14', label: 'トライアル日数', desc: '新規登録時に付与するトライアル日数', type: 'number', suffix: '日' },
+    payment_setup_url: { value: '', label: '導入費 決済リンク', desc: 'STEP 1 の「決済ページへ」に使用するURL', type: 'url', suffix: '' },
+    payment_lite_url: { value: '', label: 'ライトプラン 決済リンク', desc: '月額ライトプランの申込ボタンに使用するURL', type: 'url', suffix: '' },
+    payment_standard_url: { value: '', label: 'スタンダードプラン 決済リンク', desc: '月額スタンダードプランの申込ボタンに使用するURL', type: 'url', suffix: '' },
+    payment_pro_url: { value: '', label: 'プロプラン 決済リンク', desc: '月額プロプランの申込ボタンに使用するURL', type: 'url', suffix: '' },
+  };
+  const allowedKeys = Object.keys(defaults);
   const filtered = (j.settings || []).filter(s => allowedKeys.includes(s.key));
-  // trial_days がレスポンスに無い場合はデフォルト14日として追加
-  if (!filtered.find(s => s.key === 'trial_days')) {
-    filtered.push({ key: 'trial_days', value: '14', description: '新規登録時に付与するトライアル日数' });
+  for (const key of allowedKeys) {
+    if (!filtered.find(s => s.key === key)) {
+      filtered.push({ key, value: defaults[key].value, description: defaults[key].desc });
+    }
   }
+  filtered.sort((a,b) => allowedKeys.indexOf(a.key) - allowedKeys.indexOf(b.key));
   const form = document.getElementById('settings-form');
-  form.innerHTML = filtered.map(s => \`
+  form.innerHTML = filtered.map(s => {
+    const meta = defaults[s.key] || { label: s.key, desc: s.description || '', type: 'text', suffix: '' };
+    const isUrl = meta.type === 'url';
+    return \`
     <div class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm" style="border:1px solid #E5E7EB">
       <div class="flex-1">
-        <div class="font-bold text-lg" style="color:#1F2937">\${s.key === 'trial_days' ? 'トライアル日数' : s.key}</div>
-        <div class="text-sm" style="color:#6B7280">\${s.description || '新規登録時に付与するトライアル日数'}</div>
+        <div class="font-bold text-lg" style="color:#1F2937">\${meta.label}</div>
+        <div class="text-sm" style="color:#6B7280">\${meta.desc || s.description || ''}</div>
       </div>
-      <input type="number" min="0" id="setting-\${s.key}" class="input-field" style="width:8rem;font-size:1rem" value="\${s.value || '14'}">
-      <span style="color:#6B7280">日</span>
+      <input type="\${meta.type}" \${meta.type === 'number' ? 'min="0"' : ''} id="setting-\${s.key}" class="input-field" style="\${isUrl?'width:min(34rem,48vw)':'width:8rem'};font-size:1rem" value="\${s.value || meta.value || ''}" placeholder="\${isUrl?'https://...':''}">
+      <span style="color:#6B7280">\${meta.suffix || ''}</span>
       <button onclick="saveSetting('\${s.key}')" class="btn-primary" style="padding:.5rem 1.25rem;background:#2563EB;color:#fff;border-radius:.4rem;border:none;cursor:pointer;font-weight:600"><i class="fas fa-save"></i> 保存</button>
     </div>
-  \`).join('');
+  \`}).join('');
 }
 async function saveSetting(key) {
   const value = document.getElementById('setting-' + key).value;
