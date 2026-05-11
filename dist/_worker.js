@@ -3171,6 +3171,7 @@ function dlExport(key) {
       <div style="font-size:.78rem;color:var(--ink-muted);margin-bottom:.35rem">Developer Portal に登録するCallback URL</div>
       <code id="x-oauth-callback" style="display:block;font-size:.78rem;word-break:break-all;color:#111827;background:#fff;border:1px solid var(--border);padding:.45rem;border-radius:.35rem"></code>
       <button type="button" class="btn btn-subtle btn-sm" style="margin-top:.5rem" onclick="startXOAuth2()"><i class="fa-brands fa-x-twitter"></i> X OAuth2認証を開始</button>
+      <div style="font-size:.75rem;color:var(--ink-muted);margin-top:.45rem;line-height:1.6">複数Xアカウントを使う場合は、先に画面上部の「現在のアカウント」を切り替えてから認証してください。X側で別アカウントにログイン中の場合は、Xから一度ログアウトして対象アカウントでログインし直してください。</div>
     </div>
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="saveXApi()"><i class="fas fa-save"></i>保存</button>
@@ -3344,22 +3345,22 @@ async function __geUserPlan(e,t){let s=null;try{s=await e.DB.prepare(`SELECT s.p
 function __geLimitText(e){return e===0?"無制限":`${e}アカウント`}
 async function __gePaymentLinks(e){const keys=["payment_setup_url","payment_lite_url","payment_standard_url","payment_pro_url"];const out={};try{const{results:t}=await e.DB.prepare(`SELECT key, value FROM system_settings WHERE key IN (${keys.map(()=>"?").join(",")})`).bind(...keys).all();for(const s of t||[])out[s.key]=s.value||""}catch{}return out}
 function __paymentLinkButton(e,t,s=""){const url=String(e||"").trim();if(url)return`<a class="billing-btn ${s}" href="${w(url)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i>${w(t)}</a>`;return`<button class="billing-btn ${s}" type="button" onclick="alert('決済リンクは管理画面のシステム設定で登録してください')"><i class="fas fa-arrow-up-right-from-square"></i>${w(t)}</button>`}
-function __renderBilling(e,links={}){const remainMs=e.status==="trial"&&e.current_period_end?Date.parse(String(e.current_period_end).replace(" ","T")+"+09:00")-Date.now():NaN,remain=Number.isFinite(remainMs)?Math.max(0,Math.ceil(remainMs/864e5)):0,currentLabel=e.status==="trial"?"無料トライアル":e.label;const t=[{code:"ge365x_lite",badge:"シンプルプラン",name:"ライトプラン",price:"¥1,980",unit:"/月",link:links.payment_lite_url,accent:"purple",features:["予約投稿・スケジュール","AI投稿生成（月30回）","3アカウント連携","メールサポート"]},{code:"ge365x_standard",badge:"プロプラン",popular:!0,name:"スタンダードプラン",price:"¥3,980",unit:"/月",link:links.payment_standard_url,accent:"blue",features:["シンプルの全機能","AI投稿生成（無制限）","10アカウント連携","バズリサーチ","優先サポート"]},{code:"ge365x_pro",badge:"アドバンスプラン",name:"プロプラン",price:"¥9,980",unit:"/月",link:links.payment_pro_url,accent:"cyan",features:["プロの全機能","無制限アカウント連携","バズリサーチ","自動DM","専任サポート"]}];return`
+function __renderBilling(e,links={}){const remainMs=e.status==="trial"&&e.current_period_end?Date.parse(String(e.current_period_end).replace(" ","T")+"+09:00")-Date.now():NaN,remain=Number.isFinite(remainMs)?Math.max(0,Math.ceil(remainMs/864e5)):0,currentLabel=e.status==="trial"?"無料トライアル":e.label;const t=[{code:"ge365x_lite",badge:"ライトプラン",name:"ライトプラン",price:"¥3,980",unit:"/月",link:links.payment_lite_url,accent:"purple",features:["予約投稿・スケジュール","AI投稿生成（無制限）","3アカウント連携","メールサポート"]},{code:"ge365x_standard",badge:"人気プラン",popular:!0,name:"スタンダードプラン",price:"¥6,980",unit:"/月",link:links.payment_standard_url,accent:"blue",features:["AI投稿生成（無制限）","10アカウント連携","バズリサーチ","優先サポート"]},{code:"ge365x_pro",badge:"プロプラン",name:"プロプラン",price:"¥9,980",unit:"/月",link:links.payment_pro_url,accent:"cyan",features:["無制限アカウント連携","バズリサーチ","専任サポート"]}];return`
   <style>
-    .billing-shell{background:#050812;color:#F8FAFC;border-radius:16px;padding:2.25rem;max-width:1180px;margin:0 auto;box-shadow:0 20px 55px rgba(2,6,23,.22)}
-    .billing-shell *{box-sizing:border-box}.billing-muted{color:#9AA6B8}.billing-current{border:1px solid #182238;background:#07101E;border-radius:16px;padding:1.4rem 1.6rem;display:flex;align-items:center;gap:1.2rem}
-    .billing-icon{width:3rem;height:3rem;border-radius:999px;background:#1E1647;color:#A78BFA;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
-    .billing-status{display:inline-flex;align-items:center;gap:.5rem;background:#211B08;border:1px solid #A16207;color:#FACC15;border-radius:999px;font-size:.78rem;font-weight:700;padding:.15rem .55rem;margin-left:.5rem}
-    .billing-step-title{font-weight:800;font-size:1.05rem;margin:2.1rem 0 .9rem;display:flex;align-items:center;gap:.55rem}.billing-step-title.setup{color:#FCD34D}.billing-step-title.plan{color:#A78BFA}
-    .billing-setup{border:1px solid #854D0E;background:linear-gradient(135deg,rgba(65,45,6,.58),rgba(23,16,5,.92));border-radius:16px;padding:1.7rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
-    .billing-tags{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:1rem}.billing-tags span{border:1px solid #A16207;color:#EAB308;background:rgba(113,63,18,.25);border-radius:999px;font-size:.78rem;padding:.28rem .58rem}
-    .billing-price{text-align:right;min-width:10rem}.billing-price strong{display:block;font-size:2rem;line-height:1;color:#fff}.billing-price small{color:#9AA6B8}
+    .billing-shell{background:#FFFFFF;color:#111827;border-radius:16px;padding:2.25rem;max-width:1180px;margin:0 auto;box-shadow:0 12px 36px rgba(15,23,42,.10);border:1px solid #E5E7EB}
+    .billing-shell *{box-sizing:border-box}.billing-muted{color:#64748B}.billing-current{border:1px solid #E2E8F0;background:#F8FAFC;border-radius:16px;padding:1.4rem 1.6rem;display:flex;align-items:center;gap:1.2rem}
+    .billing-icon{width:3rem;height:3rem;border-radius:999px;background:#EEF2FF;color:#2563EB;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+    .billing-status{display:inline-flex;align-items:center;gap:.5rem;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E;border-radius:999px;font-size:.78rem;font-weight:700;padding:.15rem .55rem;margin-left:.5rem}
+    .billing-step-title{font-weight:800;font-size:1.05rem;margin:2.1rem 0 .9rem;display:flex;align-items:center;gap:.55rem}.billing-step-title.setup{color:#B45309}.billing-step-title.plan{color:#2563EB}
+    .billing-setup{border:1px solid #F59E0B;background:linear-gradient(135deg,#FFFBEB,#FFFFFF);border-radius:16px;padding:1.7rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
+    .billing-tags{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:1rem}.billing-tags span{border:1px solid #FBBF24;color:#92400E;background:#FEF3C7;border-radius:999px;font-size:.78rem;padding:.28rem .58rem}
+    .billing-price{text-align:right;min-width:10rem}.billing-price strong{display:block;font-size:2rem;line-height:1;color:#111827}.billing-price small{color:#64748B}
     .billing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.15rem}.billing-plan{position:relative;border-radius:16px;padding:1.55rem;border:1px solid rgba(148,163,184,.28);min-height:24rem;display:flex;flex-direction:column;overflow:visible}
-    .billing-plan.purple{background:linear-gradient(160deg,#2A0D43,#12071F);border-color:#7E22CE}.billing-plan.blue{background:linear-gradient(160deg,#2B1E62,#082233);border-color:#6477FF}.billing-plan.cyan{background:linear-gradient(160deg,#073949,#061E2A);border-color:#0891B2}
+    .billing-plan.purple{background:linear-gradient(160deg,#FAF5FF,#FFFFFF);border-color:#C084FC}.billing-plan.blue{background:linear-gradient(160deg,#EFF6FF,#FFFFFF);border-color:#60A5FA}.billing-plan.cyan{background:linear-gradient(160deg,#ECFEFF,#FFFFFF);border-color:#22D3EE}
     .billing-popular{position:absolute;top:-.85rem;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#8B5CF6,#06B6D4);color:#fff;border-radius:999px;padding:.25rem .75rem;font-size:.78rem;font-weight:800}
-    .billing-plan-badge{display:inline-flex;width:max-content;align-items:center;gap:.45rem;border-radius:999px;padding:.4rem .75rem;font-size:.82rem;font-weight:700;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}
-    .billing-plan h3{font-size:1.05rem;margin:.85rem 0 0}.billing-plan-price{font-size:2rem;font-weight:900;margin:1.3rem 0 .35rem}.billing-plan-price span{font-size:.9rem;font-weight:500;color:#B8C2D6}
-    .billing-features{list-style:none;padding:0;margin:1.2rem 0 1.4rem;display:grid;gap:.72rem;color:#C9D3E5}.billing-features li{display:flex;align-items:center;gap:.55rem}.billing-features i{color:#34D399}
+    .billing-plan-badge{display:inline-flex;width:max-content;align-items:center;gap:.45rem;border-radius:999px;padding:.4rem .75rem;font-size:.82rem;font-weight:700;background:#FFFFFF;border:1px solid #E5E7EB;color:#334155}
+    .billing-plan h3{font-size:1.05rem;margin:.85rem 0 0}.billing-plan-price{font-size:2rem;font-weight:900;margin:1.3rem 0 .35rem}.billing-plan-price span{font-size:.9rem;font-weight:500;color:#64748B}
+    .billing-features{list-style:none;padding:0;margin:1.2rem 0 1.4rem;display:grid;gap:.72rem;color:#334155}.billing-features li{display:flex;align-items:center;gap:.55rem}.billing-features i{color:#10B981}
     .billing-btn{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;min-height:2.7rem;border:0;border-radius:.55rem;color:#fff;text-decoration:none;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#A855F7,#06B6D4)}
     .billing-btn.setup{background:#F59E0B;color:#111827;width:auto;padding:0 1.2rem}.billing-btn.purple{background:#B010F4}.billing-btn.cyan{background:#0891B2}
     @media(max-width:900px){.billing-shell{padding:1.25rem}.billing-setup{display:block}.billing-price{text-align:left;margin-top:1.25rem}.billing-grid{grid-template-columns:1fr}.billing-btn.setup{width:100%}}
@@ -3402,7 +3403,13 @@ function __renderBilling(e,links={}){const remainMs=e.status==="trial"&&e.curren
     </div>
   </div>`}
 F.post("/api/admin/api-settings/x",m,async e=>{const t=e.get("user"),{api_key:s,api_secret:a,oauth2_client_id:cid,oauth2_client_secret:csec,oauth2_user_token:oauth2Token}=await e.req.json();const newKey=s&&!s.includes("•")?s.trim():null,newSecret=a&&!a.includes("•")?a.trim():null,newClientId=cid&&!cid.includes("•")?cid.trim():null,newClientSecret=csec&&!csec.includes("•")?csec.trim():null,newOauth2=oauth2Token&&!oauth2Token.includes("•")&&oauth2Token.trim()?oauth2Token.trim():null;if(newClientId)await _t(e,"x_oauth2_client_id",newClientId,"X OAuth2 Client ID");if(newClientSecret)await _t(e,"x_oauth2_client_secret",await _e(newClientSecret,e.env.ENCRYPTION_KEY),"X OAuth2 Client Secret");if(newOauth2)await _t(e,"x_oauth2_user_token",await _e(newOauth2,e.env.ENCRYPTION_KEY),"X OAuth2 User Access Token (tweet.write)");if(!newKey&&!newSecret){if(newClientId||newClientSecret||newOauth2)return e.json({success:!0});const ex=await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first(),hasOauth=(await __xReadSetting(e.env,"x_oauth2_client_id")).trim();if(!ex&&!hasOauth)return e.json({success:!1,error:"API KeyまたはOAuth2 Client IDを入力してください"},400);return e.json({success:!0,unchanged:!0})}const encKey=newKey?await _e(newKey,e.env.ENCRYPTION_KEY):null,encSec=newSecret?await _e(newSecret,e.env.ENCRYPTION_KEY):null,exist=await e.env.DB.prepare("SELECT id FROM x_api_settings WHERE user_id = ?").bind(t.id).first();if(exist){if(encKey&&encSec)await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encKey,encSec,t.id).run();else if(encKey)await e.env.DB.prepare("UPDATE x_api_settings SET api_key=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encKey,t.id).run();else if(encSec)await e.env.DB.prepare("UPDATE x_api_settings SET api_secret=?, updated_at=datetime('now','+9 hours') WHERE user_id=?").bind(encSec,t.id).run()}else{if(!encKey)return e.json({success:!1,error:"初回保存時はAPI Keyを入力してください"},400);await e.env.DB.prepare("INSERT INTO x_api_settings (user_id, api_key, api_secret) VALUES (?, ?, ?)").bind(t.id,encKey,encSec||"").run()}return e.json({success:!0})});
-F.get("/api/admin/x/oauth2/start",m,async e=>{try{const clientId=(await __xReadSetting(e.env,"x_oauth2_client_id")).trim();if(!clientId)return e.text("OAuth2 Client ID未設定。API設定でClient IDを保存してください。",400);const origin=new URL(e.req.url).origin,redirectUri=origin+"/api/admin/x/oauth2/callback";const state=St(Ct(24)),verifier=St(Ct(48));const digest=new Uint8Array(await crypto.subtle.digest("SHA-256",ie.encode(verifier)));const challenge=St(digest);const scope="tweet.read tweet.write users.read offline.access";const u=new URL("https://x.com/i/oauth2/authorize");u.searchParams.set("response_type","code");u.searchParams.set("client_id",clientId);u.searchParams.set("redirect_uri",redirectUri);u.searchParams.set("scope",scope);u.searchParams.set("state",state);u.searchParams.set("code_challenge",challenge);u.searchParams.set("code_challenge_method","S256");e.header("Set-Cookie",Ls("x_oauth2_state",state,{maxAge:600,sameSite:"Lax"}),{append:true});e.header("Set-Cookie",Ls("x_oauth2_verifier",verifier,{maxAge:600,sameSite:"Lax"}),{append:true});return e.redirect(u.toString())}catch(err){return e.text((err&&err.message)||String(err),500)}});
+F.get("/api/admin/x/oauth2/start",m,async e=>{try{const user=e.get("user"),clientId=(await __xReadSetting(e.env,"x_oauth2_client_id")).trim();if(!clientId)return e.text("OAuth2 Client ID未設定。API設定でClient IDを保存してください。",400);const acct=await __xOAuth2AccountForUser(e.env,user,e.req.query("account_id")||"");const origin=new URL(e.req.url).origin,redirectUri=origin+"/api/admin/x/oauth2/callback";const state=St(Ct(24)),verifier=St(Ct(48));const digest=new Uint8Array(await crypto.subtle.digest("SHA-256",ie.encode(verifier)));const challenge=St(digest);const scope="tweet.read tweet.write users.read offline.access";const u=new URL("https://x.com/i/oauth2/authorize");u.searchParams.set("response_type","code");u.searchParams.set("client_id",clientId);u.searchParams.set("redirect_uri",redirectUri);u.searchParams.set("scope",scope);u.searchParams.set("state",state);u.searchParams.set("code_challenge",challenge);u.searchParams.set("code_challenge_method","S256");e.header("Set-Cookie",Ls("x_oauth2_state",state,{maxAge:600,sameSite:"Lax"}),{append:true});e.header("Set-Cookie",Ls("x_oauth2_verifier",verifier,{maxAge:600,sameSite:"Lax"}),{append:true});e.header("Set-Cookie",Ls("x_oauth2_account_id",acct&&acct.id?String(acct.id):"",{maxAge:600,sameSite:"Lax"}),{append:true});return e.redirect(u.toString())}catch(err){return e.text((err&&err.message)||String(err),500)}});
+F.get("/api/admin/x/oauth2/callback",m,async e=>{try{const user=e.get("user"),qState=e.req.query("state")||"",code=e.req.query("code")||"",oauthErr=e.req.query("error")||"",cState=Ga(e.req.raw,"x_oauth2_state")||"",verifier=Ga(e.req.raw,"x_oauth2_verifier")||"",accountId=Ga(e.req.raw,"x_oauth2_account_id")||"";if(oauthErr)return e.text("X OAuth2認証エラー: "+oauthErr+"。X Developer PortalのCallback URL、OAuth2 Client ID、権限(tweet.read/tweet.write/users.read/offline.access)を確認してください。",400);if(!code)return e.text("X OAuth2認証コードがありません。",400);if(!qState||!cState||qState!==cState||!verifier)return e.text("X OAuth2 state検証に失敗しました。もう一度API設定から認証してください。",400);const clientId=(await __xReadSetting(e.env,"x_oauth2_client_id")).trim();const secEnc=await __xReadSetting(e.env,"x_oauth2_client_secret");let clientSecret="";try{clientSecret=secEnc?await At(secEnc,e.env.ENCRYPTION_KEY):""}catch{}const redirectUri=new URL(e.req.url).origin+"/api/admin/x/oauth2/callback";const body=new URLSearchParams({code,grant_type:"authorization_code",client_id:clientId,redirect_uri:redirectUri,code_verifier:verifier});const headers={"content-type":"application/x-www-form-urlencoded"};if(clientSecret)headers.authorization=__xBasicAuth(clientId,clientSecret);const r=await fetch("https://api.x.com/2/oauth2/token",{method:"POST",headers,body,signal:AbortSignal.timeout(3e4)});const raw=await r.text();let j={};try{j=JSON.parse(raw)}catch{}if(!r.ok||!j.access_token)return e.text("OAuth2 token取得失敗: "+r.status+" "+__xDetailFromRaw(raw),400);await __xPutSetting(e.env,"x_oauth2_user_token",await _e(j.access_token,e.env.ENCRYPTION_KEY),"X OAuth2 User Access Token (tweet.write)");if(j.refresh_token)await __xPutSetting(e.env,"x_oauth2_refresh_token",await _e(j.refresh_token,e.env.ENCRYPTION_KEY),"X OAuth2 Refresh Token");if(j.expires_in)await __xPutSetting(e.env,"x_oauth2_expires_at",String(Math.floor(Date.now()/1e3)+Number(j.expires_in)),"X OAuth2 Access Token expiry");let xUserId=null,xUsername=null;try{const meRes=await fetch("https://api.x.com/2/users/me",{headers:{authorization:"Bearer "+j.access_token},signal:AbortSignal.timeout(2e4)});const meRaw=await meRes.text();const me=JSON.parse(meRaw);xUserId=me&&me.data&&me.data.id?String(me.data.id):null;xUsername=me&&me.data&&me.data.username?String(me.data.username):null}catch{}await __ensureXAccountOAuth2Columns(e.env);let acct=await __xOAuth2AccountForUser(e.env,user,accountId);if(!acct&&(xUserId||xUsername)){try{acct=await e.env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND (x_user_id=? OR lower(x_username)=lower(?)) AND is_active=1 LIMIT 1").bind(user.id,xUserId||"",xUsername||"").first()}catch{}}if(acct&&acct.id){const exp=j.expires_in?Math.floor(Date.now()/1e3)+Number(j.expires_in):null;await e.env.DB.prepare(`UPDATE x_accounts
+       SET oauth2_access_token=?, oauth2_refresh_token=COALESCE(?, oauth2_refresh_token),
+           oauth2_expires_at=?, oauth2_linked_at=datetime('now','+9 hours'),
+           x_user_id=COALESCE(?, x_user_id), x_username=COALESCE(?, x_username),
+           updated_at=datetime('now','+9 hours')
+     WHERE id=? AND user_id=?`).bind(await _e(j.access_token,e.env.ENCRYPTION_KEY),j.refresh_token?await _e(j.refresh_token,e.env.ENCRYPTION_KEY):null,exp,xUserId,xUsername,acct.id,user.id).run()}e.header("Set-Cookie",Ls("x_oauth2_state","",{maxAge:0,sameSite:"Lax"}),{append:true});e.header("Set-Cookie",Ls("x_oauth2_verifier","",{maxAge:0,sameSite:"Lax"}),{append:true});e.header("Set-Cookie",Ls("x_oauth2_account_id","",{maxAge:0,sameSite:"Lax"}),{append:true});return e.redirect("/dashboard/api?x_oauth2=ok")}catch(err){return e.text((err&&err.message)||String(err),500)}});
 function __renderBuzz(e){if(!e.buzzResearch)return`
   <div class="space-y-4">
     <div>
@@ -4386,6 +4393,61 @@ async function __xStoredOAuth2AccessToken(env){
   if(exp&&Math.floor(Date.now()/1e3)>exp-120)return await __xRefreshOAuth2Token(env);
   try{return(await At(enc,env.ENCRYPTION_KEY)).trim()}catch{return""}
 }
+async function __ensureXAccountOAuth2Columns(env){
+  const cols=[
+    "oauth2_access_token TEXT",
+    "oauth2_refresh_token TEXT",
+    "oauth2_expires_at INTEGER",
+    "oauth2_linked_at TEXT"
+  ];
+  for(const col of cols){
+    try{await env.DB.prepare(`ALTER TABLE x_accounts ADD COLUMN ${col}`).run()}catch{}
+  }
+}
+async function __xOAuth2AccountForUser(env,user,accountId){
+  await __ensureXAccountOAuth2Columns(env);
+  const uid=user&&user.id;
+  if(!uid)return null;
+  const id=parseInt(accountId||"0",10);
+  if(id){
+    try{return await env.DB.prepare("SELECT * FROM x_accounts WHERE id=? AND user_id=? AND is_active=1 LIMIT 1").bind(id,uid).first()}catch{}
+  }
+  try{
+    const current=await env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_current=1 AND is_active=1 ORDER BY id DESC LIMIT 1").bind(uid).first();
+    if(current)return current;
+  }catch{}
+  try{return await env.DB.prepare("SELECT * FROM x_accounts WHERE user_id=? AND is_active=1 ORDER BY id DESC LIMIT 1").bind(uid).first()}catch{}
+  return null;
+}
+async function __xRefreshOAuth2TokenForAccount(env,account){
+  if(!(account&&account.id&&account.oauth2_refresh_token))return"";
+  const clientId=(await __xReadSetting(env,"x_oauth2_client_id")).trim();
+  const secEnc=await __xReadSetting(env,"x_oauth2_client_secret");
+  if(!clientId)return"";
+  let clientSecret="",refreshToken="";
+  try{clientSecret=secEnc?await At(secEnc,env.ENCRYPTION_KEY):""}catch{}
+  try{refreshToken=await At(account.oauth2_refresh_token,env.ENCRYPTION_KEY)}catch{return""}
+  if(!refreshToken)return"";
+  const body=new URLSearchParams({refresh_token:refreshToken,grant_type:"refresh_token",client_id:clientId});
+  const headers={"content-type":"application/x-www-form-urlencoded"};
+  if(clientSecret)headers.authorization=__xBasicAuth(clientId,clientSecret);
+  const r=await fetch("https://api.x.com/2/oauth2/token",{method:"POST",headers,body,signal:AbortSignal.timeout(3e4)});
+  const raw=await r.text();let j={};try{j=JSON.parse(raw)}catch{}
+  if(!r.ok||!j.access_token)return"";
+  const exp=j.expires_in?Math.floor(Date.now()/1e3)+Number(j.expires_in):0;
+  await __ensureXAccountOAuth2Columns(env);
+  await env.DB.prepare(`UPDATE x_accounts
+       SET oauth2_access_token=?, oauth2_refresh_token=COALESCE(?, oauth2_refresh_token),
+           oauth2_expires_at=?, oauth2_linked_at=datetime('now','+9 hours'), updated_at=datetime('now','+9 hours')
+     WHERE id=?`).bind(await _e(j.access_token,env.ENCRYPTION_KEY),j.refresh_token?await _e(j.refresh_token,env.ENCRYPTION_KEY):null,exp||null,account.id).run();
+  return j.access_token;
+}
+async function __xStoredOAuth2AccessTokenForAccount(env,account){
+  if(!(account&&account.oauth2_access_token))return"";
+  const exp=parseInt(account.oauth2_expires_at||"0",10);
+  if(exp&&Math.floor(Date.now()/1e3)>exp-120)return await __xRefreshOAuth2TokenForAccount(env,account);
+  try{return(await At(account.oauth2_access_token,env.ENCRYPTION_KEY)).trim()}catch{return""}
+}
 async function __resolveXApiPair(env,account,override){
   const hasOverride=!!(override&&((override.apiKey||"").trim()||(override.apiSecret||"").trim()));
   let apiKey=hasOverride?((override.apiKey||"").trim()):"";
@@ -4417,7 +4479,7 @@ Ft=async function(env,account,override){
   try{accessTokenSecret=await At(account.access_token_secret,env.ENCRYPTION_KEY)}catch{throw new $("Access Token Secret の復号に失敗",0,"decrypt_failed")}
   if(!accessToken.trim())throw new $("Access Token が空",0,"decrypt_failed");
   if(!accessTokenSecret.trim())throw new $("Access Token Secret が空",0,"decrypt_failed");
-  const oauth2AccessToken=await __xStoredOAuth2AccessToken(env);return{consumerKey:pair.apiKey,consumerSecret:pair.apiSecret,accessToken,accessTokenSecret,oauth2AccessToken};
+  const accountOAuth2=await __xStoredOAuth2AccessTokenForAccount(env,account),oauth2AccessToken=account&&account.id?accountOAuth2:(accountOAuth2||await __xStoredOAuth2AccessToken(env));return{consumerKey:pair.apiKey,consumerSecret:pair.apiSecret,accessToken,accessTokenSecret,oauth2AccessToken};
 };
 async function __resolvePostingAccount(env,userId,storedAccountId){
   let current=null,stored=null;
