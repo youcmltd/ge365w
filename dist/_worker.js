@@ -151,6 +151,7 @@ aside.w-56{
 .nav-item:hover{background:var(--sidebar-hover);color:#fff}
 .nav-item.active{background:var(--sidebar-active);color:#fff;box-shadow:inset 3px 0 0 #60A5FA}
 .nav-item i{width:1.2rem;text-align:center;font-size:1rem;opacity:.9;flex-shrink:0}
+.nav-item.nav-bottom{margin-top:auto;border-top:1px solid #2A3B52;padding-top:.8rem}
 
 /* ===== ラベル ===== */
 .field-label{display:flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;color:var(--ink);margin-bottom:.4rem}
@@ -753,7 +754,7 @@ async function doLicenseAuto(e){
 
   <nav class="flex-1 py-3 overflow-y-auto">
     ${Qa.map(s=>`
-      <a href="${s.path}" class="nav-item ${s.key===e?"active":""}">
+      <a href="${s.path}" class="nav-item ${s.key===e?"active":""} ${s.bottom?"nav-bottom":""}">
         <i class="fas ${s.icon}"></i>
         <span>${s.label}</span>
       </a>
@@ -2931,7 +2932,17 @@ function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
   </div>
 </div>
 <script>
-function openAddAcct() { document.getElementById('add-acct-modal').style.display='flex'; }
+  async function openAddAcct() {
+    try {
+      const r = await fetch('/api/admin/accounts');
+      const j = await r.json();
+      if (j.account_limit > 0 && j.account_count >= j.account_limit) {
+        toast((j.plan?.label || '現在のプラン') + 'はXアカウント' + j.account_limit + '件までです','err');
+        return;
+      }
+    } catch (err) {}
+    document.getElementById('add-acct-modal').style.display='flex';
+  }
 function closeAddAcct() { document.getElementById('add-acct-modal').style.display='none'; }
 async function openEditAcct(id) {
   const old = document.getElementById('edit-acct-modal');
@@ -3293,7 +3304,7 @@ async function testApi(kind){
   } catch(e){setStatus(statusId,'✗ ネットワークエラー',false);}
 }
 window.testApi = testApi;
-<\/script>`}const H=new A;async function gn(e,t){const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, is_current
+<\/script>`}if(!Qa.some(e=>e.key==="buzz"))Qa.splice(Qa.findIndex(e=>e.key==="accounts"),0,{key:"buzz",label:"バズリサーチ",icon:"fa-chart-line",path:"/dashboard/buzz"});if(!Qa.some(e=>e.key==="billing"))Qa.push({key:"billing",label:"プラン・お支払い",icon:"fa-credit-card",path:"/dashboard/billing",bottom:!0});const H=new A;async function gn(e,t){const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, is_current
        FROM x_accounts WHERE user_id = ? AND is_active = 1 ORDER BY id`).bind(t.id).all(),a=(s||[]).map(i=>({id:i.id,account_name:i.account_name,x_username:i.x_username})),n=(s||[]).find(i=>i.is_current===1);return{accounts:a,currentAccountId:(n==null?void 0:n.id)??null}}H.get("/",e=>e.redirect("/login"));async function K(e,t,s){const a=e.get("user"),{accounts:n,currentAccountId:i}=await gn(e,a),r=n.length>0&&i!==null,o=await Promise.resolve(s({user:a,hasAccount:r,accounts:n,currentAccountId:i})),d=an({active:t,user:a,accounts:n,currentAccountId:i,pageBody:o});return e.html(It("GE365x",d))}H.get("/dashboard",m,async e=>K(e,"dashboard",async({user:t,hasAccount:s})=>{const a=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first(),n=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND DATE(created_at)=DATE('now','+9 hours') AND status='posted'").bind(t.id).first(),i=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_queue WHERE user_id=? AND status IN ('pending','approved','scheduled')").bind(t.id).first(),r=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM post_logs WHERE user_id=? AND status='failed' AND DATE(created_at)=DATE('now','+9 hours')").bind(t.id).first(),{results:o}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status, is_active
          FROM x_accounts WHERE user_id = ? ORDER BY id`).bind(t.id).all(),{results:d}=await e.env.DB.prepare(`SELECT pl.content, pl.status, pl.posted_at, xa.x_username
          FROM post_logs pl LEFT JOIN x_accounts xa ON xa.id = pl.account_id
@@ -3315,6 +3326,206 @@ window.testApi = testApi;
         ORDER BY COALESCE(aj.publish_at, aj.generate_at, aj.created_at) DESC LIMIT 50`).bind(t.id).all();return _n({hasAccount:s,noAccountAlert:he,accounts:a,jobs:n||[]})}));H.get("/dashboard/accounts",m,async e=>K(e,"accounts",async({user:t})=>{const{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_username, account_health_score, health_status,
               daily_post_count, daily_post_limit, last_posted_at, is_active
          FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all();return hn({accounts:s||[]})}));H.get("/dashboard/api",m,async e=>K(e,"api",async({user:t})=>{const s=await e.env.DB.prepare("SELECT * FROM x_api_settings WHERE user_id = ? ORDER BY id DESC LIMIT 1").bind(t.id).first();let xKeyDec="",xSecDec="";if(s){try{xKeyDec=s.api_key?await lt(s.api_key,e.env.ENCRYPTION_KEY):""}catch{}try{xSecDec=s.api_secret?await lt(s.api_secret,e.env.ENCRYPTION_KEY):""}catch{}}const{results:ss}=await e.env.DB.prepare("SELECT key, value FROM system_settings WHERE key IN ('openai_api_key','openai_model','gemini_api_key','gemini_model','telegram_bot_token','telegram_chat_id','x_oauth2_user_token','x_oauth2_client_id','x_oauth2_client_secret')").all();const sm={};for(const r of(ss||[]))sm[r.key]=r.value;return bn({settings:{api_key:xKeyDec,api_secret:xSecDec,api_key_set:!!xKeyDec,api_secret_set:!!xSecDec,openai_api_key:sm.openai_api_key||"",openai_model:sm.openai_model||"",gemini_api_key:sm.gemini_api_key||"",gemini_model:sm.gemini_model||"",telegram_bot_token:sm.telegram_bot_token||"",telegram_chat_id:sm.telegram_chat_id||"",oauth2_user_token_set:!!sm.x_oauth2_user_token,oauth2_client_id:sm.x_oauth2_client_id||"",oauth2_client_secret_set:!!sm.x_oauth2_client_secret}})}));H.get("/dashboard/export",m,async e=>K(e,"export",({user:t})=>fn({isAdmin:t.is_admin})));const F=new A;
+function __gePlanRule(e){const t=String(e||"").toLowerCase();if(t.includes("pro"))return{code:"ge365x_pro",label:"プロプラン",accountLimit:0,buzzResearch:!0};if(t.includes("standard")||t.includes("スタンダード"))return{code:"ge365x_standard",label:"スタンダードプラン",accountLimit:10,buzzResearch:!0};return{code:"ge365x_lite",label:"ライトプラン",accountLimit:3,buzzResearch:!1}}
+async function __geUserPlan(e,t){let s=null;try{s=await e.DB.prepare(`SELECT s.plan_code, s.status, s.current_period_end, p.name AS plan_name
+         FROM user_subscriptions s
+         LEFT JOIN subscription_plans p ON p.code = s.plan_code
+        WHERE s.user_id = ?
+        ORDER BY CASE WHEN s.status='active' THEN 0 WHEN s.status='trial' THEN 1 ELSE 2 END, s.updated_at DESC
+        LIMIT 1`).bind(t.id).first()}catch{}const a=__gePlanRule((s&&s.plan_code)||t.plan_code);return{...a,raw_code:(s&&s.plan_code)||t.plan_code||a.code,status:(s&&s.status)||t.subscription_status||null,current_period_end:(s&&s.current_period_end)||t.current_period_end||null}}
+function __geLimitText(e){return e===0?"無制限":`${e}アカウント`}
+function __renderBilling(e){const t=[{code:"ge365x_lite",name:"ライトプラン",price:"¥1,980/月",accounts:"3アカウント",buzz:"利用不可",desc:"少数アカウントで始める基本プラン"},{code:"ge365x_standard",name:"スタンダードプラン",price:"¥3,980/月",accounts:"10アカウント",buzz:"利用可能",desc:"複数アカウント運用とバズリサーチ対応"},{code:"ge365x_pro",name:"プロプラン",price:"¥9,980/月",accounts:"無制限",buzz:"利用可能",desc:"アカウント数制限なしの上位プラン"}];return`
+  <div class="space-y-5">
+    <div>
+      <h1 class="section-title"><i class="fas fa-credit-card"></i>プラン・お支払い</h1>
+      <p class="section-desc">現在のプランと利用できる機能を確認できます。決済リンクは後で設定します。</p>
+    </div>
+    <div class="card">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <div class="text-xs text-ink-muted">現在のプラン</div>
+          <div class="text-2xl font-bold">${w(e.label)}</div>
+          <div class="text-sm text-ink-muted mt-1">Xアカウント上限: ${w(__geLimitText(e.accountLimit))} / バズリサーチ: ${e.buzzResearch?"利用可能":"ライトプランでは利用不可"}</div>
+        </div>
+        <span class="pill ${e.buzzResearch?"pill-ok":"pill-warn"}">${w(e.raw_code||e.code)}</span>
+      </div>
+    </div>
+    <div class="card" style="border-color:#FCD34D;background:#FFFBEB">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h3 class="font-bold text-ink">STEP 1 — ツール導入費（初回一括・必須）</h3>
+          <p class="section-desc mt-1">初回設定サポート、アカウント連携、使い方レクチャーを含みます。</p>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold">¥29,800</div>
+          <button class="btn btn-primary mt-2" type="button" onclick="alert('決済リンクは準備中です')"><i class="fas fa-arrow-up-right-from-square"></i>決済ページへ</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 class="font-bold text-ink mb-3">STEP 2 — 月額プラン</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        ${t.map(s=>`
+          <div class="card ${s.code===e.code?"border-accent bg-accent-light":""}">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="font-bold">${w(s.name)}</h3>
+              ${s.code===e.code?'<span class="pill pill-blue">現在</span>':""}
+            </div>
+            <div class="text-2xl font-bold mt-3">${w(s.price)}</div>
+            <p class="text-sm text-ink-muted mt-2">${w(s.desc)}</p>
+            <div class="mt-4 space-y-2 text-sm">
+              <div><i class="fas fa-circle-check text-green-600"></i> Xアカウント: ${w(s.accounts)}</div>
+              <div><i class="fas ${s.buzz==="利用可能"?"fa-circle-check text-green-600":"fa-circle-xmark text-rose-600"}"></i> バズリサーチ: ${w(s.buzz)}</div>
+            </div>
+            <button class="btn btn-subtle w-full mt-4" type="button" onclick="alert('決済リンクは後で設定します')">このプランを申し込む</button>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  </div>`}
+function __renderBuzz(e){if(!e.buzzResearch)return`
+  <div class="space-y-4">
+    <div>
+      <h1 class="section-title"><i class="fas fa-chart-line"></i>バズリサーチ</h1>
+      <p class="section-desc">Xの直近投稿を検索し、反応数からランキング化します。</p>
+    </div>
+    <div class="card">
+      <div class="alert alert-warning">
+        <i class="fas fa-lock mt-0.5"></i>
+        <div>バズリサーチはスタンダードプラン、プロプランで利用できます。現在のプラン: ${w(e.label)}</div>
+      </div>
+      <a href="/dashboard/billing" class="btn btn-primary mt-3"><i class="fas fa-credit-card"></i>プランを確認</a>
+    </div>
+  </div>`;return`
+  <div class="space-y-4">
+    <div>
+      <h1 class="section-title"><i class="fas fa-chart-line"></i>バズリサーチ</h1>
+      <p class="section-desc">キーワードからX投稿を取得し、バズスコア順に分析します。</p>
+    </div>
+    <div class="card">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div><label class="field-label">検索キーワード</label><input id="buzz-keyword" class="inp" placeholder="例: 50代 FX"></div>
+        <div><label class="field-label">検索件数</label><input id="buzz-count" class="inp" type="number" min="10" max="100" value="20"></div>
+        <div><label class="field-label">最小いいね数</label><input id="buzz-min-like" class="inp" type="number" min="0" value="0"></div>
+        <div><label class="field-label">最小リポスト数</label><input id="buzz-min-rt" class="inp" type="number" min="0" value="0"></div>
+        <div class="md:col-span-2"><label class="field-label">除外ワード</label><input id="buzz-exclude" class="inp" placeholder="カンマ区切り"></div>
+      </div>
+      <div class="flex flex-wrap gap-4 mt-3 text-sm">
+        <label><input id="buzz-ja" type="checkbox" checked> 日本語投稿のみ</label>
+        <label><input id="buzz-image" type="checkbox"> 画像付き投稿のみ</label>
+        <label><input id="buzz-video" type="checkbox"> 動画付き投稿のみ</label>
+      </div>
+      <div class="mt-4 flex gap-2 flex-wrap">
+        <button class="btn btn-primary" type="button" onclick="runBuzzResearch()"><i class="fas fa-magnifying-glass-chart"></i>分析開始</button>
+        <button class="btn btn-subtle" type="button" onclick="loadBuzzResults()"><i class="fas fa-rotate"></i>保存結果を表示</button>
+      </div>
+      <div id="buzz-msg" class="text-sm mt-3 text-ink-muted"></div>
+    </div>
+    <div id="buzz-results" class="space-y-3"></div>
+    <div class="card">
+      <h3 class="font-bold mb-2"><i class="fas fa-pen-nib text-accent"></i>投稿案作成エリア</h3>
+      <textarea id="buzz-draft" class="inp" rows="6" placeholder="AI分析から作成した投稿案がここに表示されます"></textarea>
+      <button class="btn btn-primary mt-3" type="button" onclick="saveBuzzDraft()"><i class="fas fa-floppy-disk"></i>下書き保存</button>
+    </div>
+  </div>
+  <script>
+  function buzzEsc(s){return (s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function buzzMsg(s,ok){var el=document.getElementById('buzz-msg');el.textContent=s||'';el.style.color=ok?'#047857':'#B91C1C'}
+  function buzzPayload(){return{keyword:document.getElementById('buzz-keyword').value.trim(),count:Number(document.getElementById('buzz-count').value||20),min_like:Number(document.getElementById('buzz-min-like').value||0),min_retweet:Number(document.getElementById('buzz-min-rt').value||0),exclude_words:document.getElementById('buzz-exclude').value,japanese_only:document.getElementById('buzz-ja').checked,image_only:document.getElementById('buzz-image').checked,video_only:document.getElementById('buzz-video').checked}}
+  function buzzRender(rows){var root=document.getElementById('buzz-results');if(!rows||!rows.length){root.innerHTML='<div class="card text-sm text-ink-muted">結果がありません。</div>';return}root.innerHTML=rows.map(function(r,i){return '<div class="card"><div class="flex items-start justify-between gap-3"><div><div class="text-xs text-ink-muted">#'+(i+1)+' @'+buzzEsc(r.author_username||'-')+' / '+buzzEsc(r.tweet_created_at||r.created_at||'')+'</div><div class="font-semibold mt-1" style="white-space:pre-wrap">'+buzzEsc(r.tweet_text)+'</div><div class="text-xs text-ink-muted mt-2">いいね '+(r.like_count||0)+' / RT '+(r.retweet_count||0)+' / 返信 '+(r.reply_count||0)+' / 引用 '+(r.quote_count||0)+' / スコア '+(r.buzz_score||0)+'</div></div><div class="flex gap-2 flex-wrap justify-end"><a class="btn btn-subtle btn-sm" target="_blank" href="'+buzzEsc(r.tweet_url||'#')+'">投稿URL</a><button class="btn btn-primary btn-sm" onclick="analyzeBuzz('+r.id+')">AI分析</button><button class="btn btn-ghost btn-sm" onclick="makeBuzzDraft('+r.id+')">投稿案</button></div></div>'+(r.ai_summary?'<div class="alert alert-info mt-3" style="white-space:pre-wrap">'+buzzEsc(r.ai_summary)+'</div>':'')+'</div>'}).join('')}
+  async function runBuzzResearch(){var p=buzzPayload();if(!p.keyword){buzzMsg('検索キーワードを入力してください',false);return}buzzMsg('検索中です...',true);var r=await fetch('/api/admin/buzz/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(p)});var j=await r.json();if(!r.ok){buzzMsg(j.message||j.error||'検索に失敗しました',false);return}buzzMsg('取得しました: '+(j.results||[]).length+'件',true);buzzRender(j.results||[])}
+  async function loadBuzzResults(){var r=await fetch('/api/admin/buzz/results');var j=await r.json();buzzRender(j.results||[])}
+  async function analyzeBuzz(id){buzzMsg('AI分析中です...',true);var r=await fetch('/api/admin/buzz/'+id+'/analyze',{method:'POST'});var j=await r.json();if(!r.ok){buzzMsg(j.message||j.error||'AI分析に失敗しました',false);return}buzzMsg('AI分析を保存しました',true);loadBuzzResults()}
+  async function makeBuzzDraft(id){var r=await fetch('/api/admin/buzz/'+id+'/idea',{method:'POST'});var j=await r.json();if(!r.ok){buzzMsg(j.message||j.error||'投稿案作成に失敗しました',false);return}document.getElementById('buzz-draft').value=j.body||'';buzzMsg('投稿案を作成しました',true)}
+  async function saveBuzzDraft(){var body=document.getElementById('buzz-draft').value.trim();if(!body){buzzMsg('保存する投稿案がありません',false);return}var r=await fetch('/api/admin/drafts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:'バズリサーチ投稿案',body:body,post_mode:'body'})});var j=await r.json();if(j.success){buzzMsg('下書きへ保存しました',true)}else buzzMsg(j.error||'下書き保存に失敗しました',false)}
+  loadBuzzResults();
+  <\/script>`}
+H.get("/dashboard/billing",m,async e=>K(e,"billing",async({user:t})=>__renderBilling(await __geUserPlan(e.env,t))));
+H.get("/dashboard/buzz",m,async e=>K(e,"buzz",async({user:t})=>__renderBuzz(await __geUserPlan(e.env,t))));
+async function __ensureBuzzTable(e){await e.DB.prepare(`CREATE TABLE IF NOT EXISTS buzz_research_results (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  keyword TEXT NOT NULL,
+  tweet_id TEXT NOT NULL,
+  tweet_text TEXT,
+  author_id TEXT,
+  author_username TEXT,
+  author_name TEXT,
+  tweet_created_at TEXT,
+  like_count INTEGER DEFAULT 0,
+  retweet_count INTEGER DEFAULT 0,
+  reply_count INTEGER DEFAULT 0,
+  quote_count INTEGER DEFAULT 0,
+  bookmark_count INTEGER DEFAULT 0,
+  impression_count INTEGER DEFAULT 0,
+  media_type TEXT,
+  tweet_url TEXT,
+  buzz_score INTEGER DEFAULT 0,
+  engagement_rate REAL DEFAULT 0,
+  ai_summary TEXT,
+  ai_structure TEXT,
+  ai_template TEXT,
+  created_at_local TEXT DEFAULT (datetime('now','+9 hours')),
+  updated_at TEXT DEFAULT (datetime('now','+9 hours')),
+  UNIQUE(user_id, tweet_id)
+)`).run()}
+function __toInt(e){const t=parseInt(e,10);return Number.isFinite(t)?t:0}
+function __buzzScore(e){return __toInt(e.like_count)+__toInt(e.retweet_count)*3+__toInt(e.reply_count)*2+__toInt(e.quote_count)*3+__toInt(e.bookmark_count)*2}
+async function __getSetting(e,t){try{const s=await e.DB.prepare("SELECT value FROM system_settings WHERE key=? LIMIT 1").bind(t).first();return s&&s.value?s.value:null}catch{return null}}
+async function __buzzBearer(e){return e.X_BEARER_TOKEN||await __getSetting(e,"x_bearer_token")||await __getSetting(e,"x_api_bearer_token")||await __getSetting(e,"twitter_bearer_token")}
+async function __buzzOpenAiKey(e){return e.OPENAI_API_KEY||await __getSetting(e,"openai_api_key")}
+const __buzzApi=F;
+F.get("/api/admin/accounts",m,async e=>{const t=e.get("user"),p=await __geUserPlan(e.env,t),{results:s}=await e.env.DB.prepare(`SELECT id, account_name, x_user_id, x_username,
+            daily_post_count, daily_post_limit, last_posted_at,
+            account_health_score, health_status, is_active, is_current, created_at
+       FROM x_accounts WHERE user_id = ? ORDER BY id DESC`).bind(t.id).all(),count=(s||[]).length;return e.json({accounts:s||[],plan:p,account_limit:p.accountLimit,account_limit_label:__geLimitText(p.accountLimit),account_count:count})});
+F.post("/api/admin/accounts",m,async e=>{const t=e.get("user"),s=await e.req.json();if(!s.account_name)return e.json({error:"account_name required"},400);if(!((s.access_token||"").trim())||!((s.access_token_secret||"").trim()))return e.json({error:"access_token and access_token_secret required"},400);const plan=await __geUserPlan(e.env,t),limit=plan.accountLimit;if(limit>0){const cnt=await e.env.DB.prepare("SELECT COUNT(*) AS n FROM x_accounts WHERE user_id=?").bind(t.id).first();if(((cnt==null?void 0:cnt.n)??0)>=limit)return e.json({success:false,error:"x_account_limit",message:`${plan.label}はXアカウント${limit}件までです。不要なアカウントを削除するか、上位プランへ変更してください。`},409)}const a=await _e(s.access_token.trim(),e.env.ENCRYPTION_KEY),n=await _e(s.access_token_secret.trim(),e.env.ENCRYPTION_KEY),i=await e.env.DB.prepare(`INSERT INTO x_accounts
+       (user_id, account_name, access_token, access_token_secret, daily_post_limit, is_active, is_current)
+     VALUES (?, ?, ?, ?, ?, 1, 1)`).bind(t.id,s.account_name,a,n,s.daily_post_limit??20).run();const newId=i.meta.last_row_id;await e.env.DB.prepare("UPDATE x_accounts SET is_current=0 WHERE user_id=? AND id<>?").bind(t.id,newId).run();return e.json({success:!0,id:newId,plan,account_limit:limit})});
+__buzzApi.get("/api/admin/buzz/results",m,async e=>{const t=e.get("user"),p=await __geUserPlan(e.env,t);if(!p.buzzResearch)return e.json({error:"plan_required",message:"バズリサーチはスタンダードプラン、プロプランで利用できます。"},403);await __ensureBuzzTable(e.env);const{results:s}=await e.env.DB.prepare("SELECT * FROM buzz_research_results WHERE user_id=? ORDER BY buzz_score DESC, id DESC LIMIT 100").bind(t.id).all();return e.json({results:s||[]})});
+__buzzApi.post("/api/admin/buzz/search",m,async e=>{const t=e.get("user"),p=await __geUserPlan(e.env,t);if(!p.buzzResearch)return e.json({error:"plan_required",message:"バズリサーチはスタンダードプラン、プロプランで利用できます。"},403);const b=await e.req.json().catch(()=>({})),kw=String(b.keyword||"").trim();if(!kw)return e.json({error:"keyword_required",message:"検索キーワードを入力してください。"},400);const token=await __buzzBearer(e.env);if(!token)return e.json({error:"x_bearer_token_missing",message:"X API v2検索用のBearer Tokenが未設定です。Cloudflare環境変数 X_BEARER_TOKEN または system_settings の x_bearer_token を設定してください。"},400);await __ensureBuzzTable(e.env);let q=kw;if(b.japanese_only!==!1)q+=" lang:ja";if(b.image_only)q+=" has:images";if(b.video_only)q+=" has:videos";String(b.exclude_words||"").split(/[,\n]/).map(s=>s.trim()).filter(Boolean).slice(0,10).forEach(s=>{q+=" -"+s});const params=new URLSearchParams;params.set("query",q.slice(0,480));params.set("max_results",String(Math.max(10,Math.min(100,__toInt(b.count)||20))));params.set("tweet.fields","created_at,public_metrics,author_id,entities,attachments");params.set("expansions","author_id,attachments.media_keys");params.set("media.fields","type,url,preview_image_url");params.set("user.fields","username,name,public_metrics,verified");const rr=await fetch("https://api.twitter.com/2/tweets/search/recent?"+params.toString(),{headers:{authorization:"Bearer "+token}});const raw=await rr.text();if(!rr.ok)return e.json({error:"x_api_error",message:"X API検索に失敗しました: "+rr.status+" "+raw.slice(0,240)},rr.status);let data={};try{data=JSON.parse(raw)}catch{return e.json({error:"invalid_x_response",message:"X APIの応答を解析できませんでした。"},502)}const users=new Map((data.includes&&data.includes.users||[]).map(u=>[u.id,u])),media=new Map((data.includes&&data.includes.media||[]).map(m=>[m.media_key,m])),minLike=__toInt(b.min_like),minRt=__toInt(b.min_retweet),rows=[];for(const tw of data.data||[]){const pm=tw.public_metrics||{},like=__toInt(pm.like_count),rt=__toInt(pm.retweet_count);if(like<minLike||rt<minRt)continue;const ms=(tw.attachments&&tw.attachments.media_keys||[]).map(k=>media.get(k)).filter(Boolean),mt=ms.map(x=>x.type).filter(Boolean).join(",");if(b.image_only&&!mt.includes("photo"))continue;if(b.video_only&&!/video|animated_gif/.test(mt))continue;const u=users.get(tw.author_id)||{},row={keyword:kw,tweet_id:tw.id,tweet_text:tw.text||"",author_id:tw.author_id||"",author_username:u.username||"",author_name:u.name||"",tweet_created_at:tw.created_at||"",like_count:like,retweet_count:rt,reply_count:__toInt(pm.reply_count),quote_count:__toInt(pm.quote_count),bookmark_count:__toInt(pm.bookmark_count),impression_count:__toInt(pm.impression_count),media_type:mt,tweet_url:`https://x.com/${u.username||tw.author_id}/status/${tw.id}`};row.buzz_score=__buzzScore(row);row.engagement_rate=row.impression_count>0?(row.like_count+row.retweet_count+row.reply_count+row.quote_count+row.bookmark_count)/row.impression_count:0;await e.env.DB.prepare(`INSERT INTO buzz_research_results
+        (user_id, keyword, tweet_id, tweet_text, author_id, author_username, author_name, tweet_created_at,
+         like_count, retweet_count, reply_count, quote_count, bookmark_count, impression_count, media_type, tweet_url, buzz_score, engagement_rate, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now','+9 hours'))
+       ON CONFLICT(user_id, tweet_id) DO UPDATE SET
+         keyword=excluded.keyword, tweet_text=excluded.tweet_text, author_id=excluded.author_id,
+         author_username=excluded.author_username, author_name=excluded.author_name, tweet_created_at=excluded.tweet_created_at,
+         like_count=excluded.like_count, retweet_count=excluded.retweet_count, reply_count=excluded.reply_count,
+         quote_count=excluded.quote_count, bookmark_count=excluded.bookmark_count, impression_count=excluded.impression_count,
+         media_type=excluded.media_type, tweet_url=excluded.tweet_url, buzz_score=excluded.buzz_score,
+         engagement_rate=excluded.engagement_rate, updated_at=datetime('now','+9 hours')`).bind(t.id,row.keyword,row.tweet_id,row.tweet_text,row.author_id,row.author_username,row.author_name,row.tweet_created_at,row.like_count,row.retweet_count,row.reply_count,row.quote_count,row.bookmark_count,row.impression_count,row.media_type,row.tweet_url,row.buzz_score,row.engagement_rate).run();rows.push(row)}const{results:saved}=await e.env.DB.prepare("SELECT * FROM buzz_research_results WHERE user_id=? AND keyword=? ORDER BY buzz_score DESC, id DESC LIMIT 100").bind(t.id,kw).all();return e.json({results:saved||rows.sort((a,b)=>b.buzz_score-a.buzz_score)})});
+__buzzApi.post("/api/admin/buzz/:id/analyze",m,async e=>{const t=e.get("user"),p=await __geUserPlan(e.env,t);if(!p.buzzResearch)return e.json({error:"plan_required",message:"バズリサーチはスタンダードプラン、プロプランで利用できます。"},403);await __ensureBuzzTable(e.env);const id=parseInt(e.req.param("id"),10),row=await e.env.DB.prepare("SELECT * FROM buzz_research_results WHERE id=? AND user_id=?").bind(id,t.id).first();if(!row)return e.json({error:"not_found"},404);const key=await __buzzOpenAiKey(e.env);if(!key)return e.json({error:"openai_api_key_missing",message:"OpenAI APIキーが未設定です。API設定または環境変数 OPENAI_API_KEY を設定してください。"},400);const model=await __getSetting(e.env,"openai_model")||e.env.OPENAI_MODEL||"gpt-4o-mini",prompt=`あなたはXマーケティングの分析専門家です。
+以下の投稿を分析してください。
+
+目的:
+バズった理由を抽出し、同じ文章をコピーせず、構造だけを再利用できるテンプレートに変換すること。
+
+分析対象投稿:
+${row.tweet_text}
+
+数値情報:
+いいね数:${row.like_count}
+リポスト数:${row.retweet_count}
+返信数:${row.reply_count}
+引用数:${row.quote_count}
+ブックマーク数:${row.bookmark_count}
+
+出力形式:
+1. バズった理由
+2. 冒頭フック
+3. 読者の感情トリガー
+4. 文章構造
+5. 再利用できる型
+6. 自分の商品・サービスに置き換える場合のテンプレート
+7. 注意点
+
+重要:
+元投稿の本文をコピーしないこと。固有表現をそのまま使わないこと。文章構造だけを抽出すること。`;const rr=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{authorization:"Bearer "+key,"content-type":"application/json"},body:JSON.stringify({model,messages:[{role:"user",content:prompt}],temperature:.4})});const js=await rr.json().catch(()=>({}));if(!rr.ok)return e.json({error:"openai_api_error",message:js.error&&js.error.message||"OpenAI APIエラー"},500);const text=((js.choices||[])[0]&&js.choices[0].message&&js.choices[0].message.content)||"";await e.env.DB.prepare("UPDATE buzz_research_results SET ai_summary=?, ai_structure=?, ai_template=?, updated_at=datetime('now','+9 hours') WHERE id=? AND user_id=?").bind(text,text,text,id,t.id).run();return e.json({success:!0,analysis:text})});
+__buzzApi.post("/api/admin/buzz/:id/idea",m,async e=>{const t=e.get("user"),p=await __geUserPlan(e.env,t);if(!p.buzzResearch)return e.json({error:"plan_required",message:"バズリサーチはスタンダードプラン、プロプランで利用できます。"},403);await __ensureBuzzTable(e.env);const id=parseInt(e.req.param("id"),10),row=await e.env.DB.prepare("SELECT * FROM buzz_research_results WHERE id=? AND user_id=?").bind(id,t.id).first();if(!row)return e.json({error:"not_found"},404);const body=`【投稿案】
+${row.ai_template||row.ai_summary||"この投稿は、読者の悩みを先に示し、原因を整理してから解決策を提案する構造が使えます。"}
+
+【作成メモ】
+元投稿をコピーせず、冒頭フック、悩み、原因、解決策、行動提案の順で自社向けに置き換えてください。`;return e.json({body})});
 const __GE365X_MANUAL=[
 {title:"X API設定の手順",keywords:["api","x api","oauth","oauth1","oauth2","設定","投稿権限"],answer:`このWEB版は、OAuth2のユーザーAccess Tokenが保存されている場合はOAuth2で /2/tweets へ投稿し、未設定または失敗した場合はOAuth 1.0a User Contextへフォールバックします。画像・動画アップロードはOAuth 1.0a署名の経路も使うため、一般ユーザーには両方の設定を推奨します。\n\n必要な値は、API Key / API Secret、Access Token / Access Token Secret、OAuth2 Client ID、必要に応じてOAuth2 Client Secretです。X公式では、OAuth 1.0aはAPI key/secretとAccess token/secretでユーザーとしてリクエストを署名すると説明されています。OAuth2はAuthorization Code with PKCEを有効化し、tweet.writeなどのscopeを付けたユーザーAccess Tokenを取得します。\n\n手順: 1. X Developer PortalでProject/Appを作成します。2. User authentication settingsを開きます。3. App permissionsをRead and Writeにします。4. OAuth 1.0aとOAuth2を有効化します。5. Callback URLに、この画面に表示される /api/admin/x/oauth2/callback を完全一致で登録します。6. Keys and tokensでAPI Key/Secret、Access Token/Secretを発行します。7. API設定画面に保存します。8. OAuth2認証を開始し、Xで許可します。9. 接続テスト、投稿権限テストを順に実行します。\n\n公式資料: https://docs.x.com/fundamentals/authentication/oauth-1-0a/overview / https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code / https://docs.x.com/x-api/posts/manage-tweets/quickstart`},
 {title:"初回セットアップ",keywords:["初回","セットアップ","はじめて","登録","ログイン"],answer:`無料トライアルはログイン画面の「無料トライアル登録」から登録すると自動承認され、そのまま利用できます。購入者は /license のライセンス認証画面でメール、パスワード、ライセンスキーを入力すると自動承認されます。ログイン後、API設定、Xアカウント管理、ターゲット設定、ブランドボイスの順に設定してください。最低限必要なのはX API設定とXアカウント管理です。`},
@@ -3445,9 +3656,9 @@ F.get("/admin",m,R,e=>{const t=`
             <div>
               <label class="text-sm text-brand-300 mb-1 block">プラン</label>
               <select id="issue-plan" class="input-field">
-                <option value="ge365x_free">トライアル</option>
+                <option value="ge365x_free">ライト</option>
                 <option value="ge365x_standard" selected>スタンダード</option>
-                <option value="ge365x_pro">プロ（アカウント数無制限予定）</option>
+                <option value="ge365x_pro">プロ（アカウント数無制限）</option>
               </select>
             </div>
             <div>
@@ -3571,9 +3782,10 @@ function formatPlanLabel(code, status, licenseType) {
   const c = String(code || '').toLowerCase();
   const s = String(status || '').toLowerCase();
   const t = String(licenseType || '').toLowerCase();
-  if (s === 'trial' || t === 'trial' || c.includes('free')) return 'トライアル';
   if (c.includes('pro')) return 'プロ';
   if (c.includes('standard') || c.includes('paid')) return 'スタンダード';
+  if (c.includes('free') || c.includes('lite') || c.includes('light')) return 'ライト';
+  if (s === 'trial' || t === 'trial') return 'ライト';
   return code || '-';
 }
 function formatStatusLabel(status) {
