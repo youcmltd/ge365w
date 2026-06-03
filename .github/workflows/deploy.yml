@@ -5,7 +5,7 @@ on:
       branches:
             - main
                 paths:
-                      - '_worker.js'
+                      - 'dist/_worker.js'
 
                       jobs:
                         deploy:
@@ -17,4 +17,4 @@ on:
                                                             with:
                                                                       apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                                                                                 accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                                                                                          command: deploy --name ge365x --compatibility-date 2024-01-01
+                                                                                          command: deploy --name ge365x --compatibility-date 2024-01-01 --no-bundle dist/_worker.js
