@@ -2,19 +2,19 @@ name: Deploy to Cloudflare Workers
 
 on:
   push:
-      branches:
-            - main
-                paths:
-                      - 'dist/_worker.js'
+    branches:
+      - main
+    paths:
+      - 'dist/_worker.js'
 
-                      jobs:
-                        deploy:
-                            runs-on: ubuntu-latest
-                                steps:
-                                      - uses: actions/checkout@v4
-                                            - name: Deploy to Cloudflare Workers
-                                                    uses: cloudflare/wrangler-action@v3
-                                                            with:
-                                                                      apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                                                                                accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                                                                                          command: deploy --name ge365x --compatibility-date 2024-01-01 --no-bundle dist/_worker.js
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --name ge365x --compatibility-date 2024-01-01 --no-bundle dist/_worker.js
